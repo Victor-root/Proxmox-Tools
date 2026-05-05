@@ -1,45 +1,143 @@
-# 🛠️ Proxmox-Tools
+# 🚀 Proxmox-Tools
 
-<p align="center">
-  <strong>A growing hub of useful Proxmox VE shell scripts</strong><br>
-  Practical tools for automation, quality-of-life improvements, maintenance, and admin workflows.
-</p>
-
-<p align="center">
-  <img alt="Platform" src="https://img.shields.io/badge/platform-Proxmox%20VE-E57000?style=for-the-badge&logo=proxmox&logoColor=white">
-  <img alt="Language" src="https://img.shields.io/badge/language-Bash-121011?style=for-the-badge&logo=gnu-bash&logoColor=white">
-  <img alt="Status" src="https://img.shields.io/badge/status-active-2ea44f?style=for-the-badge">
-  <img alt="Repo type" src="https://img.shields.io/badge/repo-script%20hub-0366d6?style=for-the-badge">
-</p>
+> A growing hub of useful shell scripts for **Proxmox VE**.
+>
+> Fast to run. Easy to reuse. Built for real-world homelab and admin workflows.
 
 ---
 
-## 📦 About this repository
+## ✨ What is this repository?
 
-**Proxmox-Tools** is a personal collection of standalone scripts for **Proxmox VE**.
+**Proxmox-Tools** is a central place for small, practical, focused scripts made to improve day-to-day life on **Proxmox VE**.
 
-The goal of this repository is simple:
+The goal is simple:
 
-- ✅ keep useful Proxmox scripts in one place
-- ✅ make every tool easy to run independently
-- ✅ provide targeted one-line launch commands
-- ✅ improve daily admin workflows without bloating the system
-- ✅ build a reusable toolbox over time
+* 🧰 keep each tool **independent**
+* ⚡ make scripts runnable in **one command**
+* 🔎 keep behavior **clear and predictable**
+* 💾 always prefer **safe changes with backup/restore when possible**
+* 📦 build a reusable **toolbox / hub** instead of one giant script
 
-This repository is **not meant to be a single global installer**.  
-Each script is designed to be used **on its own**, through a direct link to the specific file you want to run.
+This repository is meant to grow over time with more Proxmox-oriented utilities.
 
 ---
 
-## 🎯 Philosophy
+## 📂 Repository philosophy
 
-This repo is built around a few simple ideas:
+Each script lives as its **own file** inside the `scripts/` directory.
 
-- **One script = one job**
-- **Direct execution from a targeted raw URL**
-- **Minimal dependencies**
-- **Readable shell scripts**
-- **Safe-by-default whenever possible**
-- **Easy rollback when a script modifies something important**
+That means:
 
-That makes this repository act more like a **toolbox** than a monolithic project.
+* you can call **one specific script** directly
+* you do **not** need a global installer for everything
+* each tool can evolve independently
+* sharing a tool is easy with a targeted raw GitHub URL
+
+Example layout:
+
+```text
+scripts/
+├── pve-console-newtab.sh
+├── future-tool-1.sh
+├── future-tool-2.sh
+└── ...
+```
+
+---
+
+## 🛠️ Available scripts
+
+### `pve-console-newtab.sh`
+
+Adds a more convenient browser workflow for the Proxmox VE web interface:
+
+* 🖱️ **Middle click** on the main **Console** button opens the default web console in a **new tab**
+* 🖱️ **Middle click** on **noVNC** opens it in a **new tab**
+* 🖱️ **Middle click** on **xterm.js** opens it in a **new tab**
+* 🖱️ **Middle click** on **SPICE** behaves like a normal click, without opening a useless browser tab
+* 💾 automatic **backup** before patching
+* ♻️ built-in **restore** options
+* 📋 interactive menu
+
+### Run it directly
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-console-newtab.sh)
+```
+
+### Alternative method
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-console-newtab.sh -o /tmp/pve-console-newtab.sh && bash /tmp/pve-console-newtab.sh
+```
+
+---
+
+## 🔒 Safety notes
+
+Some tools in this repository may modify Proxmox files or behavior.
+
+Before using any script:
+
+* read what it does
+* keep an active **root SSH session** open
+* make sure you understand the rollback path
+* prefer testing on a non-critical node first
+
+When relevant, scripts in this repository should:
+
+* create backups before changes
+* fail safely if expected patterns are not found
+* avoid destructive behavior by default
+
+---
+
+## 🎯 Project goals
+
+This repo is intended to become a practical **Proxmox utility hub**, for example:
+
+* UI enhancements
+* backup helpers
+* audit / health-check scripts
+* storage / ZFS helpers
+* cluster helpers
+* networking helpers
+* quick-fix admin tools
+
+The main idea is not to build a huge framework.
+
+The idea is to keep things:
+
+* simple
+* useful
+* modular
+* easy to launch
+
+---
+
+## 🤝 Contributing
+
+Ideas, fixes, and improvements are welcome.
+
+Good contributions are usually:
+
+* focused on one real problem
+* easy to understand
+* safe to test
+* easy to remove or rollback
+
+---
+
+## 📜 Disclaimer
+
+These scripts are provided as-is.
+
+Use them carefully, review them before running them, and test them in your own environment.
+
+---
+
+## ⭐ Why this repo exists
+
+Because Proxmox is great, but there are always a few small things that can be made faster, cleaner, or less annoying with the right script.
+
+This repository exists to collect those improvements in one place.
