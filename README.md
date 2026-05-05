@@ -22,30 +22,6 @@ This repository is meant to grow over time with more Proxmox-oriented utilities.
 
 ---
 
-## 📂 Repository philosophy
-
-Each script lives as its **own file** inside the `scripts/` directory.
-
-That means:
-
-* you can call **one specific script** directly
-* you do **not** need a global installer for everything
-* each tool can evolve independently
-* sharing a tool is easy with a targeted raw GitHub URL
-
-Example layout:
-
-```text
-scripts/
-├── pve-console-newtab.sh
-├── pve-default-language-i18n
-├── future-tool-1.sh
-├── future-tool-2.sh
-└── ...
-```
-
----
-
 ## 🛠️ Available scripts
 
 ### 🖱️ Open Proxmox consoles in new tabs
@@ -103,6 +79,30 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-default-language-i18n -o /tmp/pve-default-language-i18n && bash /tmp/pve-default-language-i18n
+```
+
+---
+
+## 📂 Repository philosophy
+
+Each script lives as its **own file** inside the `scripts/` directory.
+
+That means:
+
+* you can call **one specific script** directly
+* you do **not** need a global installer for everything
+* each tool can evolve independently
+* sharing a tool is easy with a targeted raw GitHub URL
+
+Example layout:
+
+```text
+scripts/
+├── pve-console-newtab.sh
+├── pve-default-language-i18n
+├── future-tool-1.sh
+├── future-tool-2.sh
+└── ...
 ```
 
 ---
