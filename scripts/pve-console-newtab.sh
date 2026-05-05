@@ -199,31 +199,49 @@ rule() {
 show_banner() {
     clear || true
     local title="Proxmox-Tools by VROOT"
+    local script_title="pve-console-newtab.sh"
     local width=58
-    local inner
     local pad_total
     local pad_left
     local pad_right
-
-    inner="$title"
-    pad_total=$((width - ${#inner}))
-    if (( pad_total < 0 )); then
-        pad_total=0
-    fi
-    pad_left=$((pad_total / 2))
-    pad_right=$((pad_total - pad_left))
 
     printf "%b" "${PMX_ORANGE}${BOLD}"
     printf '┌'
     printf '─%.0s' $(seq 1 "$width")
     printf '┐
 '
+
+    pad_total=$((width - ${#title}))
+    if (( pad_total < 0 )); then
+        pad_total=0
+    fi
+    pad_left=$((pad_total / 2))
+    pad_right=$((pad_total - pad_left))
     printf '│'
     printf '%*s' "$pad_left" ''
-    printf "%b%s%b" "${PMX_WHITE}${BOLD}" "$inner" "${PMX_ORANGE}${BOLD}"
+    printf "%b%s%b" "${PMX_WHITE}${BOLD}" "$title" "${PMX_ORANGE}${BOLD}"
     printf '%*s' "$pad_right" ''
     printf '│
 '
+
+    printf '│'
+    printf '%*s' "$width" ''
+    printf '│
+'
+
+    pad_total=$((width - ${#script_title}))
+    if (( pad_total < 0 )); then
+        pad_total=0
+    fi
+    pad_left=$((pad_total / 2))
+    pad_right=$((pad_total - pad_left))
+    printf '│'
+    printf '%*s' "$pad_left" ''
+    printf "%b%s%b" "${PMX_ORANGE_SOFT}${BOLD}" "$script_title" "${PMX_ORANGE}${BOLD}"
+    printf '%*s' "$pad_right" ''
+    printf '│
+'
+
     printf '└'
     printf '─%.0s' $(seq 1 "$width")
     printf '┘
