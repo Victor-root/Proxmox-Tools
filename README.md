@@ -48,7 +48,9 @@ scripts/
 
 ## 🛠️ Available scripts
 
-### `pve-console-newtab.sh`
+### 🖱️ Open Proxmox consoles in new tabs
+
+**Script:** `pve-console-newtab.sh`
 
 Adds a more convenient browser workflow for the Proxmox VE web interface:
 
@@ -60,13 +62,13 @@ Adds a more convenient browser workflow for the Proxmox VE web interface:
 * ♻️ built-in **restore** options
 * 📋 interactive menu
 
-### Run it directly
+#### Run it directly
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-console-newtab.sh)
 ```
 
-### Alternative method
+#### Alternative method
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-console-newtab.sh -o /tmp/pve-console-newtab.sh && bash /tmp/pve-console-newtab.sh
@@ -74,7 +76,9 @@ curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scri
 
 ---
 
-### `pve-default-language-i18n`
+### 🌍 Proxmox VE default language manager
+
+**Script:** `pve-default-language-i18n`
 
 Changes the default **Proxmox VE language** for both the shell and the web interface:
 
@@ -89,13 +93,13 @@ Changes the default **Proxmox VE language** for both the shell and the web inter
 
 > ⚠️ Keep an active **root SSH session** open while running this script, in case the Proxmox VE web interface does not restart correctly.
 
-### Run it directly
+#### Run it directly
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-default-language-i18n)
 ```
 
-### Alternative method
+#### Alternative method
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-default-language-i18n -o /tmp/pve-default-language-i18n && bash /tmp/pve-default-language-i18n
