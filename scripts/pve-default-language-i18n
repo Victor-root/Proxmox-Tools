@@ -1,0 +1,2658 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PATCH_PREFIX="/root/pve-default-language"
+LOCALE_GEN_FILE="/etc/locale.gen"
+DEFAULT_LOCALE_FILE="/etc/default/locale"
+DATACENTER_CFG="/etc/pve/datacenter.cfg"
+PROFILE_LOCALE_FILE="/etc/profile.d/proxmox-tools-locale.sh"
+TIMEZONE_FILE="/etc/timezone"
+
+# ------------------------------------------------------------
+# Full script i18n
+# - All user-facing text is stored below for all supported Proxmox UI languages.
+# - The displayed language is detected from the server locale first.
+# - If a language or a key is missing, English is used as fallback.
+# ------------------------------------------------------------
+declare -A I18N
+
+load_i18n() {
+    local lang key text
+    while IFS='|' read -r lang key text; do
+        [[ -z "${lang:-}" || -z "${key:-}" ]] && continue
+        I18N["$lang:$key"]="$text"
+    done <<'I18N_DATA'
+ar|script_title|أداة اللغة الافتراضية
+ar|repo_hint|إعداد لغة Proxmox VE بشكل تفاعلي
+ar|ssh_warning_title|نصيحة أمان
+ar|ssh_warning_body|أبق جلسة SSH مفتوحة أثناء العملية في حال لم تتم إعادة تشغيل واجهة Proxmox VE الويب بشكل صحيح.
+ar|latest_backup_hint|لاستعادة آخر نسخة احتياطية عبر SSH
+ar|menu_option_2|خيار القائمة 2
+ar|menu_apply|تطبيق اللغة الافتراضية
+ar|menu_restore_latest|استعادة آخر نسخة احتياطية
+ar|menu_restore_select|استعادة نسخة احتياطية محددة
+ar|menu_status|عرض الحالة الحالية
+ar|menu_languages|عرض اللغات المدعومة
+ar|menu_backups|عرض النسخ الاحتياطية
+ar|menu_quit|خروج
+ar|choose_option|اختر خياراً
+ar|press_enter|اضغط Enter للمتابعة...
+ar|cancelled|تم إلغاء العملية.
+ar|running_as_root|يجب تشغيل هذا السكربت بصلاحية root.
+ar|file_not_found|الملف غير موجود
+ar|directory_not_found|المجلد غير موجود
+ar|missing_command|الأمر المطلوب غير موجود
+ar|backup_created|تم إنشاء النسخة الاحتياطية
+ar|restart_proxy|إعادة تشغيل pveproxy...
+ar|config_applied|تم تطبيق الإعدادات بنجاح.
+ar|relogin_needed|افتح جلسة shell جديدة أو أعد التشغيل لتطبيق locale في كل مكان.
+ar|backup_used|النسخة الاحتياطية المستخدمة
+ar|no_backup_found|لم يتم العثور على نسخة احتياطية.
+ar|restore_done|اكتملت الاستعادة من
+ar|invalid_choice|اختيار غير صالح.
+ar|selection_out_of_range|الاختيار خارج النطاق.
+ar|restore_cancelled|تم إلغاء الاستعادة.
+ar|detected_language|اللغة المكتشفة
+ar|status_title|حالة اللغة الافتراضية
+ar|available_backups|النسخ الاحتياطية المتاحة
+ar|choose_backup_number|اختر رقم النسخة الاحتياطية للاستعادة
+ar|bye|إلى اللقاء.
+ar|warning_title|تحذير
+ar|warning_body_1|هذا السكربت يغير locale النظام في Debian/Proxmox VE.
+ar|warning_body_2|ويغير أيضاً لغة واجهة الويب الافتراضية في /etc/pve/datacenter.cfg.
+ar|warning_body_3|يتم إنشاء نسخة احتياطية تلقائية قبل أي تغيير.
+ar|warning_body_4|أبق وصول SSH مفتوحاً حتى تتمكن من الاستعادة إذا أصبحت واجهة الويب غير متاحة.
+ar|type_yes|اكتب yes للمتابعة
+ar|supported_languages|اللغات المدعومة
+ar|detected_default|الافتراضي المكتشف
+ar|choose_language|رمز اللغة المراد تطبيقه
+ar|choose_locale|locale النظام المراد تطبيقه
+ar|choose_timezone|المنطقة الزمنية المراد تطبيقها
+ar|confirm_apply|تطبيق هذا الإعداد
+ar|unsupported_language|لغة غير مدعومة
+ar|locale_generated|تم إنشاء locale
+ar|locale_updated|تم تحديث locale النظام
+ar|profile_updated|تم تحديث ملف shell الشخصي
+ar|timezone_updated|تم تحديث المنطقة الزمنية
+ar|ntp_enabled|تم تفعيل NTP
+ar|web_language_updated|تم تحديث لغة ويب Proxmox VE
+ar|reboot_question|إعادة التشغيل الآن
+ar|reboot_later|تم تخطي إعادة التشغيل. افتح جلسة جديدة أو أعد التشغيل لاحقاً.
+ar|not_set|غير مضبوط
+ar|yes_no_default_no|y/N
+ar|summary_title|ملخص
+ar|label_host|المضيف
+ar|label_pve_ui_language|لغة ويب PVE
+ar|label_system_locale|locale النظام
+ar|label_language_priority|أولوية LANGUAGE
+ar|label_timezone|المنطقة الزمنية
+ar|label_current_shell_lang|LANG الحالي للـ shell
+ar|label_current_shell_lc_all|LC_ALL الحالي للـ shell
+ar|label_generated_locale|locale المنشأ
+ar|label_shell_profile|تجاوز ملف shell الشخصي
+ar|status_ok|OK
+ar|status_missing|مفقود
+ca|script_title|Utilitat de llengua per defecte
+ca|repo_hint|Configuració interactiva de la llengua de Proxmox VE
+ca|ssh_warning_title|Consell de seguretat
+ca|ssh_warning_body|Mantén una sessió SSH oberta durant l’operació, per si la interfície web de Proxmox VE no es reinicia correctament.
+ca|latest_backup_hint|Per restaurar la darrera còpia per SSH
+ca|menu_option_2|opció 2 del menú
+ca|menu_apply|Aplica la llengua per defecte
+ca|menu_restore_latest|Restaura la darrera còpia
+ca|menu_restore_select|Restaura una còpia seleccionada
+ca|menu_status|Mostra l’estat actual
+ca|menu_languages|Llista les llengües compatibles
+ca|menu_backups|Llista les còpies
+ca|menu_quit|Surt
+ca|choose_option|Tria una opció
+ca|press_enter|Prem Retorn per continuar...
+ca|cancelled|Operació cancel·lada.
+ca|running_as_root|Aquest script s’ha d’executar com a root.
+ca|file_not_found|Fitxer no trobat
+ca|directory_not_found|Directori no trobat
+ca|missing_command|Ordre requerida no trobada
+ca|backup_created|Còpia creada
+ca|restart_proxy|Reiniciant pveproxy...
+ca|config_applied|Configuració aplicada correctament.
+ca|relogin_needed|Obre una nova sessió de shell o reinicia per veure la locale aplicada arreu.
+ca|backup_used|Còpia usada
+ca|no_backup_found|No s’ha trobat cap còpia.
+ca|restore_done|Restauració completada des de
+ca|invalid_choice|Opció no vàlida.
+ca|selection_out_of_range|Selecció fora de rang.
+ca|restore_cancelled|Restauració cancel·lada.
+ca|detected_language|Llengua detectada
+ca|status_title|Estat de la llengua per defecte
+ca|available_backups|Còpies disponibles
+ca|choose_backup_number|Tria el número de còpia a restaurar
+ca|bye|Adeu.
+ca|warning_title|AVÍS
+ca|warning_body_1|Aquest script modifica la locale del sistema Debian/Proxmox VE.
+ca|warning_body_2|També canvia la llengua web per defecte a /etc/pve/datacenter.cfg.
+ca|warning_body_3|Es crea una còpia automàtica abans de qualsevol canvi.
+ca|warning_body_4|Mantén l’accés SSH obert per poder restaurar si la web queda inaccessible.
+ca|type_yes|Escriu yes per continuar
+ca|supported_languages|Llengües compatibles
+ca|detected_default|Per defecte detectat
+ca|choose_language|Codi de llengua a aplicar
+ca|choose_locale|Locale del sistema a aplicar
+ca|choose_timezone|Zona horària a aplicar
+ca|confirm_apply|Aplica aquesta configuració
+ca|unsupported_language|Llengua no compatible
+ca|locale_generated|Locale generada
+ca|locale_updated|Locale del sistema actualitzada
+ca|profile_updated|Perfil de shell actualitzat
+ca|timezone_updated|Zona horària actualitzada
+ca|ntp_enabled|NTP activat
+ca|web_language_updated|Llengua web de Proxmox VE actualitzada
+ca|reboot_question|Reiniciar ara
+ca|reboot_later|Reinici omès. Obre una nova sessió o reinicia més tard.
+ca|not_set|No definit
+ca|yes_no_default_no|s/N
+ca|summary_title|Resum
+ca|label_host|Amfitrió
+ca|label_pve_ui_language|Llengua web PVE
+ca|label_system_locale|Locale del sistema
+ca|label_language_priority|Prioritat LANGUAGE
+ca|label_timezone|Zona horària
+ca|label_current_shell_lang|LANG del shell actual
+ca|label_current_shell_lc_all|LC_ALL del shell actual
+ca|label_generated_locale|Locale generada
+ca|label_shell_profile|Sobreescriptura del perfil shell
+ca|status_ok|OK
+ca|status_missing|MANCA
+da|script_title|Værktøj til standardsprog
+da|repo_hint|Interaktiv sprogkonfiguration for Proxmox VE
+da|ssh_warning_title|Sikkerhedsråd
+da|ssh_warning_body|Hold en SSH-session åben under handlingen, hvis Proxmox VE-webgrænsefladen ikke genstarter korrekt.
+da|latest_backup_hint|For at gendanne seneste backup via SSH
+da|menu_option_2|menuvalg 2
+da|menu_apply|Anvend standardsprog
+da|menu_restore_latest|Gendan seneste backup
+da|menu_restore_select|Gendan valgt backup
+da|menu_status|Vis aktuel status
+da|menu_languages|Vis understøttede sprog
+da|menu_backups|Vis backups
+da|menu_quit|Afslut
+da|choose_option|Vælg en mulighed
+da|press_enter|Tryk Enter for at fortsætte...
+da|cancelled|Handling annulleret.
+da|running_as_root|Dette script skal køres som root.
+da|file_not_found|Fil ikke fundet
+da|directory_not_found|Mappe ikke fundet
+da|missing_command|Påkrævet kommando ikke fundet
+da|backup_created|Backup oprettet
+da|restart_proxy|Genstarter pveproxy...
+da|config_applied|Konfiguration anvendt korrekt.
+da|relogin_needed|Åbn en ny shell-session eller genstart for at anvende locale overalt.
+da|backup_used|Brugt backup
+da|no_backup_found|Ingen backup fundet.
+da|restore_done|Gendannelse fuldført fra
+da|invalid_choice|Ugyldigt valg.
+da|selection_out_of_range|Valg uden for interval.
+da|restore_cancelled|Gendannelse annulleret.
+da|detected_language|Registreret sprog
+da|status_title|Status for standardsprog
+da|available_backups|Tilgængelige backups
+da|choose_backup_number|Vælg backupnummer til gendannelse
+da|bye|Farvel.
+da|warning_title|ADVARSEL
+da|warning_body_1|Dette script ændrer Debian/Proxmox VE system-locale.
+da|warning_body_2|Det ændrer også standard web-sprog i /etc/pve/datacenter.cfg.
+da|warning_body_3|En automatisk backup oprettes før enhver ændring.
+da|warning_body_4|Hold SSH-adgang åben, så du kan gendanne, hvis webgrænsefladen bliver utilgængelig.
+da|type_yes|Skriv yes for at fortsætte
+da|supported_languages|Understøttede sprog
+da|detected_default|Registreret standard
+da|choose_language|Sprogkode der skal anvendes
+da|choose_locale|System-locale der skal anvendes
+da|choose_timezone|Tidszone der skal anvendes
+da|confirm_apply|Anvend denne konfiguration
+da|unsupported_language|Ikke-understøttet sprog
+da|locale_generated|Locale genereret
+da|locale_updated|System-locale opdateret
+da|profile_updated|Shell-profil opdateret
+da|timezone_updated|Tidszone opdateret
+da|ntp_enabled|NTP aktiveret
+da|web_language_updated|Proxmox VE web-sprog opdateret
+da|reboot_question|Genstart nu
+da|reboot_later|Genstart sprunget over. Åbn en ny session eller genstart senere.
+da|not_set|Ikke sat
+da|yes_no_default_no|j/N
+da|summary_title|Oversigt
+da|label_host|Vært
+da|label_pve_ui_language|PVE web-sprog
+da|label_system_locale|System-locale
+da|label_language_priority|LANGUAGE-prioritet
+da|label_timezone|Tidszone
+da|label_current_shell_lang|Aktuel shell LANG
+da|label_current_shell_lc_all|Aktuel shell LC_ALL
+da|label_generated_locale|Genereret locale
+da|label_shell_profile|Shell-profil tilsidesættelse
+da|status_ok|OK
+da|status_missing|MANGLER
+de|script_title|Werkzeug für die Standardsprache
+de|repo_hint|Interaktive Sprachkonfiguration für Proxmox VE
+de|ssh_warning_title|Sicherheitshinweis
+de|ssh_warning_body|Lassen Sie während des Vorgangs eine SSH-Sitzung offen, falls die Proxmox VE-Weboberfläche nicht korrekt neu startet.
+de|latest_backup_hint|Zum Wiederherstellen des letzten Backups per SSH
+de|menu_option_2|Menüoption 2
+de|menu_apply|Standardsprache anwenden
+de|menu_restore_latest|Letztes Backup wiederherstellen
+de|menu_restore_select|Ausgewähltes Backup wiederherstellen
+de|menu_status|Aktuellen Status anzeigen
+de|menu_languages|Unterstützte Sprachen anzeigen
+de|menu_backups|Backups anzeigen
+de|menu_quit|Beenden
+de|choose_option|Option wählen
+de|press_enter|Enter drücken, um fortzufahren...
+de|cancelled|Vorgang abgebrochen.
+de|running_as_root|Dieses Skript muss als root ausgeführt werden.
+de|file_not_found|Datei nicht gefunden
+de|directory_not_found|Verzeichnis nicht gefunden
+de|missing_command|Erforderlicher Befehl nicht gefunden
+de|backup_created|Backup erstellt
+de|restart_proxy|pveproxy wird neu gestartet...
+de|config_applied|Konfiguration erfolgreich angewendet.
+de|relogin_needed|Öffnen Sie eine neue Shell-Sitzung oder starten Sie neu, damit die Locale überall gilt.
+de|backup_used|Verwendetes Backup
+de|no_backup_found|Kein Backup gefunden.
+de|restore_done|Wiederherstellung abgeschlossen von
+de|invalid_choice|Ungültige Auswahl.
+de|selection_out_of_range|Auswahl außerhalb des Bereichs.
+de|restore_cancelled|Wiederherstellung abgebrochen.
+de|detected_language|Erkannte Sprache
+de|status_title|Status der Standardsprache
+de|available_backups|Verfügbare Backups
+de|choose_backup_number|Backup-Nummer zum Wiederherstellen wählen
+de|bye|Auf Wiedersehen.
+de|warning_title|WARNUNG
+de|warning_body_1|Dieses Skript ändert die System-Locale von Debian/Proxmox VE.
+de|warning_body_2|Es ändert auch die Standard-Websprache in /etc/pve/datacenter.cfg.
+de|warning_body_3|Vor jeder Änderung wird automatisch ein Backup erstellt.
+de|warning_body_4|Halten Sie SSH-Zugriff offen, damit Sie wiederherstellen können, falls die Weboberfläche unerreichbar wird.
+de|type_yes|Geben Sie 'yes' ein, um fortzufahren
+de|supported_languages|Unterstützte Sprachen
+de|detected_default|Erkannter Standard
+de|choose_language|Anzuwendender Sprachcode
+de|choose_locale|Anzuwendende System-Locale
+de|choose_timezone|Anzuwendende Zeitzone
+de|confirm_apply|Diese Konfiguration anwenden
+de|unsupported_language|Nicht unterstützte Sprache
+de|locale_generated|Locale erzeugt
+de|locale_updated|System-Locale aktualisiert
+de|profile_updated|Shell-Profil aktualisiert
+de|timezone_updated|Zeitzone aktualisiert
+de|ntp_enabled|NTP aktiviert
+de|web_language_updated|Proxmox VE-Websprache aktualisiert
+de|reboot_question|Jetzt neu starten
+de|reboot_later|Neustart übersprungen. Öffnen Sie eine neue Sitzung oder starten Sie später neu.
+de|not_set|Nicht gesetzt
+de|yes_no_default_no|j/N
+de|summary_title|Zusammenfassung
+de|label_host|Host
+de|label_pve_ui_language|PVE-Websprache
+de|label_system_locale|System-Locale
+de|label_language_priority|LANGUAGE-Priorität
+de|label_timezone|Zeitzone
+de|label_current_shell_lang|Aktuelles Shell-LANG
+de|label_current_shell_lc_all|Aktuelles Shell-LC_ALL
+de|label_generated_locale|Erzeugte Locale
+de|label_shell_profile|Shell-Profil-Override
+de|status_ok|OK
+de|status_missing|FEHLT
+en|script_title|Default Language Utility
+en|repo_hint|Interactive language configuration for Proxmox VE
+en|ssh_warning_title|Safety advice
+en|ssh_warning_body|Keep an SSH session open during the operation, in case the Proxmox VE web interface does not restart correctly.
+en|latest_backup_hint|To restore the latest backup over SSH
+en|menu_option_2|menu option 2
+en|menu_apply|Apply default language
+en|menu_restore_latest|Restore latest backup
+en|menu_restore_select|Restore from selected backup
+en|menu_status|Show current status
+en|menu_languages|List supported languages
+en|menu_backups|List backups
+en|menu_quit|Quit
+en|choose_option|Choose an option
+en|press_enter|Press Enter to continue...
+en|cancelled|Operation cancelled.
+en|running_as_root|This script must be run as root.
+en|file_not_found|File not found
+en|directory_not_found|Directory not found
+en|missing_command|Required command not found
+en|backup_created|Backup created
+en|restart_proxy|Restarting pveproxy...
+en|config_applied|Configuration applied successfully.
+en|relogin_needed|Open a new shell session, or reboot, to see the locale applied everywhere.
+en|backup_used|Backup used
+en|no_backup_found|No backup found.
+en|restore_done|Restore completed from
+en|invalid_choice|Invalid choice.
+en|selection_out_of_range|Selection out of range.
+en|restore_cancelled|Restore cancelled.
+en|detected_language|Detected language
+en|status_title|Default language status
+en|available_backups|Available backups
+en|choose_backup_number|Choose a backup number to restore
+en|bye|Bye.
+en|warning_title|WARNING
+en|warning_body_1|This script modifies the Debian/Proxmox VE system locale.
+en|warning_body_2|It also changes the default web interface language in /etc/pve/datacenter.cfg.
+en|warning_body_3|An automatic backup is created before any change.
+en|warning_body_4|Keep SSH access open so you can restore if the web interface becomes unreachable.
+en|type_yes|Type 'yes' to continue
+en|supported_languages|Supported languages
+en|detected_default|Detected default
+en|choose_language|Language code to apply
+en|choose_locale|System locale to apply
+en|choose_timezone|Timezone to apply
+en|confirm_apply|Apply this configuration
+en|unsupported_language|Unsupported language
+en|locale_generated|Locale generated
+en|locale_updated|System locale updated
+en|profile_updated|Shell profile updated
+en|timezone_updated|Timezone updated
+en|ntp_enabled|NTP enabled
+en|web_language_updated|Proxmox VE web language updated
+en|reboot_question|Reboot now
+en|reboot_later|Reboot skipped. Open a new session or reboot later.
+en|not_set|Not set
+en|yes_no_default_no|y/N
+en|summary_title|Summary
+en|label_host|Host
+en|label_pve_ui_language|PVE web UI language
+en|label_system_locale|System locale
+en|label_language_priority|LANGUAGE priority
+en|label_timezone|Timezone
+en|label_current_shell_lang|Current shell LANG
+en|label_current_shell_lc_all|Current shell LC_ALL
+en|label_generated_locale|Generated locale
+en|label_shell_profile|Shell profile override
+en|status_ok|OK
+en|status_missing|MISSING
+es|script_title|Utilidad de idioma predeterminado
+es|repo_hint|Configuración interactiva del idioma de Proxmox VE
+es|ssh_warning_title|Consejo de seguridad
+es|ssh_warning_body|Mantén una sesión SSH abierta durante la operación, por si la interfaz web de Proxmox VE no se reinicia correctamente.
+es|latest_backup_hint|Para restaurar la última copia por SSH
+es|menu_option_2|opción 2 del menú
+es|menu_apply|Aplicar idioma predeterminado
+es|menu_restore_latest|Restaurar última copia
+es|menu_restore_select|Restaurar desde una copia elegida
+es|menu_status|Mostrar estado actual
+es|menu_languages|Listar idiomas compatibles
+es|menu_backups|Listar copias
+es|menu_quit|Salir
+es|choose_option|Elige una opción
+es|press_enter|Pulsa Enter para continuar...
+es|cancelled|Operación cancelada.
+es|running_as_root|Este script debe ejecutarse como root.
+es|file_not_found|Archivo no encontrado
+es|directory_not_found|Directorio no encontrado
+es|missing_command|Comando requerido no encontrado
+es|backup_created|Copia creada
+es|restart_proxy|Reiniciando pveproxy...
+es|config_applied|Configuración aplicada correctamente.
+es|relogin_needed|Abre una nueva sesión de shell, o reinicia, para ver la locale aplicada en todas partes.
+es|backup_used|Copia usada
+es|no_backup_found|No se encontró ninguna copia.
+es|restore_done|Restauración completada desde
+es|invalid_choice|Opción no válida.
+es|selection_out_of_range|Selección fuera de rango.
+es|restore_cancelled|Restauración cancelada.
+es|detected_language|Idioma detectado
+es|status_title|Estado del idioma predeterminado
+es|available_backups|Copias disponibles
+es|choose_backup_number|Elige el número de copia a restaurar
+es|bye|Hasta luego.
+es|warning_title|ADVERTENCIA
+es|warning_body_1|Este script modifica la locale del sistema Debian/Proxmox VE.
+es|warning_body_2|También cambia el idioma web predeterminado en /etc/pve/datacenter.cfg.
+es|warning_body_3|Se crea una copia automática antes de cualquier cambio.
+es|warning_body_4|Mantén acceso SSH abierto para poder restaurar si la interfaz web queda inaccesible.
+es|type_yes|Escribe 'yes' para continuar
+es|supported_languages|Idiomas compatibles
+es|detected_default|Predeterminado detectado
+es|choose_language|Código de idioma a aplicar
+es|choose_locale|Locale del sistema a aplicar
+es|choose_timezone|Zona horaria a aplicar
+es|confirm_apply|Aplicar esta configuración
+es|unsupported_language|Idioma no compatible
+es|locale_generated|Locale generada
+es|locale_updated|Locale del sistema actualizada
+es|profile_updated|Perfil de shell actualizado
+es|timezone_updated|Zona horaria actualizada
+es|ntp_enabled|NTP activado
+es|web_language_updated|Idioma web de Proxmox VE actualizado
+es|reboot_question|Reiniciar ahora
+es|reboot_later|Reinicio omitido. Abre una nueva sesión o reinicia más tarde.
+es|not_set|No definido
+es|yes_no_default_no|s/N
+es|summary_title|Resumen
+es|label_host|Host
+es|label_pve_ui_language|Idioma web PVE
+es|label_system_locale|Locale del sistema
+es|label_language_priority|Prioridad LANGUAGE
+es|label_timezone|Zona horaria
+es|label_current_shell_lang|LANG del shell actual
+es|label_current_shell_lc_all|LC_ALL del shell actual
+es|label_generated_locale|Locale generada
+es|label_shell_profile|Sobrescritura del perfil shell
+es|status_ok|OK
+es|status_missing|FALTA
+eu|script_title|Hizkuntza lehenetsiaren tresna
+eu|repo_hint|Proxmox VE hizkuntzaren konfigurazio interaktiboa
+eu|ssh_warning_title|Segurtasun aholkua
+eu|ssh_warning_body|Mantendu SSH saio bat irekita eragiketan zehar, Proxmox VE web interfazea ondo berrabiarazten ez bada ere.
+eu|latest_backup_hint|Azken backup-a SSH bidez leheneratzeko
+eu|menu_option_2|menuko 2. aukera
+eu|menu_apply|Aplikatu hizkuntza lehenetsia
+eu|menu_restore_latest|Leheneratu azken backup-a
+eu|menu_restore_select|Leheneratu hautatutako backup-a
+eu|menu_status|Erakutsi uneko egoera
+eu|menu_languages|Zerrendatu onartutako hizkuntzak
+eu|menu_backups|Zerrendatu backup-ak
+eu|menu_quit|Irten
+eu|choose_option|Aukeratu aukera bat
+eu|press_enter|Sakatu Enter jarraitzeko...
+eu|cancelled|Eragiketa bertan behera utzi da.
+eu|running_as_root|Script hau root gisa exekutatu behar da.
+eu|file_not_found|Fitxategia ez da aurkitu
+eu|directory_not_found|Direktorioa ez da aurkitu
+eu|missing_command|Beharrezko komandoa ez da aurkitu
+eu|backup_created|Backup-a sortu da
+eu|restart_proxy|pveproxy berrabiarazten...
+eu|config_applied|Konfigurazioa ondo aplikatu da.
+eu|relogin_needed|Ireki shell saio berri bat edo berrabiarazi locale nonahi aplikatzeko.
+eu|backup_used|Erabilitako backup-a
+eu|no_backup_found|Ez da backup-ik aurkitu.
+eu|restore_done|Leheneratzea amaitu da hemendik
+eu|invalid_choice|Aukera baliogabea.
+eu|selection_out_of_range|Hautapena tartetik kanpo.
+eu|restore_cancelled|Leheneratzea bertan behera utzi da.
+eu|detected_language|Detektatutako hizkuntza
+eu|status_title|Hizkuntza lehenetsiaren egoera
+eu|available_backups|Backup erabilgarriak
+eu|choose_backup_number|Aukeratu leheneratu beharreko backup zenbakia
+eu|bye|Agur.
+eu|warning_title|ABISUA
+eu|warning_body_1|Script honek Debian/Proxmox VE sistemaren locale-a aldatzen du.
+eu|warning_body_2|/etc/pve/datacenter.cfg fitxategiko web hizkuntza lehenetsia ere aldatzen du.
+eu|warning_body_3|Aldaketa bakoitzaren aurretik backup automatikoa sortzen da.
+eu|warning_body_4|Mantendu SSH sarbidea irekita web interfazea eskuragarri ez badago leheneratzeko.
+eu|type_yes|Idatzi yes jarraitzeko
+eu|supported_languages|Onartutako hizkuntzak
+eu|detected_default|Detektatutako lehenetsia
+eu|choose_language|Aplikatu beharreko hizkuntza kodea
+eu|choose_locale|Aplikatu beharreko sistemaren locale-a
+eu|choose_timezone|Aplikatu beharreko ordu-eremua
+eu|confirm_apply|Aplikatu konfigurazio hau
+eu|unsupported_language|Onartu gabeko hizkuntza
+eu|locale_generated|Locale-a sortu da
+eu|locale_updated|Sistemaren locale-a eguneratu da
+eu|profile_updated|Shell profila eguneratu da
+eu|timezone_updated|Ordu-eremua eguneratu da
+eu|ntp_enabled|NTP gaituta
+eu|web_language_updated|Proxmox VE web hizkuntza eguneratu da
+eu|reboot_question|Berrabiarazi orain
+eu|reboot_later|Berrabiaraztea saltatu da. Ireki saio berria edo berrabiarazi geroago.
+eu|not_set|Ezarri gabe
+eu|yes_no_default_no|b/E
+eu|summary_title|Laburpena
+eu|label_host|Ostalaria
+eu|label_pve_ui_language|PVE web hizkuntza
+eu|label_system_locale|Sistemaren locale-a
+eu|label_language_priority|LANGUAGE lehentasuna
+eu|label_timezone|Ordu-eremua
+eu|label_current_shell_lang|Uneko shell LANG
+eu|label_current_shell_lc_all|Uneko shell LC_ALL
+eu|label_generated_locale|Sortutako locale-a
+eu|label_shell_profile|Shell profilaren gainidazketa
+eu|status_ok|OK
+eu|status_missing|FALTA
+fa|script_title|ابزار زبان پیش‌فرض
+fa|repo_hint|پیکربندی تعاملی زبان Proxmox VE
+fa|ssh_warning_title|توصیه امنیتی
+fa|ssh_warning_body|در طول عملیات یک نشست SSH باز نگه دارید، اگر رابط وب Proxmox VE درست راه‌اندازی مجدد نشد.
+fa|latest_backup_hint|برای بازیابی آخرین پشتیبان از طریق SSH
+fa|menu_option_2|گزینه منوی ۲
+fa|menu_apply|اعمال زبان پیش‌فرض
+fa|menu_restore_latest|بازیابی آخرین پشتیبان
+fa|menu_restore_select|بازیابی پشتیبان انتخاب‌شده
+fa|menu_status|نمایش وضعیت فعلی
+fa|menu_languages|فهرست زبان‌های پشتیبانی‌شده
+fa|menu_backups|فهرست پشتیبان‌ها
+fa|menu_quit|خروج
+fa|choose_option|یک گزینه انتخاب کنید
+fa|press_enter|برای ادامه Enter را بزنید...
+fa|cancelled|عملیات لغو شد.
+fa|running_as_root|این اسکریپت باید با root اجرا شود.
+fa|file_not_found|فایل پیدا نشد
+fa|directory_not_found|پوشه پیدا نشد
+fa|missing_command|دستور لازم پیدا نشد
+fa|backup_created|پشتیبان ساخته شد
+fa|restart_proxy|در حال راه‌اندازی مجدد pveproxy...
+fa|config_applied|پیکربندی با موفقیت اعمال شد.
+fa|relogin_needed|یک نشست shell جدید باز کنید یا راه‌اندازی مجدد کنید تا locale همه‌جا اعمال شود.
+fa|backup_used|پشتیبان استفاده‌شده
+fa|no_backup_found|هیچ پشتیبانی پیدا نشد.
+fa|restore_done|بازیابی کامل شد از
+fa|invalid_choice|انتخاب نامعتبر است.
+fa|selection_out_of_range|انتخاب خارج از محدوده است.
+fa|restore_cancelled|بازیابی لغو شد.
+fa|detected_language|زبان شناسایی‌شده
+fa|status_title|وضعیت زبان پیش‌فرض
+fa|available_backups|پشتیبان‌های موجود
+fa|choose_backup_number|شماره پشتیبان برای بازیابی را انتخاب کنید
+fa|bye|خدانگهدار.
+fa|warning_title|هشدار
+fa|warning_body_1|این اسکریپت locale سیستم Debian/Proxmox VE را تغییر می‌دهد.
+fa|warning_body_2|همچنین زبان وب پیش‌فرض را در /etc/pve/datacenter.cfg تغییر می‌دهد.
+fa|warning_body_3|قبل از هر تغییر یک پشتیبان خودکار ساخته می‌شود.
+fa|warning_body_4|دسترسی SSH را باز نگه دارید تا اگر رابط وب در دسترس نبود بتوانید بازیابی کنید.
+fa|type_yes|برای ادامه yes را وارد کنید
+fa|supported_languages|زبان‌های پشتیبانی‌شده
+fa|detected_default|پیش‌فرض شناسایی‌شده
+fa|choose_language|کد زبان برای اعمال
+fa|choose_locale|locale سیستم برای اعمال
+fa|choose_timezone|منطقه زمانی برای اعمال
+fa|confirm_apply|اعمال این پیکربندی
+fa|unsupported_language|زبان پشتیبانی نمی‌شود
+fa|locale_generated|locale ساخته شد
+fa|locale_updated|locale سیستم به‌روزرسانی شد
+fa|profile_updated|پروفایل shell به‌روزرسانی شد
+fa|timezone_updated|منطقه زمانی به‌روزرسانی شد
+fa|ntp_enabled|NTP فعال شد
+fa|web_language_updated|زبان وب Proxmox VE به‌روزرسانی شد
+fa|reboot_question|اکنون راه‌اندازی مجدد شود
+fa|reboot_later|راه‌اندازی مجدد رد شد. نشست جدید باز کنید یا بعداً راه‌اندازی مجدد کنید.
+fa|not_set|تنظیم نشده
+fa|yes_no_default_no|y/N
+fa|summary_title|خلاصه
+fa|label_host|میزبان
+fa|label_pve_ui_language|زبان وب PVE
+fa|label_system_locale|locale سیستم
+fa|label_language_priority|اولویت LANGUAGE
+fa|label_timezone|منطقه زمانی
+fa|label_current_shell_lang|LANG فعلی shell
+fa|label_current_shell_lc_all|LC_ALL فعلی shell
+fa|label_generated_locale|locale ساخته‌شده
+fa|label_shell_profile|بازنویسی پروفایل shell
+fa|status_ok|OK
+fa|status_missing|موجود نیست
+fr|script_title|Utilitaire de langue par défaut
+fr|repo_hint|Configuration interactive de la langue Proxmox VE
+fr|ssh_warning_title|Conseil de sécurité
+fr|ssh_warning_body|Gardez une session SSH ouverte pendant l'opération, au cas où l'interface web Proxmox VE ne redémarre pas correctement.
+fr|latest_backup_hint|Pour restaurer le dernier backup en SSH
+fr|menu_option_2|option 2 du menu
+fr|menu_apply|Appliquer une langue par défaut
+fr|menu_restore_latest|Restaurer le dernier backup
+fr|menu_restore_select|Restaurer depuis un backup choisi
+fr|menu_status|Afficher l'état actuel
+fr|menu_languages|Lister les langues supportées
+fr|menu_backups|Lister les backups
+fr|menu_quit|Quitter
+fr|choose_option|Choisissez une option
+fr|press_enter|Appuyez sur Entrée pour continuer...
+fr|cancelled|Opération annulée.
+fr|running_as_root|Ce script doit être lancé en root.
+fr|file_not_found|Fichier introuvable
+fr|directory_not_found|Dossier introuvable
+fr|missing_command|Commande requise introuvable
+fr|backup_created|Backup créé
+fr|restart_proxy|Redémarrage de pveproxy...
+fr|config_applied|Configuration appliquée avec succès.
+fr|relogin_needed|Ouvrez une nouvelle session shell, ou redémarrez, pour voir la locale appliquée partout.
+fr|backup_used|Backup utilisé
+fr|no_backup_found|Aucun backup trouvé.
+fr|restore_done|Restauration terminée depuis
+fr|invalid_choice|Choix invalide.
+fr|selection_out_of_range|Sélection hors limite.
+fr|restore_cancelled|Restauration annulée.
+fr|detected_language|Langue détectée
+fr|status_title|État de la langue par défaut
+fr|available_backups|Backups disponibles
+fr|choose_backup_number|Choisissez le numéro du backup à restaurer
+fr|bye|À bientôt.
+fr|warning_title|AVERTISSEMENT
+fr|warning_body_1|Ce script modifie la locale système Debian/Proxmox VE.
+fr|warning_body_2|Il modifie aussi la langue par défaut de l'interface web dans /etc/pve/datacenter.cfg.
+fr|warning_body_3|Un backup automatique est créé avant toute modification.
+fr|warning_body_4|Gardez un accès SSH ouvert pour pouvoir restaurer si l'interface web devient inaccessible.
+fr|type_yes|Tapez 'yes' pour continuer
+fr|supported_languages|Langues supportées
+fr|detected_default|Défaut détecté
+fr|choose_language|Code langue à appliquer
+fr|choose_locale|Locale système à appliquer
+fr|choose_timezone|Fuseau horaire à appliquer
+fr|confirm_apply|Appliquer cette configuration
+fr|unsupported_language|Langue non supportée
+fr|locale_generated|Locale générée
+fr|locale_updated|Locale système mise à jour
+fr|profile_updated|Profil shell mis à jour
+fr|timezone_updated|Fuseau horaire mis à jour
+fr|ntp_enabled|NTP activé
+fr|web_language_updated|Langue web Proxmox VE mise à jour
+fr|reboot_question|Redémarrer maintenant
+fr|reboot_later|Redémarrage ignoré. Pensez à ouvrir une nouvelle session ou redémarrer plus tard.
+fr|not_set|Non défini
+fr|yes_no_default_no|o/N
+fr|summary_title|Résumé
+fr|label_host|Hôte
+fr|label_pve_ui_language|Langue interface web PVE
+fr|label_system_locale|Locale système
+fr|label_language_priority|Priorité LANGUAGE
+fr|label_timezone|Fuseau horaire
+fr|label_current_shell_lang|LANG du shell actuel
+fr|label_current_shell_lc_all|LC_ALL du shell actuel
+fr|label_generated_locale|Locale générée
+fr|label_shell_profile|Surcharge profil shell
+fr|status_ok|OK
+fr|status_missing|MANQUANTE
+gl|script_title|Utilidade de idioma predeterminado
+gl|repo_hint|Configuración interactiva do idioma de Proxmox VE
+gl|ssh_warning_title|Consello de seguridade
+gl|ssh_warning_body|Mantén unha sesión SSH aberta durante a operación, por se a interface web de Proxmox VE non reinicia correctamente.
+gl|latest_backup_hint|Para restaurar a última copia por SSH
+gl|menu_option_2|opción 2 do menú
+gl|menu_apply|Aplicar idioma predeterminado
+gl|menu_restore_latest|Restaurar última copia
+gl|menu_restore_select|Restaurar copia seleccionada
+gl|menu_status|Mostrar estado actual
+gl|menu_languages|Listar idiomas compatibles
+gl|menu_backups|Listar copias
+gl|menu_quit|Saír
+gl|choose_option|Escolle unha opción
+gl|press_enter|Preme Enter para continuar...
+gl|cancelled|Operación cancelada.
+gl|running_as_root|Este script debe executarse como root.
+gl|file_not_found|Ficheiro non atopado
+gl|directory_not_found|Directorio non atopado
+gl|missing_command|Comando requirido non atopado
+gl|backup_created|Copia creada
+gl|restart_proxy|Reiniciando pveproxy...
+gl|config_applied|Configuración aplicada correctamente.
+gl|relogin_needed|Abre unha nova sesión shell ou reinicia para aplicar a locale en todas partes.
+gl|backup_used|Copia usada
+gl|no_backup_found|Non se atopou ningunha copia.
+gl|restore_done|Restauración completada desde
+gl|invalid_choice|Escolla non válida.
+gl|selection_out_of_range|Selección fóra de rango.
+gl|restore_cancelled|Restauración cancelada.
+gl|detected_language|Idioma detectado
+gl|status_title|Estado do idioma predeterminado
+gl|available_backups|Copias dispoñibles
+gl|choose_backup_number|Escolle o número da copia para restaurar
+gl|bye|Adeus.
+gl|warning_title|AVISO
+gl|warning_body_1|Este script modifica a locale do sistema Debian/Proxmox VE.
+gl|warning_body_2|Tamén cambia o idioma web predeterminado en /etc/pve/datacenter.cfg.
+gl|warning_body_3|Créase unha copia automática antes de calquera cambio.
+gl|warning_body_4|Mantén o acceso SSH aberto para poder restaurar se a web queda inaccesible.
+gl|type_yes|Escribe yes para continuar
+gl|supported_languages|Idiomas compatibles
+gl|detected_default|Predeterminado detectado
+gl|choose_language|Código de idioma a aplicar
+gl|choose_locale|Locale do sistema a aplicar
+gl|choose_timezone|Fuso horario a aplicar
+gl|confirm_apply|Aplicar esta configuración
+gl|unsupported_language|Idioma non compatible
+gl|locale_generated|Locale xerada
+gl|locale_updated|Locale do sistema actualizada
+gl|profile_updated|Perfil shell actualizado
+gl|timezone_updated|Fuso horario actualizado
+gl|ntp_enabled|NTP activado
+gl|web_language_updated|Idioma web de Proxmox VE actualizado
+gl|reboot_question|Reiniciar agora
+gl|reboot_later|Reinicio omitido. Abre unha nova sesión ou reinicia máis tarde.
+gl|not_set|Non definido
+gl|yes_no_default_no|s/N
+gl|summary_title|Resumo
+gl|label_host|Host
+gl|label_pve_ui_language|Idioma web PVE
+gl|label_system_locale|Locale do sistema
+gl|label_language_priority|Prioridade LANGUAGE
+gl|label_timezone|Fuso horario
+gl|label_current_shell_lang|LANG do shell actual
+gl|label_current_shell_lc_all|LC_ALL do shell actual
+gl|label_generated_locale|Locale xerada
+gl|label_shell_profile|Sobrescritura do perfil shell
+gl|status_ok|OK
+gl|status_missing|FALTA
+he|script_title|כלי שפת ברירת מחדל
+he|repo_hint|הגדרת שפה אינטראקטיבית עבור Proxmox VE
+he|ssh_warning_title|עצת בטיחות
+he|ssh_warning_body|השאר חיבור SSH פתוח במהלך הפעולה, למקרה שממשק הווב של Proxmox VE לא יופעל מחדש כראוי.
+he|latest_backup_hint|כדי לשחזר את הגיבוי האחרון דרך SSH
+he|menu_option_2|אפשרות תפריט 2
+he|menu_apply|החל שפת ברירת מחדל
+he|menu_restore_latest|שחזר גיבוי אחרון
+he|menu_restore_select|שחזר גיבוי נבחר
+he|menu_status|הצג מצב נוכחי
+he|menu_languages|הצג שפות נתמכות
+he|menu_backups|הצג גיבויים
+he|menu_quit|יציאה
+he|choose_option|בחר אפשרות
+he|press_enter|לחץ Enter להמשך...
+he|cancelled|הפעולה בוטלה.
+he|running_as_root|יש להריץ סקריפט זה כ-root.
+he|file_not_found|קובץ לא נמצא
+he|directory_not_found|תיקייה לא נמצאה
+he|missing_command|פקודה נדרשת לא נמצאה
+he|backup_created|גיבוי נוצר
+he|restart_proxy|מפעיל מחדש את pveproxy...
+he|config_applied|ההגדרה הוחלה בהצלחה.
+he|relogin_needed|פתח סשן shell חדש או אתחל כדי להחיל את locale בכל מקום.
+he|backup_used|גיבוי בשימוש
+he|no_backup_found|לא נמצא גיבוי.
+he|restore_done|השחזור הושלם מ
+he|invalid_choice|בחירה לא חוקית.
+he|selection_out_of_range|הבחירה מחוץ לטווח.
+he|restore_cancelled|השחזור בוטל.
+he|detected_language|שפה שזוהתה
+he|status_title|מצב שפת ברירת מחדל
+he|available_backups|גיבויים זמינים
+he|choose_backup_number|בחר מספר גיבוי לשחזור
+he|bye|להתראות.
+he|warning_title|אזהרה
+he|warning_body_1|סקריפט זה משנה את locale המערכת של Debian/Proxmox VE.
+he|warning_body_2|הוא גם משנה את שפת הווב בברירת מחדל ב-/etc/pve/datacenter.cfg.
+he|warning_body_3|גיבוי אוטומטי נוצר לפני כל שינוי.
+he|warning_body_4|השאר גישת SSH פתוחה כדי שתוכל לשחזר אם ממשק הווב לא יהיה נגיש.
+he|type_yes|הקלד yes להמשך
+he|supported_languages|שפות נתמכות
+he|detected_default|ברירת מחדל שזוהתה
+he|choose_language|קוד שפה להחלה
+he|choose_locale|locale מערכת להחלה
+he|choose_timezone|אזור זמן להחלה
+he|confirm_apply|החל הגדרה זו
+he|unsupported_language|שפה לא נתמכת
+he|locale_generated|locale נוצר
+he|locale_updated|locale המערכת עודכן
+he|profile_updated|פרופיל shell עודכן
+he|timezone_updated|אזור הזמן עודכן
+he|ntp_enabled|NTP הופעל
+he|web_language_updated|שפת הווב של Proxmox VE עודכנה
+he|reboot_question|לאתחל עכשיו
+he|reboot_later|האתחול דולג. פתח סשן חדש או אתחל מאוחר יותר.
+he|not_set|לא מוגדר
+he|yes_no_default_no|y/N
+he|summary_title|סיכום
+he|label_host|מארח
+he|label_pve_ui_language|שפת ווב PVE
+he|label_system_locale|locale מערכת
+he|label_language_priority|עדיפות LANGUAGE
+he|label_timezone|אזור זמן
+he|label_current_shell_lang|LANG נוכחי של shell
+he|label_current_shell_lc_all|LC_ALL נוכחי של shell
+he|label_generated_locale|locale שנוצר
+he|label_shell_profile|עקיפת פרופיל shell
+he|status_ok|OK
+he|status_missing|חסר
+hu|script_title|Alapértelmezett nyelv eszköz
+hu|repo_hint|Interaktív Proxmox VE nyelvbeállítás
+hu|ssh_warning_title|Biztonsági tanács
+hu|ssh_warning_body|Tarts nyitva egy SSH-munkamenetet a művelet alatt, ha a Proxmox VE webes felülete nem indul újra megfelelően.
+hu|latest_backup_hint|A legutóbbi mentés visszaállítása SSH-n
+hu|menu_option_2|2. menüpont
+hu|menu_apply|Alapértelmezett nyelv alkalmazása
+hu|menu_restore_latest|Legutóbbi mentés visszaállítása
+hu|menu_restore_select|Kiválasztott mentés visszaállítása
+hu|menu_status|Jelenlegi állapot mutatása
+hu|menu_languages|Támogatott nyelvek listája
+hu|menu_backups|Mentések listája
+hu|menu_quit|Kilépés
+hu|choose_option|Válassz egy opciót
+hu|press_enter|Nyomj Entert a folytatáshoz...
+hu|cancelled|Művelet megszakítva.
+hu|running_as_root|Ezt a szkriptet rootként kell futtatni.
+hu|file_not_found|Fájl nem található
+hu|directory_not_found|Könyvtár nem található
+hu|missing_command|Szükséges parancs nem található
+hu|backup_created|Mentés létrehozva
+hu|restart_proxy|pveproxy újraindítása...
+hu|config_applied|Konfiguráció sikeresen alkalmazva.
+hu|relogin_needed|Nyiss új shell-munkamenetet vagy indítsd újra, hogy a locale mindenhol érvényesüljön.
+hu|backup_used|Használt mentés
+hu|no_backup_found|Nem található mentés.
+hu|restore_done|Visszaállítás befejezve innen
+hu|invalid_choice|Érvénytelen választás.
+hu|selection_out_of_range|A választás tartományon kívül van.
+hu|restore_cancelled|Visszaállítás megszakítva.
+hu|detected_language|Érzékelt nyelv
+hu|status_title|Alapértelmezett nyelv állapota
+hu|available_backups|Elérhető mentések
+hu|choose_backup_number|Válaszd ki a visszaállítandó mentés számát
+hu|bye|Viszlát.
+hu|warning_title|FIGYELMEZTETÉS
+hu|warning_body_1|Ez a szkript módosítja a Debian/Proxmox VE rendszer locale beállítását.
+hu|warning_body_2|Módosítja az alapértelmezett webnyelvet is a /etc/pve/datacenter.cfg fájlban.
+hu|warning_body_3|Minden módosítás előtt automatikus mentés készül.
+hu|warning_body_4|Tartsd nyitva az SSH-hozzáférést, hogy vissza tudj állítani, ha a webfelület elérhetetlenné válik.
+hu|type_yes|Írd be: yes a folytatáshoz
+hu|supported_languages|Támogatott nyelvek
+hu|detected_default|Érzékelt alapértelmezés
+hu|choose_language|Alkalmazandó nyelvkód
+hu|choose_locale|Alkalmazandó rendszer locale
+hu|choose_timezone|Alkalmazandó időzóna
+hu|confirm_apply|Konfiguráció alkalmazása
+hu|unsupported_language|Nem támogatott nyelv
+hu|locale_generated|Locale létrehozva
+hu|locale_updated|Rendszer locale frissítve
+hu|profile_updated|Shell profil frissítve
+hu|timezone_updated|Időzóna frissítve
+hu|ntp_enabled|NTP engedélyezve
+hu|web_language_updated|Proxmox VE webnyelv frissítve
+hu|reboot_question|Újraindítás most
+hu|reboot_later|Újraindítás kihagyva. Nyiss új munkamenetet vagy indíts újra később.
+hu|not_set|Nincs beállítva
+hu|yes_no_default_no|i/N
+hu|summary_title|Összegzés
+hu|label_host|Gép
+hu|label_pve_ui_language|PVE webnyelv
+hu|label_system_locale|Rendszer locale
+hu|label_language_priority|LANGUAGE prioritás
+hu|label_timezone|Időzóna
+hu|label_current_shell_lang|Jelenlegi shell LANG
+hu|label_current_shell_lc_all|Jelenlegi shell LC_ALL
+hu|label_generated_locale|Létrehozott locale
+hu|label_shell_profile|Shell profil felülírás
+hu|status_ok|OK
+hu|status_missing|HIÁNYZIK
+it|script_title|Utility lingua predefinita
+it|repo_hint|Configurazione interattiva della lingua di Proxmox VE
+it|ssh_warning_title|Consiglio di sicurezza
+it|ssh_warning_body|Mantieni aperta una sessione SSH durante l'operazione, nel caso l'interfaccia web di Proxmox VE non si riavvii correttamente.
+it|latest_backup_hint|Per ripristinare l'ultimo backup via SSH
+it|menu_option_2|opzione 2 del menu
+it|menu_apply|Applica lingua predefinita
+it|menu_restore_latest|Ripristina ultimo backup
+it|menu_restore_select|Ripristina da backup selezionato
+it|menu_status|Mostra stato attuale
+it|menu_languages|Elenca lingue supportate
+it|menu_backups|Elenca backup
+it|menu_quit|Esci
+it|choose_option|Scegli un'opzione
+it|press_enter|Premi Invio per continuare...
+it|cancelled|Operazione annullata.
+it|running_as_root|Questo script deve essere eseguito come root.
+it|file_not_found|File non trovato
+it|directory_not_found|Cartella non trovata
+it|missing_command|Comando richiesto non trovato
+it|backup_created|Backup creato
+it|restart_proxy|Riavvio di pveproxy...
+it|config_applied|Configurazione applicata con successo.
+it|relogin_needed|Apri una nuova sessione shell o riavvia per applicare la locale ovunque.
+it|backup_used|Backup usato
+it|no_backup_found|Nessun backup trovato.
+it|restore_done|Ripristino completato da
+it|invalid_choice|Scelta non valida.
+it|selection_out_of_range|Selezione fuori intervallo.
+it|restore_cancelled|Ripristino annullato.
+it|detected_language|Lingua rilevata
+it|status_title|Stato lingua predefinita
+it|available_backups|Backup disponibili
+it|choose_backup_number|Scegli il numero del backup da ripristinare
+it|bye|Arrivederci.
+it|warning_title|AVVISO
+it|warning_body_1|Questo script modifica la locale di sistema Debian/Proxmox VE.
+it|warning_body_2|Modifica anche la lingua web predefinita in /etc/pve/datacenter.cfg.
+it|warning_body_3|Viene creato un backup automatico prima di ogni modifica.
+it|warning_body_4|Mantieni aperto l'accesso SSH per poter ripristinare se l'interfaccia web diventa irraggiungibile.
+it|type_yes|Digita 'yes' per continuare
+it|supported_languages|Lingue supportate
+it|detected_default|Predefinito rilevato
+it|choose_language|Codice lingua da applicare
+it|choose_locale|Locale di sistema da applicare
+it|choose_timezone|Fuso orario da applicare
+it|confirm_apply|Applicare questa configurazione
+it|unsupported_language|Lingua non supportata
+it|locale_generated|Locale generata
+it|locale_updated|Locale di sistema aggiornata
+it|profile_updated|Profilo shell aggiornato
+it|timezone_updated|Fuso orario aggiornato
+it|ntp_enabled|NTP abilitato
+it|web_language_updated|Lingua web Proxmox VE aggiornata
+it|reboot_question|Riavviare ora
+it|reboot_later|Riavvio saltato. Apri una nuova sessione o riavvia più tardi.
+it|not_set|Non impostato
+it|yes_no_default_no|s/N
+it|summary_title|Riepilogo
+it|label_host|Host
+it|label_pve_ui_language|Lingua web PVE
+it|label_system_locale|Locale di sistema
+it|label_language_priority|Priorità LANGUAGE
+it|label_timezone|Fuso orario
+it|label_current_shell_lang|LANG shell attuale
+it|label_current_shell_lc_all|LC_ALL shell attuale
+it|label_generated_locale|Locale generata
+it|label_shell_profile|Override profilo shell
+it|status_ok|OK
+it|status_missing|MANCANTE
+ja|script_title|デフォルト言語ユーティリティ
+ja|repo_hint|Proxmox VE の対話型言語設定
+ja|ssh_warning_title|安全上の注意
+ja|ssh_warning_body|Proxmox VE のWebインターフェイスが正しく再起動しない場合に備えて、操作中はSSHセッションを開いたままにしてください。
+ja|latest_backup_hint|SSHで最新バックアップを復元するには
+ja|menu_option_2|メニュー項目 2
+ja|menu_apply|デフォルト言語を適用
+ja|menu_restore_latest|最新バックアップを復元
+ja|menu_restore_select|選択したバックアップを復元
+ja|menu_status|現在の状態を表示
+ja|menu_languages|対応言語を一覧表示
+ja|menu_backups|バックアップを一覧表示
+ja|menu_quit|終了
+ja|choose_option|オプションを選択
+ja|press_enter|Enterを押して続行...
+ja|cancelled|操作をキャンセルしました。
+ja|running_as_root|このスクリプトはrootで実行する必要があります。
+ja|file_not_found|ファイルが見つかりません
+ja|directory_not_found|ディレクトリが見つかりません
+ja|missing_command|必要なコマンドが見つかりません
+ja|backup_created|バックアップを作成しました
+ja|restart_proxy|pveproxyを再起動しています...
+ja|config_applied|設定を正常に適用しました。
+ja|relogin_needed|localeを全体に適用するには、新しいシェルセッションを開くか再起動してください。
+ja|backup_used|使用したバックアップ
+ja|no_backup_found|バックアップが見つかりません。
+ja|restore_done|復元が完了しました。復元元
+ja|invalid_choice|無効な選択です。
+ja|selection_out_of_range|選択が範囲外です。
+ja|restore_cancelled|復元をキャンセルしました。
+ja|detected_language|検出された言語
+ja|status_title|デフォルト言語の状態
+ja|available_backups|利用可能なバックアップ
+ja|choose_backup_number|復元するバックアップ番号を選択
+ja|bye|さようなら。
+ja|warning_title|警告
+ja|warning_body_1|このスクリプトは Debian/Proxmox VE のシステム locale を変更します。
+ja|warning_body_2|/etc/pve/datacenter.cfg のデフォルトWeb言語も変更します。
+ja|warning_body_3|変更前に自動バックアップを作成します。
+ja|warning_body_4|Webインターフェイスにアクセスできなくなった場合に復元できるよう、SSHアクセスを開いたままにしてください。
+ja|type_yes|続行するには yes と入力
+ja|supported_languages|対応言語
+ja|detected_default|検出されたデフォルト
+ja|choose_language|適用する言語コード
+ja|choose_locale|適用するシステム locale
+ja|choose_timezone|適用するタイムゾーン
+ja|confirm_apply|この設定を適用
+ja|unsupported_language|対応していない言語
+ja|locale_generated|localeを生成しました
+ja|locale_updated|システム localeを更新しました
+ja|profile_updated|シェルプロファイルを更新しました
+ja|timezone_updated|タイムゾーンを更新しました
+ja|ntp_enabled|NTPを有効化しました
+ja|web_language_updated|Proxmox VE Web言語を更新しました
+ja|reboot_question|今すぐ再起動
+ja|reboot_later|再起動をスキップしました。新しいセッションを開くか後で再起動してください。
+ja|not_set|未設定
+ja|yes_no_default_no|y/N
+ja|summary_title|概要
+ja|label_host|ホスト
+ja|label_pve_ui_language|PVE Web言語
+ja|label_system_locale|システム locale
+ja|label_language_priority|LANGUAGE 優先度
+ja|label_timezone|タイムゾーン
+ja|label_current_shell_lang|現在のシェル LANG
+ja|label_current_shell_lc_all|現在のシェル LC_ALL
+ja|label_generated_locale|生成済み locale
+ja|label_shell_profile|シェルプロファイル上書き
+ja|status_ok|OK
+ja|status_missing|不足
+kr|script_title|기본 언어 유틸리티
+kr|repo_hint|Proxmox VE 대화형 언어 설정
+kr|ssh_warning_title|안전 안내
+kr|ssh_warning_body|Proxmox VE 웹 인터페이스가 정상적으로 다시 시작되지 않을 경우를 대비해 작업 중 SSH 세션을 열어 두세요.
+kr|latest_backup_hint|SSH로 최신 백업을 복원하려면
+kr|menu_option_2|메뉴 옵션 2
+kr|menu_apply|기본 언어 적용
+kr|menu_restore_latest|최신 백업 복원
+kr|menu_restore_select|선택한 백업 복원
+kr|menu_status|현재 상태 표시
+kr|menu_languages|지원 언어 목록
+kr|menu_backups|백업 목록
+kr|menu_quit|종료
+kr|choose_option|옵션 선택
+kr|press_enter|계속하려면 Enter를 누르세요...
+kr|cancelled|작업이 취소되었습니다.
+kr|running_as_root|이 스크립트는 root로 실행해야 합니다.
+kr|file_not_found|파일을 찾을 수 없습니다
+kr|directory_not_found|디렉터리를 찾을 수 없습니다
+kr|missing_command|필요한 명령을 찾을 수 없습니다
+kr|backup_created|백업 생성됨
+kr|restart_proxy|pveproxy 재시작 중...
+kr|config_applied|설정이 성공적으로 적용되었습니다.
+kr|relogin_needed|locale이 모든 곳에 적용되도록 새 shell 세션을 열거나 재부팅하세요.
+kr|backup_used|사용한 백업
+kr|no_backup_found|백업을 찾을 수 없습니다.
+kr|restore_done|복원이 완료되었습니다. 원본
+kr|invalid_choice|잘못된 선택입니다.
+kr|selection_out_of_range|선택 범위를 벗어났습니다.
+kr|restore_cancelled|복원이 취소되었습니다.
+kr|detected_language|감지된 언어
+kr|status_title|기본 언어 상태
+kr|available_backups|사용 가능한 백업
+kr|choose_backup_number|복원할 백업 번호 선택
+kr|bye|안녕히 가세요.
+kr|warning_title|경고
+kr|warning_body_1|이 스크립트는 Debian/Proxmox VE 시스템 locale을 변경합니다.
+kr|warning_body_2|/etc/pve/datacenter.cfg의 기본 웹 언어도 변경합니다.
+kr|warning_body_3|변경 전 자동 백업이 생성됩니다.
+kr|warning_body_4|웹 인터페이스에 접근할 수 없을 때 복원할 수 있도록 SSH 접속을 열어 두세요.
+kr|type_yes|계속하려면 yes 입력
+kr|supported_languages|지원 언어
+kr|detected_default|감지된 기본값
+kr|choose_language|적용할 언어 코드
+kr|choose_locale|적용할 시스템 locale
+kr|choose_timezone|적용할 시간대
+kr|confirm_apply|이 설정 적용
+kr|unsupported_language|지원되지 않는 언어
+kr|locale_generated|locale 생성됨
+kr|locale_updated|시스템 locale 업데이트됨
+kr|profile_updated|shell 프로필 업데이트됨
+kr|timezone_updated|시간대 업데이트됨
+kr|ntp_enabled|NTP 활성화됨
+kr|web_language_updated|Proxmox VE 웹 언어 업데이트됨
+kr|reboot_question|지금 재부팅
+kr|reboot_later|재부팅을 건너뜀. 새 세션을 열거나 나중에 재부팅하세요.
+kr|not_set|설정 안 됨
+kr|yes_no_default_no|y/N
+kr|summary_title|요약
+kr|label_host|호스트
+kr|label_pve_ui_language|PVE 웹 언어
+kr|label_system_locale|시스템 locale
+kr|label_language_priority|LANGUAGE 우선순위
+kr|label_timezone|시간대
+kr|label_current_shell_lang|현재 shell LANG
+kr|label_current_shell_lc_all|현재 shell LC_ALL
+kr|label_generated_locale|생성된 locale
+kr|label_shell_profile|shell 프로필 재정의
+kr|status_ok|OK
+kr|status_missing|누락
+nb|script_title|Verktøy for standardspråk
+nb|repo_hint|Interaktiv språk-konfigurasjon for Proxmox VE
+nb|ssh_warning_title|Sikkerhetsråd
+nb|ssh_warning_body|Hold en SSH-økt åpen under operasjonen, i tilfelle Proxmox VE-webgrensesnittet ikke starter riktig på nytt.
+nb|latest_backup_hint|For å gjenopprette siste backup via SSH
+nb|menu_option_2|menyvalg 2
+nb|menu_apply|Bruk standardspråk
+nb|menu_restore_latest|Gjenopprett siste backup
+nb|menu_restore_select|Gjenopprett valgt backup
+nb|menu_status|Vis gjeldende status
+nb|menu_languages|List støttede språk
+nb|menu_backups|List backuper
+nb|menu_quit|Avslutt
+nb|choose_option|Velg et alternativ
+nb|press_enter|Trykk Enter for å fortsette...
+nb|cancelled|Operasjon avbrutt.
+nb|running_as_root|Dette skriptet må kjøres som root.
+nb|file_not_found|Fil ikke funnet
+nb|directory_not_found|Mappe ikke funnet
+nb|missing_command|Påkrevd kommando ikke funnet
+nb|backup_created|Backup opprettet
+nb|restart_proxy|Starter pveproxy på nytt...
+nb|config_applied|Konfigurasjon brukt.
+nb|relogin_needed|Åpne en ny shell-økt eller start på nytt for å bruke locale overalt.
+nb|backup_used|Backup brukt
+nb|no_backup_found|Ingen backup funnet.
+nb|restore_done|Gjenoppretting fullført fra
+nb|invalid_choice|Ugyldig valg.
+nb|selection_out_of_range|Valg utenfor område.
+nb|restore_cancelled|Gjenoppretting avbrutt.
+nb|detected_language|Oppdaget språk
+nb|status_title|Status for standardspråk
+nb|available_backups|Tilgjengelige backuper
+nb|choose_backup_number|Velg backupnummer å gjenopprette
+nb|bye|Ha det.
+nb|warning_title|ADVARSEL
+nb|warning_body_1|Dette skriptet endrer Debian/Proxmox VE system-locale.
+nb|warning_body_2|Det endrer også standard webspråk i /etc/pve/datacenter.cfg.
+nb|warning_body_3|Automatisk backup opprettes før enhver endring.
+nb|warning_body_4|Hold SSH-tilgang åpen for å kunne gjenopprette hvis webgrensesnittet blir utilgjengelig.
+nb|type_yes|Skriv yes for å fortsette
+nb|supported_languages|Støttede språk
+nb|detected_default|Oppdaget standard
+nb|choose_language|Språkkode som skal brukes
+nb|choose_locale|System-locale som skal brukes
+nb|choose_timezone|Tidssone som skal brukes
+nb|confirm_apply|Bruk denne konfigurasjonen
+nb|unsupported_language|Språk støttes ikke
+nb|locale_generated|Locale generert
+nb|locale_updated|System-locale oppdatert
+nb|profile_updated|Shell-profil oppdatert
+nb|timezone_updated|Tidssone oppdatert
+nb|ntp_enabled|NTP aktivert
+nb|web_language_updated|Proxmox VE webspråk oppdatert
+nb|reboot_question|Start på nytt nå
+nb|reboot_later|Omstart hoppet over. Åpne en ny økt eller start på nytt senere.
+nb|not_set|Ikke satt
+nb|yes_no_default_no|j/N
+nb|summary_title|Sammendrag
+nb|label_host|Vert
+nb|label_pve_ui_language|PVE webspråk
+nb|label_system_locale|System-locale
+nb|label_language_priority|LANGUAGE-prioritet
+nb|label_timezone|Tidssone
+nb|label_current_shell_lang|Gjeldende shell LANG
+nb|label_current_shell_lc_all|Gjeldende shell LC_ALL
+nb|label_generated_locale|Generert locale
+nb|label_shell_profile|Shell-profil overstyring
+nb|status_ok|OK
+nb|status_missing|MANGLER
+nl|script_title|Hulpmiddel voor standaardtaal
+nl|repo_hint|Interactieve taalconfiguratie voor Proxmox VE
+nl|ssh_warning_title|Veiligheidsadvies
+nl|ssh_warning_body|Houd tijdens de bewerking een SSH-sessie open, voor het geval de Proxmox VE-webinterface niet correct herstart.
+nl|latest_backup_hint|Om de laatste back-up via SSH te herstellen
+nl|menu_option_2|menuoptie 2
+nl|menu_apply|Standaardtaal toepassen
+nl|menu_restore_latest|Laatste back-up herstellen
+nl|menu_restore_select|Gekozen back-up herstellen
+nl|menu_status|Huidige status tonen
+nl|menu_languages|Ondersteunde talen tonen
+nl|menu_backups|Back-ups tonen
+nl|menu_quit|Afsluiten
+nl|choose_option|Kies een optie
+nl|press_enter|Druk op Enter om door te gaan...
+nl|cancelled|Bewerking geannuleerd.
+nl|running_as_root|Dit script moet als root worden uitgevoerd.
+nl|file_not_found|Bestand niet gevonden
+nl|directory_not_found|Map niet gevonden
+nl|missing_command|Vereiste opdracht niet gevonden
+nl|backup_created|Back-up gemaakt
+nl|restart_proxy|pveproxy wordt herstart...
+nl|config_applied|Configuratie succesvol toegepast.
+nl|relogin_needed|Open een nieuwe shellsessie of herstart om de locale overal toe te passen.
+nl|backup_used|Gebruikte back-up
+nl|no_backup_found|Geen back-up gevonden.
+nl|restore_done|Herstel voltooid vanaf
+nl|invalid_choice|Ongeldige keuze.
+nl|selection_out_of_range|Selectie buiten bereik.
+nl|restore_cancelled|Herstel geannuleerd.
+nl|detected_language|Gedetecteerde taal
+nl|status_title|Status standaardtaal
+nl|available_backups|Beschikbare back-ups
+nl|choose_backup_number|Kies het back-upnummer om te herstellen
+nl|bye|Tot ziens.
+nl|warning_title|WAARSCHUWING
+nl|warning_body_1|Dit script wijzigt de systeemlocale van Debian/Proxmox VE.
+nl|warning_body_2|Het wijzigt ook de standaard webtaal in /etc/pve/datacenter.cfg.
+nl|warning_body_3|Voor elke wijziging wordt automatisch een back-up gemaakt.
+nl|warning_body_4|Houd SSH-toegang open zodat je kunt herstellen als de webinterface onbereikbaar wordt.
+nl|type_yes|Typ 'yes' om door te gaan
+nl|supported_languages|Ondersteunde talen
+nl|detected_default|Gedetecteerde standaard
+nl|choose_language|Taalcode om toe te passen
+nl|choose_locale|Systeemlocale om toe te passen
+nl|choose_timezone|Tijdzone om toe te passen
+nl|confirm_apply|Deze configuratie toepassen
+nl|unsupported_language|Niet-ondersteunde taal
+nl|locale_generated|Locale gegenereerd
+nl|locale_updated|Systeemlocale bijgewerkt
+nl|profile_updated|Shellprofiel bijgewerkt
+nl|timezone_updated|Tijdzone bijgewerkt
+nl|ntp_enabled|NTP ingeschakeld
+nl|web_language_updated|Proxmox VE-webtaal bijgewerkt
+nl|reboot_question|Nu herstarten
+nl|reboot_later|Herstart overgeslagen. Open een nieuwe sessie of herstart later.
+nl|not_set|Niet ingesteld
+nl|yes_no_default_no|j/N
+nl|summary_title|Samenvatting
+nl|label_host|Host
+nl|label_pve_ui_language|PVE-webtaal
+nl|label_system_locale|Systeemlocale
+nl|label_language_priority|LANGUAGE-prioriteit
+nl|label_timezone|Tijdzone
+nl|label_current_shell_lang|Huidige shell LANG
+nl|label_current_shell_lc_all|Huidige shell LC_ALL
+nl|label_generated_locale|Gegenereerde locale
+nl|label_shell_profile|Shellprofiel-override
+nl|status_ok|OK
+nl|status_missing|ONTBREEKT
+nn|script_title|Verktøy for standardspråk
+nn|repo_hint|Interaktiv språk-konfigurasjon for Proxmox VE
+nn|ssh_warning_title|Tryggleiksråd
+nn|ssh_warning_body|Hald ei SSH-økt open under operasjonen, i tilfelle Proxmox VE-webgrensesnittet ikkje startar rett på nytt.
+nn|latest_backup_hint|For å gjenopprette siste backup via SSH
+nn|menu_option_2|menyval 2
+nn|menu_apply|Bruk standardspråk
+nn|menu_restore_latest|Gjenopprett siste backup
+nn|menu_restore_select|Gjenopprett vald backup
+nn|menu_status|Vis gjeldande status
+nn|menu_languages|List støtta språk
+nn|menu_backups|List backup-ar
+nn|menu_quit|Avslutt
+nn|choose_option|Vel eit alternativ
+nn|press_enter|Trykk Enter for å halde fram...
+nn|cancelled|Operasjonen vart avbroten.
+nn|running_as_root|Dette skriptet må køyrast som root.
+nn|file_not_found|Fil ikkje funnen
+nn|directory_not_found|Mappe ikkje funnen
+nn|missing_command|Påkravd kommando ikkje funnen
+nn|backup_created|Backup oppretta
+nn|restart_proxy|Startar pveproxy på nytt...
+nn|config_applied|Konfigurasjon brukt.
+nn|relogin_needed|Opn ei ny shell-økt eller start på nytt for å bruke locale overalt.
+nn|backup_used|Backup brukt
+nn|no_backup_found|Ingen backup funnen.
+nn|restore_done|Gjenoppretting fullført frå
+nn|invalid_choice|Ugyldig val.
+nn|selection_out_of_range|Val utanfor område.
+nn|restore_cancelled|Gjenoppretting avbroten.
+nn|detected_language|Oppdaga språk
+nn|status_title|Status for standardspråk
+nn|available_backups|Tilgjengelege backup-ar
+nn|choose_backup_number|Vel backupnummer å gjenopprette
+nn|bye|Ha det.
+nn|warning_title|ÅTVARING
+nn|warning_body_1|Dette skriptet endrar Debian/Proxmox VE system-locale.
+nn|warning_body_2|Det endrar òg standard webspråk i /etc/pve/datacenter.cfg.
+nn|warning_body_3|Automatisk backup vert oppretta før kvar endring.
+nn|warning_body_4|Hald SSH-tilgang open for å kunne gjenopprette viss webgrensesnittet vert utilgjengeleg.
+nn|type_yes|Skriv yes for å halde fram
+nn|supported_languages|Støtta språk
+nn|detected_default|Oppdaga standard
+nn|choose_language|Språkkode som skal brukast
+nn|choose_locale|System-locale som skal brukast
+nn|choose_timezone|Tidssone som skal brukast
+nn|confirm_apply|Bruk denne konfigurasjonen
+nn|unsupported_language|Språk ikkje støtta
+nn|locale_generated|Locale generert
+nn|locale_updated|System-locale oppdatert
+nn|profile_updated|Shell-profil oppdatert
+nn|timezone_updated|Tidssone oppdatert
+nn|ntp_enabled|NTP aktivert
+nn|web_language_updated|Proxmox VE webspråk oppdatert
+nn|reboot_question|Start på nytt no
+nn|reboot_later|Omstart hoppa over. Opn ei ny økt eller start på nytt seinare.
+nn|not_set|Ikkje sett
+nn|yes_no_default_no|j/N
+nn|summary_title|Samandrag
+nn|label_host|Vert
+nn|label_pve_ui_language|PVE webspråk
+nn|label_system_locale|System-locale
+nn|label_language_priority|LANGUAGE-prioritet
+nn|label_timezone|Tidssone
+nn|label_current_shell_lang|Gjeldande shell LANG
+nn|label_current_shell_lc_all|Gjeldande shell LC_ALL
+nn|label_generated_locale|Generert locale
+nn|label_shell_profile|Shell-profil overstyring
+nn|status_ok|OK
+nn|status_missing|MANGLAR
+pl|script_title|Narzędzie domyślnego języka
+pl|repo_hint|Interaktywna konfiguracja języka Proxmox VE
+pl|ssh_warning_title|Wskazówka bezpieczeństwa
+pl|ssh_warning_body|Zostaw otwartą sesję SSH podczas operacji, gdyby interfejs web Proxmox VE nie uruchomił się poprawnie ponownie.
+pl|latest_backup_hint|Aby przywrócić ostatnią kopię przez SSH
+pl|menu_option_2|opcja menu 2
+pl|menu_apply|Zastosuj język domyślny
+pl|menu_restore_latest|Przywróć ostatnią kopię
+pl|menu_restore_select|Przywróć wybraną kopię
+pl|menu_status|Pokaż bieżący stan
+pl|menu_languages|Pokaż obsługiwane języki
+pl|menu_backups|Pokaż kopie
+pl|menu_quit|Wyjdź
+pl|choose_option|Wybierz opcję
+pl|press_enter|Naciśnij Enter, aby kontynuować...
+pl|cancelled|Operacja anulowana.
+pl|running_as_root|Ten skrypt musi być uruchomiony jako root.
+pl|file_not_found|Nie znaleziono pliku
+pl|directory_not_found|Nie znaleziono katalogu
+pl|missing_command|Nie znaleziono wymaganej komendy
+pl|backup_created|Kopia utworzona
+pl|restart_proxy|Ponowne uruchamianie pveproxy...
+pl|config_applied|Konfiguracja zastosowana pomyślnie.
+pl|relogin_needed|Otwórz nową sesję shell lub zrestartuj, aby locale działało wszędzie.
+pl|backup_used|Użyta kopia
+pl|no_backup_found|Nie znaleziono kopii.
+pl|restore_done|Przywracanie zakończone z
+pl|invalid_choice|Nieprawidłowy wybór.
+pl|selection_out_of_range|Wybór poza zakresem.
+pl|restore_cancelled|Przywracanie anulowane.
+pl|detected_language|Wykryty język
+pl|status_title|Stan języka domyślnego
+pl|available_backups|Dostępne kopie
+pl|choose_backup_number|Wybierz numer kopii do przywrócenia
+pl|bye|Do widzenia.
+pl|warning_title|OSTRZEŻENIE
+pl|warning_body_1|Ten skrypt modyfikuje systemową locale Debian/Proxmox VE.
+pl|warning_body_2|Zmienia też domyślny język web w /etc/pve/datacenter.cfg.
+pl|warning_body_3|Przed każdą zmianą tworzona jest automatyczna kopia.
+pl|warning_body_4|Zostaw dostęp SSH, aby móc przywrócić system, jeśli interfejs web będzie niedostępny.
+pl|type_yes|Wpisz 'yes', aby kontynuować
+pl|supported_languages|Obsługiwane języki
+pl|detected_default|Wykryte domyślne
+pl|choose_language|Kod języka do zastosowania
+pl|choose_locale|Locale systemowa do zastosowania
+pl|choose_timezone|Strefa czasowa do zastosowania
+pl|confirm_apply|Zastosować tę konfigurację
+pl|unsupported_language|Nieobsługiwany język
+pl|locale_generated|Locale wygenerowana
+pl|locale_updated|Locale systemowa zaktualizowana
+pl|profile_updated|Profil shell zaktualizowany
+pl|timezone_updated|Strefa czasowa zaktualizowana
+pl|ntp_enabled|NTP włączone
+pl|web_language_updated|Język web Proxmox VE zaktualizowany
+pl|reboot_question|Uruchomić ponownie teraz
+pl|reboot_later|Restart pominięty. Otwórz nową sesję lub zrestartuj później.
+pl|not_set|Nie ustawiono
+pl|yes_no_default_no|t/N
+pl|summary_title|Podsumowanie
+pl|label_host|Host
+pl|label_pve_ui_language|Język web PVE
+pl|label_system_locale|Locale systemowa
+pl|label_language_priority|Priorytet LANGUAGE
+pl|label_timezone|Strefa czasowa
+pl|label_current_shell_lang|Bieżący LANG shell
+pl|label_current_shell_lc_all|Bieżący LC_ALL shell
+pl|label_generated_locale|Wygenerowana locale
+pl|label_shell_profile|Nadpisanie profilu shell
+pl|status_ok|OK
+pl|status_missing|BRAK
+pt_BR|script_title|Utilitário de idioma padrão
+pt_BR|repo_hint|Configuração interativa de idioma do Proxmox VE
+pt_BR|ssh_warning_title|Aviso de segurança
+pt_BR|ssh_warning_body|Mantenha uma sessão SSH aberta durante a operação, caso a interface web do Proxmox VE não reinicie corretamente.
+pt_BR|latest_backup_hint|Para restaurar o backup mais recente por SSH
+pt_BR|menu_option_2|opção 2 do menu
+pt_BR|menu_apply|Aplicar idioma padrão
+pt_BR|menu_restore_latest|Restaurar backup mais recente
+pt_BR|menu_restore_select|Restaurar backup selecionado
+pt_BR|menu_status|Mostrar estado atual
+pt_BR|menu_languages|Listar idiomas suportados
+pt_BR|menu_backups|Listar backups
+pt_BR|menu_quit|Sair
+pt_BR|choose_option|Escolha uma opção
+pt_BR|press_enter|Pressione Enter para continuar...
+pt_BR|cancelled|Operação cancelada.
+pt_BR|running_as_root|Este script deve ser executado como root.
+pt_BR|file_not_found|Arquivo não encontrado
+pt_BR|directory_not_found|Diretório não encontrado
+pt_BR|missing_command|Comando necessário não encontrado
+pt_BR|backup_created|Backup criado
+pt_BR|restart_proxy|Reiniciando pveproxy...
+pt_BR|config_applied|Configuração aplicada com sucesso.
+pt_BR|relogin_needed|Abra uma nova sessão de shell ou reinicie para ver a locale aplicada em todos os lugares.
+pt_BR|backup_used|Backup usado
+pt_BR|no_backup_found|Nenhum backup encontrado.
+pt_BR|restore_done|Restauração concluída de
+pt_BR|invalid_choice|Escolha inválida.
+pt_BR|selection_out_of_range|Seleção fora do intervalo.
+pt_BR|restore_cancelled|Restauração cancelada.
+pt_BR|detected_language|Idioma detectado
+pt_BR|status_title|Estado do idioma padrão
+pt_BR|available_backups|Backups disponíveis
+pt_BR|choose_backup_number|Escolha o número do backup para restaurar
+pt_BR|bye|Até logo.
+pt_BR|warning_title|AVISO
+pt_BR|warning_body_1|Este script modifica a locale do sistema Debian/Proxmox VE.
+pt_BR|warning_body_2|Também altera o idioma web padrão em /etc/pve/datacenter.cfg.
+pt_BR|warning_body_3|Um backup automático é criado antes de qualquer alteração.
+pt_BR|warning_body_4|Mantenha o acesso SSH aberto para restaurar se a interface web ficar inacessível.
+pt_BR|type_yes|Digite 'yes' para continuar
+pt_BR|supported_languages|Idiomas suportados
+pt_BR|detected_default|Padrão detectado
+pt_BR|choose_language|Código de idioma a aplicar
+pt_BR|choose_locale|Locale do sistema a aplicar
+pt_BR|choose_timezone|Fuso horário a aplicar
+pt_BR|confirm_apply|Aplicar esta configuração
+pt_BR|unsupported_language|Idioma não suportado
+pt_BR|locale_generated|Locale gerada
+pt_BR|locale_updated|Locale do sistema atualizada
+pt_BR|profile_updated|Perfil do shell atualizado
+pt_BR|timezone_updated|Fuso horário atualizado
+pt_BR|ntp_enabled|NTP ativado
+pt_BR|web_language_updated|Idioma web do Proxmox VE atualizado
+pt_BR|reboot_question|Reiniciar agora
+pt_BR|reboot_later|Reinício ignorado. Abra uma nova sessão ou reinicie depois.
+pt_BR|not_set|Não definido
+pt_BR|yes_no_default_no|s/N
+pt_BR|summary_title|Resumo
+pt_BR|label_host|Host
+pt_BR|label_pve_ui_language|Idioma web PVE
+pt_BR|label_system_locale|Locale do sistema
+pt_BR|label_language_priority|Prioridade LANGUAGE
+pt_BR|label_timezone|Fuso horário
+pt_BR|label_current_shell_lang|LANG do shell atual
+pt_BR|label_current_shell_lc_all|LC_ALL do shell atual
+pt_BR|label_generated_locale|Locale gerada
+pt_BR|label_shell_profile|Sobrescrita do perfil shell
+pt_BR|status_ok|OK
+pt_BR|status_missing|AUSENTE
+ru|script_title|Утилита языка по умолчанию
+ru|repo_hint|Интерактивная настройка языка Proxmox VE
+ru|ssh_warning_title|Совет по безопасности
+ru|ssh_warning_body|Держите SSH-сессию открытой во время операции на случай, если веб-интерфейс Proxmox VE не перезапустится корректно.
+ru|latest_backup_hint|Чтобы восстановить последний бэкап по SSH
+ru|menu_option_2|пункт меню 2
+ru|menu_apply|Применить язык по умолчанию
+ru|menu_restore_latest|Восстановить последний бэкап
+ru|menu_restore_select|Восстановить выбранный бэкап
+ru|menu_status|Показать текущий статус
+ru|menu_languages|Показать поддерживаемые языки
+ru|menu_backups|Показать бэкапы
+ru|menu_quit|Выход
+ru|choose_option|Выберите опцию
+ru|press_enter|Нажмите Enter для продолжения...
+ru|cancelled|Операция отменена.
+ru|running_as_root|Этот скрипт нужно запускать от root.
+ru|file_not_found|Файл не найден
+ru|directory_not_found|Каталог не найден
+ru|missing_command|Требуемая команда не найдена
+ru|backup_created|Бэкап создан
+ru|restart_proxy|Перезапуск pveproxy...
+ru|config_applied|Конфигурация успешно применена.
+ru|relogin_needed|Откройте новую shell-сессию или перезагрузитесь, чтобы locale применился везде.
+ru|backup_used|Использован бэкап
+ru|no_backup_found|Бэкап не найден.
+ru|restore_done|Восстановление завершено из
+ru|invalid_choice|Неверный выбор.
+ru|selection_out_of_range|Выбор вне диапазона.
+ru|restore_cancelled|Восстановление отменено.
+ru|detected_language|Обнаруженный язык
+ru|status_title|Статус языка по умолчанию
+ru|available_backups|Доступные бэкапы
+ru|choose_backup_number|Выберите номер бэкапа для восстановления
+ru|bye|До свидания.
+ru|warning_title|ПРЕДУПРЕЖДЕНИЕ
+ru|warning_body_1|Этот скрипт изменяет системную locale Debian/Proxmox VE.
+ru|warning_body_2|Он также меняет язык веб-интерфейса по умолчанию в /etc/pve/datacenter.cfg.
+ru|warning_body_3|Перед любым изменением создаётся автоматический бэкап.
+ru|warning_body_4|Держите SSH-доступ открытым, чтобы восстановиться, если веб-интерфейс станет недоступен.
+ru|type_yes|Введите 'yes' для продолжения
+ru|supported_languages|Поддерживаемые языки
+ru|detected_default|Обнаружено по умолчанию
+ru|choose_language|Код языка для применения
+ru|choose_locale|Системная locale для применения
+ru|choose_timezone|Часовой пояс для применения
+ru|confirm_apply|Применить эту конфигурацию
+ru|unsupported_language|Неподдерживаемый язык
+ru|locale_generated|Locale сгенерирована
+ru|locale_updated|Системная locale обновлена
+ru|profile_updated|Профиль shell обновлён
+ru|timezone_updated|Часовой пояс обновлён
+ru|ntp_enabled|NTP включён
+ru|web_language_updated|Язык веб-интерфейса Proxmox VE обновлён
+ru|reboot_question|Перезагрузить сейчас
+ru|reboot_later|Перезагрузка пропущена. Откройте новую сессию или перезагрузитесь позже.
+ru|not_set|Не задано
+ru|yes_no_default_no|д/Н
+ru|summary_title|Сводка
+ru|label_host|Хост
+ru|label_pve_ui_language|Язык веб-интерфейса PVE
+ru|label_system_locale|Системная locale
+ru|label_language_priority|Приоритет LANGUAGE
+ru|label_timezone|Часовой пояс
+ru|label_current_shell_lang|Текущий LANG shell
+ru|label_current_shell_lc_all|Текущий LC_ALL shell
+ru|label_generated_locale|Сгенерированная locale
+ru|label_shell_profile|Переопределение профиля shell
+ru|status_ok|OK
+ru|status_missing|ОТСУТСТВУЕТ
+sl|script_title|Orodje za privzeti jezik
+sl|repo_hint|Interaktivna nastavitev jezika za Proxmox VE
+sl|ssh_warning_title|Varnostni nasvet
+sl|ssh_warning_body|Med postopkom pustite odprto SSH sejo, če se spletni vmesnik Proxmox VE ne zažene pravilno znova.
+sl|latest_backup_hint|Za obnovitev zadnje varnostne kopije prek SSH
+sl|menu_option_2|možnost menija 2
+sl|menu_apply|Uporabi privzeti jezik
+sl|menu_restore_latest|Obnovi zadnjo varnostno kopijo
+sl|menu_restore_select|Obnovi izbrano varnostno kopijo
+sl|menu_status|Prikaži trenutno stanje
+sl|menu_languages|Prikaži podprte jezike
+sl|menu_backups|Prikaži varnostne kopije
+sl|menu_quit|Izhod
+sl|choose_option|Izberite možnost
+sl|press_enter|Pritisnite Enter za nadaljevanje...
+sl|cancelled|Postopek preklican.
+sl|running_as_root|Ta skript mora biti zagnan kot root.
+sl|file_not_found|Datoteka ni najdena
+sl|directory_not_found|Mapa ni najdena
+sl|missing_command|Zahtevan ukaz ni najden
+sl|backup_created|Varnostna kopija ustvarjena
+sl|restart_proxy|Ponovni zagon pveproxy...
+sl|config_applied|Konfiguracija uspešno uporabljena.
+sl|relogin_needed|Odprite novo shell sejo ali ponovno zaženite, da bo locale uporabljen povsod.
+sl|backup_used|Uporabljena varnostna kopija
+sl|no_backup_found|Ni najdene varnostne kopije.
+sl|restore_done|Obnova zaključena iz
+sl|invalid_choice|Neveljavna izbira.
+sl|selection_out_of_range|Izbira izven obsega.
+sl|restore_cancelled|Obnova preklicana.
+sl|detected_language|Zaznan jezik
+sl|status_title|Stanje privzetega jezika
+sl|available_backups|Razpoložljive varnostne kopije
+sl|choose_backup_number|Izberite številko varnostne kopije za obnovo
+sl|bye|Nasvidenje.
+sl|warning_title|OPOZORILO
+sl|warning_body_1|Ta skript spremeni sistemski locale Debian/Proxmox VE.
+sl|warning_body_2|Spremeni tudi privzeti spletni jezik v /etc/pve/datacenter.cfg.
+sl|warning_body_3|Pred vsako spremembo se ustvari samodejna varnostna kopija.
+sl|warning_body_4|Pustite SSH dostop odprt, da lahko obnovite, če spletni vmesnik postane nedosegljiv.
+sl|type_yes|Vpišite yes za nadaljevanje
+sl|supported_languages|Podprti jeziki
+sl|detected_default|Zaznana privzeta vrednost
+sl|choose_language|Koda jezika za uporabo
+sl|choose_locale|Sistemski locale za uporabo
+sl|choose_timezone|Časovni pas za uporabo
+sl|confirm_apply|Uporabi to konfiguracijo
+sl|unsupported_language|Nepodprt jezik
+sl|locale_generated|Locale ustvarjen
+sl|locale_updated|Sistemski locale posodobljen
+sl|profile_updated|Shell profil posodobljen
+sl|timezone_updated|Časovni pas posodobljen
+sl|ntp_enabled|NTP omogočen
+sl|web_language_updated|Spletni jezik Proxmox VE posodobljen
+sl|reboot_question|Ponovno zaženi zdaj
+sl|reboot_later|Ponovni zagon preskočen. Odprite novo sejo ali ponovno zaženite pozneje.
+sl|not_set|Ni nastavljeno
+sl|yes_no_default_no|d/N
+sl|summary_title|Povzetek
+sl|label_host|Gostitelj
+sl|label_pve_ui_language|PVE spletni jezik
+sl|label_system_locale|Sistemski locale
+sl|label_language_priority|Prednost LANGUAGE
+sl|label_timezone|Časovni pas
+sl|label_current_shell_lang|Trenutni shell LANG
+sl|label_current_shell_lc_all|Trenutni shell LC_ALL
+sl|label_generated_locale|Ustvarjen locale
+sl|label_shell_profile|Prepis shell profila
+sl|status_ok|OK
+sl|status_missing|MANJKA
+sv|script_title|Verktyg för standardspråk
+sv|repo_hint|Interaktiv språkkonfiguration för Proxmox VE
+sv|ssh_warning_title|Säkerhetsråd
+sv|ssh_warning_body|Håll en SSH-session öppen under åtgärden om Proxmox VE-webbgränssnittet inte startar om korrekt.
+sv|latest_backup_hint|För att återställa senaste backup via SSH
+sv|menu_option_2|menyalternativ 2
+sv|menu_apply|Använd standardspråk
+sv|menu_restore_latest|Återställ senaste backup
+sv|menu_restore_select|Återställ vald backup
+sv|menu_status|Visa aktuell status
+sv|menu_languages|Lista språk som stöds
+sv|menu_backups|Lista backuper
+sv|menu_quit|Avsluta
+sv|choose_option|Välj ett alternativ
+sv|press_enter|Tryck Enter för att fortsätta...
+sv|cancelled|Åtgärden avbröts.
+sv|running_as_root|Detta skript måste köras som root.
+sv|file_not_found|Fil hittades inte
+sv|directory_not_found|Katalog hittades inte
+sv|missing_command|Nödvändigt kommando hittades inte
+sv|backup_created|Backup skapad
+sv|restart_proxy|Startar om pveproxy...
+sv|config_applied|Konfigurationen har tillämpats.
+sv|relogin_needed|Öppna en ny shell-session eller starta om för att locale ska gälla överallt.
+sv|backup_used|Använd backup
+sv|no_backup_found|Ingen backup hittades.
+sv|restore_done|Återställning slutförd från
+sv|invalid_choice|Ogiltigt val.
+sv|selection_out_of_range|Val utanför intervallet.
+sv|restore_cancelled|Återställning avbruten.
+sv|detected_language|Upptäckt språk
+sv|status_title|Status för standardspråk
+sv|available_backups|Tillgängliga backuper
+sv|choose_backup_number|Välj backupnummer att återställa
+sv|bye|Hej då.
+sv|warning_title|VARNING
+sv|warning_body_1|Detta skript ändrar Debian/Proxmox VE:s system-locale.
+sv|warning_body_2|Det ändrar även standardspråk för webben i /etc/pve/datacenter.cfg.
+sv|warning_body_3|En automatisk backup skapas före varje ändring.
+sv|warning_body_4|Håll SSH-åtkomst öppen så att du kan återställa om webben blir otillgänglig.
+sv|type_yes|Skriv yes för att fortsätta
+sv|supported_languages|Språk som stöds
+sv|detected_default|Upptäckt standard
+sv|choose_language|Språkkod att tillämpa
+sv|choose_locale|System-locale att tillämpa
+sv|choose_timezone|Tidszon att tillämpa
+sv|confirm_apply|Tillämpa denna konfiguration
+sv|unsupported_language|Språk stöds inte
+sv|locale_generated|Locale genererad
+sv|locale_updated|System-locale uppdaterad
+sv|profile_updated|Shellprofil uppdaterad
+sv|timezone_updated|Tidszon uppdaterad
+sv|ntp_enabled|NTP aktiverat
+sv|web_language_updated|Proxmox VE webbspråk uppdaterat
+sv|reboot_question|Starta om nu
+sv|reboot_later|Omstart hoppades över. Öppna en ny session eller starta om senare.
+sv|not_set|Inte angivet
+sv|yes_no_default_no|j/N
+sv|summary_title|Sammanfattning
+sv|label_host|Värd
+sv|label_pve_ui_language|PVE webbspråk
+sv|label_system_locale|System-locale
+sv|label_language_priority|LANGUAGE-prioritet
+sv|label_timezone|Tidszon
+sv|label_current_shell_lang|Aktuell shell LANG
+sv|label_current_shell_lc_all|Aktuell shell LC_ALL
+sv|label_generated_locale|Genererad locale
+sv|label_shell_profile|Shellprofil-åsidosättning
+sv|status_ok|OK
+sv|status_missing|SAKNAS
+tr|script_title|Varsayılan Dil Aracı
+tr|repo_hint|Proxmox VE için etkileşimli dil yapılandırması
+tr|ssh_warning_title|Güvenlik tavsiyesi
+tr|ssh_warning_body|İşlem sırasında SSH oturumunu açık tutun; Proxmox VE web arayüzü düzgün yeniden başlamazsa gerekir.
+tr|latest_backup_hint|SSH üzerinden son yedeği geri yüklemek için
+tr|menu_option_2|menü seçeneği 2
+tr|menu_apply|Varsayılan dili uygula
+tr|menu_restore_latest|Son yedeği geri yükle
+tr|menu_restore_select|Seçilen yedeği geri yükle
+tr|menu_status|Geçerli durumu göster
+tr|menu_languages|Desteklenen dilleri listele
+tr|menu_backups|Yedekleri listele
+tr|menu_quit|Çık
+tr|choose_option|Bir seçenek seçin
+tr|press_enter|Devam etmek için Enter tuşuna basın...
+tr|cancelled|İşlem iptal edildi.
+tr|running_as_root|Bu betik root olarak çalıştırılmalıdır.
+tr|file_not_found|Dosya bulunamadı
+tr|directory_not_found|Dizin bulunamadı
+tr|missing_command|Gerekli komut bulunamadı
+tr|backup_created|Yedek oluşturuldu
+tr|restart_proxy|pveproxy yeniden başlatılıyor...
+tr|config_applied|Yapılandırma başarıyla uygulandı.
+tr|relogin_needed|Locale her yerde geçerli olsun diye yeni bir shell oturumu açın veya yeniden başlatın.
+tr|backup_used|Kullanılan yedek
+tr|no_backup_found|Yedek bulunamadı.
+tr|restore_done|Geri yükleme tamamlandı, kaynak
+tr|invalid_choice|Geçersiz seçim.
+tr|selection_out_of_range|Seçim aralık dışında.
+tr|restore_cancelled|Geri yükleme iptal edildi.
+tr|detected_language|Algılanan dil
+tr|status_title|Varsayılan dil durumu
+tr|available_backups|Kullanılabilir yedekler
+tr|choose_backup_number|Geri yüklenecek yedek numarasını seçin
+tr|bye|Hoşça kal.
+tr|warning_title|UYARI
+tr|warning_body_1|Bu betik Debian/Proxmox VE sistem locale değerini değiştirir.
+tr|warning_body_2|Ayrıca /etc/pve/datacenter.cfg içindeki varsayılan web dilini değiştirir.
+tr|warning_body_3|Her değişiklikten önce otomatik yedek oluşturulur.
+tr|warning_body_4|Web arayüzü erişilemez olursa geri yükleyebilmek için SSH erişimini açık tutun.
+tr|type_yes|Devam etmek için yes yazın
+tr|supported_languages|Desteklenen diller
+tr|detected_default|Algılanan varsayılan
+tr|choose_language|Uygulanacak dil kodu
+tr|choose_locale|Uygulanacak sistem locale değeri
+tr|choose_timezone|Uygulanacak saat dilimi
+tr|confirm_apply|Bu yapılandırmayı uygula
+tr|unsupported_language|Desteklenmeyen dil
+tr|locale_generated|Locale oluşturuldu
+tr|locale_updated|Sistem locale güncellendi
+tr|profile_updated|Shell profili güncellendi
+tr|timezone_updated|Saat dilimi güncellendi
+tr|ntp_enabled|NTP etkinleştirildi
+tr|web_language_updated|Proxmox VE web dili güncellendi
+tr|reboot_question|Şimdi yeniden başlat
+tr|reboot_later|Yeniden başlatma atlandı. Yeni oturum açın veya daha sonra yeniden başlatın.
+tr|not_set|Ayarlı değil
+tr|yes_no_default_no|e/H
+tr|summary_title|Özet
+tr|label_host|Ana makine
+tr|label_pve_ui_language|PVE web dili
+tr|label_system_locale|Sistem locale
+tr|label_language_priority|LANGUAGE önceliği
+tr|label_timezone|Saat dilimi
+tr|label_current_shell_lang|Geçerli shell LANG
+tr|label_current_shell_lc_all|Geçerli shell LC_ALL
+tr|label_generated_locale|Oluşturulan locale
+tr|label_shell_profile|Shell profil geçersiz kılma
+tr|status_ok|OK
+tr|status_missing|EKSİK
+zh_CN|script_title|默认语言工具
+zh_CN|repo_hint|Proxmox VE 语言交互配置
+zh_CN|ssh_warning_title|安全建议
+zh_CN|ssh_warning_body|操作期间请保持 SSH 会话开启，以防 Proxmox VE 网页界面无法正确重启。
+zh_CN|latest_backup_hint|通过 SSH 恢复最新备份
+zh_CN|menu_option_2|菜单选项 2
+zh_CN|menu_apply|应用默认语言
+zh_CN|menu_restore_latest|恢复最新备份
+zh_CN|menu_restore_select|恢复选定备份
+zh_CN|menu_status|显示当前状态
+zh_CN|menu_languages|列出支持的语言
+zh_CN|menu_backups|列出备份
+zh_CN|menu_quit|退出
+zh_CN|choose_option|选择一个选项
+zh_CN|press_enter|按 Enter 继续...
+zh_CN|cancelled|操作已取消。
+zh_CN|running_as_root|此脚本必须以 root 运行。
+zh_CN|file_not_found|未找到文件
+zh_CN|directory_not_found|未找到目录
+zh_CN|missing_command|未找到所需命令
+zh_CN|backup_created|备份已创建
+zh_CN|restart_proxy|正在重启 pveproxy...
+zh_CN|config_applied|配置已成功应用。
+zh_CN|relogin_needed|打开新的 shell 会话或重启，以便 locale 在所有地方生效。
+zh_CN|backup_used|使用的备份
+zh_CN|no_backup_found|未找到备份。
+zh_CN|restore_done|恢复完成，来源
+zh_CN|invalid_choice|无效选择。
+zh_CN|selection_out_of_range|选择超出范围。
+zh_CN|restore_cancelled|恢复已取消。
+zh_CN|detected_language|检测到的语言
+zh_CN|status_title|默认语言状态
+zh_CN|available_backups|可用备份
+zh_CN|choose_backup_number|选择要恢复的备份编号
+zh_CN|bye|再见。
+zh_CN|warning_title|警告
+zh_CN|warning_body_1|此脚本会修改 Debian/Proxmox VE 系统 locale。
+zh_CN|warning_body_2|它还会修改 /etc/pve/datacenter.cfg 中的默认网页语言。
+zh_CN|warning_body_3|每次修改前都会自动创建备份。
+zh_CN|warning_body_4|请保持 SSH 访问开启，以便网页界面不可用时可以恢复。
+zh_CN|type_yes|输入 yes 继续
+zh_CN|supported_languages|支持的语言
+zh_CN|detected_default|检测到的默认值
+zh_CN|choose_language|要应用的语言代码
+zh_CN|choose_locale|要应用的系统 locale
+zh_CN|choose_timezone|要应用的时区
+zh_CN|confirm_apply|应用此配置
+zh_CN|unsupported_language|不支持的语言
+zh_CN|locale_generated|locale 已生成
+zh_CN|locale_updated|系统 locale 已更新
+zh_CN|profile_updated|shell 配置已更新
+zh_CN|timezone_updated|时区已更新
+zh_CN|ntp_enabled|NTP 已启用
+zh_CN|web_language_updated|Proxmox VE 网页语言已更新
+zh_CN|reboot_question|现在重启
+zh_CN|reboot_later|已跳过重启。请打开新会话或稍后重启。
+zh_CN|not_set|未设置
+zh_CN|yes_no_default_no|y/N
+zh_CN|summary_title|摘要
+zh_CN|label_host|主机
+zh_CN|label_pve_ui_language|PVE 网页语言
+zh_CN|label_system_locale|系统 locale
+zh_CN|label_language_priority|LANGUAGE 优先级
+zh_CN|label_timezone|时区
+zh_CN|label_current_shell_lang|当前 shell LANG
+zh_CN|label_current_shell_lc_all|当前 shell LC_ALL
+zh_CN|label_generated_locale|已生成的 locale
+zh_CN|label_shell_profile|shell 配置覆盖
+zh_CN|status_ok|OK
+zh_CN|status_missing|缺失
+zh_TW|script_title|預設語言工具
+zh_TW|repo_hint|Proxmox VE 語言互動設定
+zh_TW|ssh_warning_title|安全建議
+zh_TW|ssh_warning_body|操作期間請保持 SSH 工作階段開啟，以防 Proxmox VE 網頁介面無法正確重新啟動。
+zh_TW|latest_backup_hint|透過 SSH 還原最新備份
+zh_TW|menu_option_2|選單選項 2
+zh_TW|menu_apply|套用預設語言
+zh_TW|menu_restore_latest|還原最新備份
+zh_TW|menu_restore_select|還原選取的備份
+zh_TW|menu_status|顯示目前狀態
+zh_TW|menu_languages|列出支援的語言
+zh_TW|menu_backups|列出備份
+zh_TW|menu_quit|離開
+zh_TW|choose_option|選擇一個選項
+zh_TW|press_enter|按 Enter 繼續...
+zh_TW|cancelled|操作已取消。
+zh_TW|running_as_root|此腳本必須以 root 執行。
+zh_TW|file_not_found|找不到檔案
+zh_TW|directory_not_found|找不到目錄
+zh_TW|missing_command|找不到必要命令
+zh_TW|backup_created|備份已建立
+zh_TW|restart_proxy|正在重新啟動 pveproxy...
+zh_TW|config_applied|設定已成功套用。
+zh_TW|relogin_needed|開啟新的 shell 工作階段或重新啟動，讓 locale 在所有地方生效。
+zh_TW|backup_used|使用的備份
+zh_TW|no_backup_found|找不到備份。
+zh_TW|restore_done|還原完成，來源
+zh_TW|invalid_choice|無效選擇。
+zh_TW|selection_out_of_range|選擇超出範圍。
+zh_TW|restore_cancelled|還原已取消。
+zh_TW|detected_language|偵測到的語言
+zh_TW|status_title|預設語言狀態
+zh_TW|available_backups|可用備份
+zh_TW|choose_backup_number|選擇要還原的備份編號
+zh_TW|bye|再見。
+zh_TW|warning_title|警告
+zh_TW|warning_body_1|此腳本會修改 Debian/Proxmox VE 系統 locale。
+zh_TW|warning_body_2|它也會修改 /etc/pve/datacenter.cfg 中的預設網頁語言。
+zh_TW|warning_body_3|每次修改前都會自動建立備份。
+zh_TW|warning_body_4|請保持 SSH 存取開啟，以便網頁介面無法存取時可以還原。
+zh_TW|type_yes|輸入 yes 繼續
+zh_TW|supported_languages|支援的語言
+zh_TW|detected_default|偵測到的預設值
+zh_TW|choose_language|要套用的語言代碼
+zh_TW|choose_locale|要套用的系統 locale
+zh_TW|choose_timezone|要套用的時區
+zh_TW|confirm_apply|套用此設定
+zh_TW|unsupported_language|不支援的語言
+zh_TW|locale_generated|locale 已產生
+zh_TW|locale_updated|系統 locale 已更新
+zh_TW|profile_updated|shell 設定檔已更新
+zh_TW|timezone_updated|時區已更新
+zh_TW|ntp_enabled|NTP 已啟用
+zh_TW|web_language_updated|Proxmox VE 網頁語言已更新
+zh_TW|reboot_question|現在重新啟動
+zh_TW|reboot_later|已略過重新啟動。請開啟新工作階段或稍後重新啟動。
+zh_TW|not_set|未設定
+zh_TW|yes_no_default_no|y/N
+zh_TW|summary_title|摘要
+zh_TW|label_host|主機
+zh_TW|label_pve_ui_language|PVE 網頁語言
+zh_TW|label_system_locale|系統 locale
+zh_TW|label_language_priority|LANGUAGE 優先順序
+zh_TW|label_timezone|時區
+zh_TW|label_current_shell_lang|目前 shell LANG
+zh_TW|label_current_shell_lc_all|目前 shell LC_ALL
+zh_TW|label_generated_locale|已產生的 locale
+zh_TW|label_shell_profile|shell 設定檔覆寫
+zh_TW|status_ok|OK
+zh_TW|status_missing|缺少
+I18N_DATA
+}
+
+LANG_CODES=(
+    ar ca da de en es eu fa fr gl he hu it ja kr nb nl nn pl pt_BR ru sl sv tr zh_CN zh_TW
+)
+
+is_supported_code() {
+    local code="$1"
+    local item
+
+    for item in "${LANG_CODES[@]}"; do
+        [[ "$item" == "$code" ]] && return 0
+    done
+
+    return 1
+}
+
+normalize_locale_to_code() {
+    local raw="$1"
+
+    raw="${raw%%.*}"
+    raw="${raw,,}"
+    raw="${raw/-/_}"
+
+    case "$raw" in
+        ar*) echo "ar" ;;
+        ca*) echo "ca" ;;
+        da*) echo "da" ;;
+        de*) echo "de" ;;
+        es*) echo "es" ;;
+        eu*) echo "eu" ;;
+        fa*) echo "fa" ;;
+        fr*) echo "fr" ;;
+        gl*) echo "gl" ;;
+        he*|iw*) echo "he" ;;
+        hu*) echo "hu" ;;
+        it*) echo "it" ;;
+        ja*) echo "ja" ;;
+        ko*|kr*) echo "kr" ;;
+        nb*) echo "nb" ;;
+        nn*) echo "nn" ;;
+        nl*) echo "nl" ;;
+        pl*) echo "pl" ;;
+        pt_br*) echo "pt_BR" ;;
+        pt*) echo "pt_BR" ;;
+        ru*) echo "ru" ;;
+        sl*) echo "sl" ;;
+        sv*) echo "sv" ;;
+        tr*) echo "tr" ;;
+        zh_cn*) echo "zh_CN" ;;
+        zh_tw*) echo "zh_TW" ;;
+        zh*) echo "zh_CN" ;;
+        en*) echo "en" ;;
+        *) echo "en" ;;
+    esac
+}
+
+read_server_lang_raw() {
+    local raw=""
+
+    if [[ -f "$DEFAULT_LOCALE_FILE" ]]; then
+        raw="$(awk -F= '
+            /^LANG=/ {
+                gsub(/"/, "", $2)
+                print $2
+                exit
+            }
+        ' "$DEFAULT_LOCALE_FILE" 2>/dev/null || true)"
+    fi
+
+    if [[ -z "$raw" ]]; then
+        raw="${LANG:-${LC_MESSAGES:-en}}"
+    fi
+
+    echo "$raw"
+}
+
+APP_LANG="en"
+
+detect_lang() {
+    local raw code
+
+    raw="$(read_server_lang_raw)"
+    code="$(normalize_locale_to_code "$raw")"
+
+    if is_supported_code "$code" && [[ -n "${I18N["$code:script_title"]:-}" ]]; then
+        APP_LANG="$code"
+    else
+        APP_LANG="en"
+    fi
+}
+
+tr_msg() {
+    local key="$1"
+    printf '%s\n' "${I18N["$APP_LANG:$key"]:-${I18N["en:$key"]:-$key}}"
+}
+
+# ------------------------------------------------------------
+# Colors (Proxmox-inspired)
+# ------------------------------------------------------------
+# Same visual theme as the existing Proxmox-Tools script, but using
+# xterm-256 colors instead of truecolor. This avoids broken output such as
+# ";2;230;106;0m" on Proxmox console/noVNC while keeping a real orange.
+if [[ -t 1 ]]; then
+    RESET='\033[0m'
+    BOLD='\033[1m'
+    DIM='\033[2m'
+    PMX_ORANGE='\033[38;5;166m'
+    PMX_ORANGE_SOFT='\033[38;5;208m'
+    PMX_RED='\033[38;5;124m'
+    PMX_GREEN='\033[38;5;70m'
+    PMX_BLUE='\033[38;5;67m'
+    PMX_GREY='\033[38;5;244m'
+    PMX_WHITE='\033[38;5;255m'
+else
+    RESET=''
+    BOLD=''
+    DIM=''
+    PMX_ORANGE=''
+    PMX_ORANGE_SOFT=''
+    PMX_RED=''
+    PMX_GREEN=''
+    PMX_BLUE=''
+    PMX_GREY=''
+    PMX_WHITE=''
+fi
+
+icon_info() { printf "%bℹ%b" "$PMX_BLUE" "$RESET"; }
+icon_ok() { printf "%b✔%b" "$PMX_GREEN" "$RESET"; }
+icon_warn() { printf "%b⚠%b" "$PMX_ORANGE" "$RESET"; }
+icon_err() { printf "%b✖%b" "$PMX_RED" "$RESET"; }
+
+say_info() { echo -e "$(icon_info) ${PMX_WHITE}$*${RESET}"; }
+say_ok() { echo -e "$(icon_ok) ${PMX_WHITE}$*${RESET}"; }
+say_err() { echo -e "$(icon_err) ${PMX_WHITE}$*${RESET}"; }
+
+rule() {
+    printf "%b" "$PMX_GREY"
+    printf '─%.0s' {1..58}
+    printf "%b
+" "$RESET"
+}
+
+native_lang_name() {
+    case "$1" in
+        ar) echo "العربية" ;;
+        ca) echo "Català" ;;
+        da) echo "Dansk" ;;
+        de) echo "Deutsch" ;;
+        en) echo "English" ;;
+        es) echo "Español" ;;
+        eu) echo "Euskara" ;;
+        fa) echo "فارسی" ;;
+        fr) echo "Français" ;;
+        gl) echo "Galego" ;;
+        he) echo "עברית" ;;
+        hu) echo "Magyar" ;;
+        it) echo "Italiano" ;;
+        ja) echo "日本語" ;;
+        kr) echo "한국어" ;;
+        nb) echo "Norsk bokmål" ;;
+        nl) echo "Nederlands" ;;
+        nn) echo "Norsk nynorsk" ;;
+        pl) echo "Polski" ;;
+        pt_BR) echo "Português do Brasil" ;;
+        ru) echo "Русский" ;;
+        sl) echo "Slovenščina" ;;
+        sv) echo "Svenska" ;;
+        tr) echo "Türkçe" ;;
+        zh_CN) echo "简体中文" ;;
+        zh_TW) echo "繁體中文" ;;
+        *) echo "$1" ;;
+    esac
+}
+
+locale_for_code() {
+    case "$1" in
+        ar) echo "ar_SA.UTF-8" ;;
+        ca) echo "ca_ES.UTF-8" ;;
+        da) echo "da_DK.UTF-8" ;;
+        de) echo "de_DE.UTF-8" ;;
+        en) echo "en_US.UTF-8" ;;
+        es) echo "es_ES.UTF-8" ;;
+        eu) echo "eu_ES.UTF-8" ;;
+        fa) echo "fa_IR.UTF-8" ;;
+        fr) echo "fr_FR.UTF-8" ;;
+        gl) echo "gl_ES.UTF-8" ;;
+        he) echo "he_IL.UTF-8" ;;
+        hu) echo "hu_HU.UTF-8" ;;
+        it) echo "it_IT.UTF-8" ;;
+        ja) echo "ja_JP.UTF-8" ;;
+        kr) echo "ko_KR.UTF-8" ;;
+        nb) echo "nb_NO.UTF-8" ;;
+        nl) echo "nl_NL.UTF-8" ;;
+        nn) echo "nn_NO.UTF-8" ;;
+        pl) echo "pl_PL.UTF-8" ;;
+        pt_BR) echo "pt_BR.UTF-8" ;;
+        ru) echo "ru_RU.UTF-8" ;;
+        sl) echo "sl_SI.UTF-8" ;;
+        sv) echo "sv_SE.UTF-8" ;;
+        tr) echo "tr_TR.UTF-8" ;;
+        zh_CN) echo "zh_CN.UTF-8" ;;
+        zh_TW) echo "zh_TW.UTF-8" ;;
+        *) echo "" ;;
+    esac
+}
+
+language_priority_for_code() {
+    case "$1" in
+        pt_BR) echo "pt_BR:pt" ;;
+        zh_CN) echo "zh_CN:zh" ;;
+        zh_TW) echo "zh_TW:zh" ;;
+        kr) echo "ko_KR:ko" ;;
+        en) echo "en_US:en" ;;
+        *) echo "$(locale_for_code "$1" | cut -d. -f1):${1%%_*}" ;;
+    esac
+}
+
+timezone_for_code() {
+    case "$1" in
+        ar) echo "Asia/Riyadh" ;;
+        ca|es|eu|gl) echo "Europe/Madrid" ;;
+        da) echo "Europe/Copenhagen" ;;
+        de) echo "Europe/Berlin" ;;
+        en) echo "UTC" ;;
+        fa) echo "Asia/Tehran" ;;
+        fr) echo "Europe/Paris" ;;
+        he) echo "Asia/Jerusalem" ;;
+        hu) echo "Europe/Budapest" ;;
+        it) echo "Europe/Rome" ;;
+        ja) echo "Asia/Tokyo" ;;
+        kr) echo "Asia/Seoul" ;;
+        nb|nn) echo "Europe/Oslo" ;;
+        nl) echo "Europe/Amsterdam" ;;
+        pl) echo "Europe/Warsaw" ;;
+        pt_BR) echo "America/Sao_Paulo" ;;
+        ru) echo "Europe/Moscow" ;;
+        sl) echo "Europe/Ljubljana" ;;
+        sv) echo "Europe/Stockholm" ;;
+        tr) echo "Europe/Istanbul" ;;
+        zh_CN) echo "Asia/Shanghai" ;;
+        zh_TW) echo "Asia/Taipei" ;;
+        *) echo "UTC" ;;
+    esac
+}
+
+detect_default_code() {
+    normalize_locale_to_code "$(read_server_lang_raw)"
+}
+
+show_ssh_warning() {
+    rule
+    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg ssh_warning_title)${RESET}"
+    echo -e "${PMX_WHITE}$(tr_msg ssh_warning_body)${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg latest_backup_hint):${RESET} ${PMX_WHITE}$(tr_msg menu_option_2)${RESET}"
+    rule
+    echo
+}
+
+show_banner() {
+    clear || true
+
+    local title="Proxmox-Tools by VROOT"
+    local script_title
+    script_title="$(tr_msg script_title)"
+
+    local width=58
+    local pad_total pad_left pad_right
+
+    printf "%b" "${PMX_ORANGE}${BOLD}"
+    printf '┌'
+    printf '─%.0s' $(seq 1 "$width")
+    printf '┐
+'
+
+    pad_total=$((width - ${#title}))
+    (( pad_total < 0 )) && pad_total=0
+    pad_left=$((pad_total / 2))
+    pad_right=$((pad_total - pad_left))
+    printf '│'
+    printf '%*s' "$pad_left" ''
+    printf "%b%s%b" "${PMX_WHITE}${BOLD}" "$title" "${PMX_ORANGE}${BOLD}"
+    printf '%*s' "$pad_right" ''
+    printf '│
+'
+
+    printf '│'
+    printf '%*s' "$width" ''
+    printf '│
+'
+
+    pad_total=$((width - ${#script_title}))
+    (( pad_total < 0 )) && pad_total=0
+    pad_left=$((pad_total / 2))
+    pad_right=$((pad_total - pad_left))
+    printf '│'
+    printf '%*s' "$pad_left" ''
+    printf "%b%s%b" "${PMX_ORANGE_SOFT}${BOLD}" "$script_title" "${PMX_ORANGE}${BOLD}"
+    printf '%*s' "$pad_right" ''
+    printf '│
+'
+
+    printf '└'
+    printf '─%.0s' $(seq 1 "$width")
+    printf '┘
+'
+    printf "%b" "$RESET"
+
+    echo -e "${PMX_ORANGE_SOFT}${BOLD}$(tr_msg repo_hint)${RESET}"
+    echo
+    echo -e "${PMX_GREY}$(tr_msg label_host):${RESET} ${PMX_WHITE}$(hostname)${RESET} ${PMX_GREY}$(tr_msg detected_language):${RESET} ${PMX_WHITE}$(native_lang_name "$APP_LANG")${RESET}"
+    echo
+
+    show_ssh_warning
+}
+
+pause() {
+    echo
+    read -r -p "$(tr_msg press_enter)" _
+}
+
+require_root() {
+    if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+        say_err "$(tr_msg running_as_root)"
+        exit 1
+    fi
+}
+
+require_commands() {
+    local cmd
+    for cmd in locale locale-gen update-locale timedatectl systemctl sed awk grep date find sort tail cp mkdir chmod mktemp cat cut seq rm touch hostname; do
+        command -v "$cmd" >/dev/null 2>&1 || { say_err "$(tr_msg missing_command): $cmd"; exit 1; }
+    done
+}
+
+require_files() {
+    [[ -f "$LOCALE_GEN_FILE" ]] || { say_err "$(tr_msg file_not_found): $LOCALE_GEN_FILE"; exit 1; }
+    [[ -d "/etc/pve" ]] || { say_err "$(tr_msg directory_not_found): /etc/pve"; exit 1; }
+}
+
+show_warning_and_confirm() {
+    echo
+    rule
+    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg warning_title)${RESET}"
+    echo
+    echo -e "${PMX_WHITE}• $(tr_msg warning_body_1)${RESET}"
+    echo -e "${PMX_WHITE}• $(tr_msg warning_body_2)${RESET}"
+    echo -e "${PMX_WHITE}• $(tr_msg warning_body_3)${RESET}"
+    echo -e "${PMX_WHITE}• $(tr_msg warning_body_4)${RESET}"
+    rule
+    echo
+
+    local answer
+    read -r -p "$(tr_msg type_yes): " answer
+
+    if [[ "$answer" != "yes" ]]; then
+        say_info "$(tr_msg cancelled)"
+        return 1
+    fi
+
+    return 0
+}
+
+latest_backup_dir() {
+    find /root -maxdepth 1 -type d -name 'pve-default-language-*' | sort | tail -n1
+}
+
+list_backups_raw() {
+    find /root -maxdepth 1 -type d -name 'pve-default-language-*' | sort
+}
+
+backup_file() {
+    local src="$1"
+    local dir="$2"
+    local safe
+
+    safe="${src#/}"
+    safe="${safe//\//__}"
+
+    if [[ -e "$src" ]]; then
+        cp -a "$src" "$dir/$safe"
+        echo "present:$src:$safe" >> "$dir/MANIFEST.txt"
+    else
+        echo "absent:$src:$safe" >> "$dir/MANIFEST.txt"
+    fi
+}
+
+create_backup() {
+    local ts dir
+
+    ts="$(date +%F-%H%M%S)"
+    dir="${PATCH_PREFIX}-${ts}"
+
+    mkdir -p "$dir"
+    : > "$dir/MANIFEST.txt"
+
+    backup_file "$LOCALE_GEN_FILE" "$dir"
+    backup_file "$DEFAULT_LOCALE_FILE" "$dir"
+    backup_file "$DATACENTER_CFG" "$dir"
+    backup_file "$PROFILE_LOCALE_FILE" "$dir"
+    backup_file "$TIMEZONE_FILE" "$dir"
+
+    {
+        echo "created_at=$(date --iso-8601=seconds)"
+        echo "hostname=$(hostname)"
+        echo "locale_gen_file=$LOCALE_GEN_FILE"
+        echo "default_locale_file=$DEFAULT_LOCALE_FILE"
+        echo "datacenter_cfg=$DATACENTER_CFG"
+        echo "profile_locale_file=$PROFILE_LOCALE_FILE"
+        echo "timezone=$(timedatectl show -p Timezone --value 2>/dev/null || true)"
+        echo
+        pveversion -v 2>/dev/null || true
+    } > "$dir/INFO.txt"
+
+    echo "$dir"
+}
+
+restore_from_manifest() {
+    local dir="$1"
+    local status src safe
+
+    [[ -f "$dir/MANIFEST.txt" ]] || { say_err "$(tr_msg file_not_found): $dir/MANIFEST.txt"; return 1; }
+
+    while IFS=: read -r status src safe; do
+        [[ -n "${src:-}" ]] || continue
+
+        if [[ "$status" == "present" ]]; then
+            [[ -f "$dir/$safe" || -d "$dir/$safe" ]] || { say_err "$(tr_msg file_not_found): $dir/$safe"; return 1; }
+            cp -a "$dir/$safe" "$src"
+        elif [[ "$status" == "absent" ]]; then
+            rm -f "$src"
+        fi
+    done < "$dir/MANIFEST.txt"
+
+    say_info "$(tr_msg restart_proxy)"
+    systemctl restart pveproxy.service
+
+    if command -v timedatectl >/dev/null 2>&1 && [[ -f "$TIMEZONE_FILE" ]]; then
+        timedatectl set-timezone "$(cat "$TIMEZONE_FILE")" >/dev/null 2>&1 || true
+    fi
+
+    say_ok "$(tr_msg restore_done): $dir"
+}
+
+restore_latest() {
+    local dir
+    dir="$(latest_backup_dir)"
+
+    if [[ -z "$dir" ]]; then
+        say_err "$(tr_msg no_backup_found)"
+        return 1
+    fi
+
+    restore_from_manifest "$dir"
+}
+
+interactive_restore_menu() {
+    mapfile -t backups < <(list_backups_raw)
+
+    if [[ "${#backups[@]}" -eq 0 ]]; then
+        say_err "$(tr_msg no_backup_found)"
+        pause
+        return
+    fi
+
+    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg available_backups)${RESET}"
+    echo
+
+    local i=1
+    local b
+
+    for b in "${backups[@]}"; do
+        echo -e " ${PMX_ORANGE_SOFT}${i})${RESET} ${PMX_WHITE}${b}${RESET}"
+        ((i++))
+    done
+
+    echo -e " ${PMX_GREY}q) $(tr_msg cancelled)${RESET}"
+    echo
+
+    local choice
+    read -r -p "$(tr_msg choose_backup_number): " choice
+
+    if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
+        say_info "$(tr_msg restore_cancelled)"
+        pause
+        return
+    fi
+
+    if ! [[ "$choice" =~ ^[0-9]+$ ]]; then
+        say_err "$(tr_msg invalid_choice)"
+        pause
+        return
+    fi
+
+    if (( choice < 1 || choice > ${#backups[@]} )); then
+        say_err "$(tr_msg selection_out_of_range)"
+        pause
+        return
+    fi
+
+    restore_from_manifest "${backups[$((choice-1))]}"
+    pause
+}
+
+show_backups() {
+    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg available_backups)${RESET}"
+    echo
+    list_backups_raw || true
+    pause
+}
+
+show_languages() {
+    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg supported_languages)${RESET}"
+    echo
+
+    local code
+    for code in "${LANG_CODES[@]}"; do
+        printf " ${PMX_ORANGE_SOFT}%-6s${RESET} ${PMX_WHITE}%-24s${RESET} ${PMX_GREY}%s${RESET}
+"             "$code" "$(native_lang_name "$code")" "$(locale_for_code "$code")"
+    done
+}
+
+ensure_locale_gen_entry() {
+    local locale_name="$1"
+    local tmp
+
+    tmp="$(mktemp)"
+
+    awk -v loc="$locale_name" -v line="$locale_name UTF-8" '
+        BEGIN { found=0 }
+        {
+            raw=$0
+            sub(/^[[:space:]]*#?[[:space:]]*/, "", raw)
+            split(raw, parts, /[[:space:]]+/)
+
+            if (parts[1] == loc) {
+                if (!found) {
+                    print line
+                }
+
+                found=1
+                next
+            }
+
+            print $0
+        }
+        END {
+            if (!found) {
+                print line
+            }
+        }
+    ' "$LOCALE_GEN_FILE" > "$tmp"
+
+    cat "$tmp" > "$LOCALE_GEN_FILE"
+    rm -f "$tmp"
+}
+
+set_system_locale() {
+    local locale_name="$1"
+    local lang_priority="$2"
+
+    ensure_locale_gen_entry "$locale_name"
+    locale-gen
+
+    update-locale LANG="$locale_name" LANGUAGE="$lang_priority"
+
+    # Remove old global LC_* overrides.
+    # LC_ALL must not be permanently set because it overrides LANG and all LC_* categories.
+    if [[ -f "$DEFAULT_LOCALE_FILE" ]]; then
+        sed -i '/^LC_ALL=/d;/^LC_[A-Z_]*=/d' "$DEFAULT_LOCALE_FILE"
+    fi
+
+    cat > "$PROFILE_LOCALE_FILE" <<EOF_PROFILE
+# Managed by Proxmox-Tools pve-default-language.sh
+# LC_ALL is deliberately unset because it overrides LANG and all LC_* categories.
+
+unset LC_ALL
+unset LC_CTYPE
+unset LC_NUMERIC
+unset LC_TIME
+unset LC_COLLATE
+unset LC_MONETARY
+unset LC_MESSAGES
+unset LC_PAPER
+unset LC_NAME
+unset LC_ADDRESS
+unset LC_TELEPHONE
+unset LC_MEASUREMENT
+unset LC_IDENTIFICATION
+
+export LANG="$locale_name"
+export LANGUAGE="$lang_priority"
+EOF_PROFILE
+
+    chmod 0644 "$PROFILE_LOCALE_FILE"
+}
+
+set_web_language() {
+    local code="$1"
+
+    touch "$DATACENTER_CFG"
+
+    if grep -Eq '^[[:space:]]*language:' "$DATACENTER_CFG"; then
+        sed -i -E "s/^[[:space:]]*language:.*/language: $code/" "$DATACENTER_CFG"
+    else
+        if [[ -s "$DATACENTER_CFG" ]]; then
+            printf '
+' >> "$DATACENTER_CFG"
+        fi
+
+        printf 'language: %s
+' "$code" >> "$DATACENTER_CFG"
+    fi
+}
+
+set_timezone_and_ntp() {
+    local timezone="$1"
+    timedatectl set-timezone "$timezone"
+    timedatectl set-ntp true
+}
+
+current_datacenter_language() {
+    if [[ -f "$DATACENTER_CFG" ]]; then
+        awk '/^[[:space:]]*language:/ { print $2; found=1 } END { if (!found) print "" }' "$DATACENTER_CFG"
+    fi
+}
+
+current_default_locale() {
+    if [[ -f "$DEFAULT_LOCALE_FILE" ]]; then
+        awk -F= '/^LANG=/ { gsub(/"/, "", $2); print $2; found=1 } END { if (!found) print "" }' "$DEFAULT_LOCALE_FILE"
+    fi
+}
+
+current_default_lc_all() {
+    if [[ -f "$DEFAULT_LOCALE_FILE" ]]; then
+        awk -F= '/^LC_ALL=/ { gsub(/"/, "", $2); print $2; found=1 } END { if (!found) print "" }' "$DEFAULT_LOCALE_FILE"
+    fi
+}
+
+is_yes() {
+    local answer="${1,,}"
+    case "$answer" in
+        y|yes|o|oui|s|si|sí|j|ja|e|evet|t|tak|d|da|i|igen|b|bai|a|ano|是|да) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+choose_and_apply() {
+    local detected_code code locale_name lang_priority timezone default_timezone current_timezone answer backup_dir
+
+    detected_code="$(detect_default_code)"
+
+    show_languages
+    echo
+    say_info "$(tr_msg detected_default): $detected_code ($(native_lang_name "$detected_code"), $(locale_for_code "$detected_code"))"
+    echo
+
+    read -r -p "$(tr_msg choose_language) [$detected_code]: " code
+    code="${code:-$detected_code}"
+
+    if ! is_supported_code "$code"; then
+        say_err "$(tr_msg unsupported_language): $code"
+        pause
+        return
+    fi
+
+    locale_name="$(locale_for_code "$code")"
+    read -r -p "$(tr_msg choose_locale) [$locale_name]: " answer
+    locale_name="${answer:-$locale_name}"
+
+    default_timezone="$(timezone_for_code "$code")"
+    current_timezone="$(timedatectl show -p Timezone --value 2>/dev/null || true)"
+
+    if [[ "$code" != "fr" && -n "$current_timezone" ]]; then
+        default_timezone="$current_timezone"
+    fi
+
+    read -r -p "$(tr_msg choose_timezone) [$default_timezone]: " timezone
+    timezone="${timezone:-$default_timezone}"
+
+    lang_priority="$(language_priority_for_code "$code")"
+
+    echo
+    rule
+    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg summary_title)${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg label_pve_ui_language):${RESET} ${PMX_WHITE}${code}${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg label_system_locale):${RESET} ${PMX_WHITE}${locale_name}${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg label_language_priority):${RESET} ${PMX_WHITE}${lang_priority}${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg label_timezone):${RESET} ${PMX_WHITE}${timezone}${RESET}"
+    rule
+    echo
+
+    read -r -p "$(tr_msg confirm_apply) ? [$(tr_msg yes_no_default_no)]: " answer
+    if ! is_yes "$answer"; then
+        say_info "$(tr_msg cancelled)"
+        pause
+        return
+    fi
+
+    show_warning_and_confirm || { pause; return; }
+
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): $backup_dir"
+
+    set_system_locale "$locale_name" "$lang_priority"
+    say_ok "$(tr_msg locale_generated): $locale_name"
+    say_ok "$(tr_msg locale_updated): LANG=$locale_name LANGUAGE=$lang_priority"
+    say_ok "$(tr_msg profile_updated): $PROFILE_LOCALE_FILE"
+
+    set_timezone_and_ntp "$timezone"
+    say_ok "$(tr_msg timezone_updated): $timezone"
+    say_ok "$(tr_msg ntp_enabled)"
+
+    set_web_language "$code"
+    say_ok "$(tr_msg web_language_updated): language: $code"
+
+    say_info "$(tr_msg restart_proxy)"
+    systemctl restart pveproxy.service
+
+    echo
+    say_ok "$(tr_msg config_applied)"
+    say_info "$(tr_msg relogin_needed)"
+    say_info "$(tr_msg backup_used): $backup_dir"
+
+    echo
+    read -r -p "$(tr_msg reboot_question) ? [$(tr_msg yes_no_default_no)]: " answer
+    if is_yes "$answer"; then
+        reboot
+    else
+        say_info "$(tr_msg reboot_later)"
+    fi
+
+    pause
+}
+
+show_status() {
+    local dc_lang locale_value default_lc_all_value tz_value profile_status generated_status current_shell current_lc_all
+
+    dc_lang="$(current_datacenter_language || true)"
+    locale_value="$(current_default_locale || true)"
+    default_lc_all_value="$(current_default_lc_all || true)"
+    tz_value="$(timedatectl show -p Timezone --value 2>/dev/null || true)"
+    current_shell="${LANG:-}"
+    current_lc_all="${LC_ALL:-}"
+
+    [[ -z "$dc_lang" ]] && dc_lang="$(tr_msg not_set)"
+    [[ -z "$locale_value" ]] && locale_value="$(tr_msg not_set)"
+    [[ -z "$default_lc_all_value" ]] && default_lc_all_value="$(tr_msg not_set)"
+    [[ -z "$tz_value" ]] && tz_value="$(tr_msg not_set)"
+    [[ -z "$current_shell" ]] && current_shell="$(tr_msg not_set)"
+    [[ -z "$current_lc_all" ]] && current_lc_all="$(tr_msg not_set)"
+
+    if [[ -f "$PROFILE_LOCALE_FILE" ]]; then
+        profile_status="$PROFILE_LOCALE_FILE"
+    else
+        profile_status="$(tr_msg not_set)"
+    fi
+
+    if [[ -n "$locale_value" && "$locale_value" != "$(tr_msg not_set)" ]] && locale -a 2>/dev/null | grep -qi "^${locale_value%.UTF-8}\(\.utf8\|\.UTF-8\)$"; then
+        generated_status="$(tr_msg status_ok)"
+    else
+        generated_status="$(tr_msg status_missing)"
+    fi
+
+    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg status_title)${RESET}"
+    echo
+    echo -e "${PMX_GREY}/etc/pve/datacenter.cfg language:${RESET} ${PMX_WHITE}${dc_lang}${RESET}"
+    echo -e "${PMX_GREY}/etc/default/locale LANG:${RESET} ${PMX_WHITE}${locale_value}${RESET}"
+    echo -e "${PMX_GREY}/etc/default/locale LC_ALL:${RESET} ${PMX_WHITE}${default_lc_all_value}${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg label_current_shell_lang):${RESET} ${PMX_WHITE}${current_shell}${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg label_current_shell_lc_all):${RESET} ${PMX_WHITE}${current_lc_all}${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg label_generated_locale):${RESET} ${PMX_WHITE}${generated_status}${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg label_timezone):${RESET} ${PMX_WHITE}${tz_value}${RESET}"
+    echo -e "${PMX_GREY}$(tr_msg label_shell_profile):${RESET} ${PMX_WHITE}${profile_status}${RESET}"
+}
+
+main_menu() {
+    while true; do
+        detect_lang
+        show_banner
+
+        echo -e " ${PMX_ORANGE_SOFT}1)${RESET} ${PMX_WHITE}$(tr_msg menu_apply)${RESET}"
+        echo -e " ${PMX_ORANGE_SOFT}2)${RESET} ${PMX_WHITE}$(tr_msg menu_restore_latest)${RESET}"
+        echo -e " ${PMX_ORANGE_SOFT}3)${RESET} ${PMX_WHITE}$(tr_msg menu_restore_select)${RESET}"
+        echo -e " ${PMX_ORANGE_SOFT}4)${RESET} ${PMX_WHITE}$(tr_msg menu_status)${RESET}"
+        echo -e " ${PMX_ORANGE_SOFT}5)${RESET} ${PMX_WHITE}$(tr_msg menu_languages)${RESET}"
+        echo -e " ${PMX_ORANGE_SOFT}6)${RESET} ${PMX_WHITE}$(tr_msg menu_backups)${RESET}"
+        echo -e " ${PMX_ORANGE_SOFT}7)${RESET} ${PMX_WHITE}$(tr_msg menu_quit)${RESET}"
+        echo
+
+        local choice
+        read -r -p "$(tr_msg choose_option) [1-7]: " choice
+        echo
+
+        case "$choice" in
+            1) choose_and_apply ;;
+            2) restore_latest; pause ;;
+            3) interactive_restore_menu ;;
+            4) show_status; pause ;;
+            5) show_languages; pause ;;
+            6) show_backups ;;
+            7) say_info "$(tr_msg bye)"; exit 0 ;;
+            *) say_err "$(tr_msg invalid_choice)"; pause ;;
+        esac
+    done
+}
+
+load_i18n
+detect_lang
+require_root
+require_commands
+require_files
+main_menu
