@@ -198,9 +198,29 @@ rule() {
 
 show_banner() {
     clear || true
-    echo -e "${PMX_ORANGE}${BOLD}┌──────────────────────────────────────────────────────────┐${RESET}"
-    echo -e "${PMX_ORANGE}${BOLD}│${RESET} ${PMX_WHITE}${BOLD}Proxmox-Tools by VROOT${RESET}$(printf ' %.0s' {1..24})${PMX_ORANGE}${BOLD}│${RESET}"
-    echo -e "${PMX_ORANGE}${BOLD}└──────────────────────────────────────────────────────────┘${RESET}"
+    local title="Proxmox-Tools by VROOT"
+    local width=58
+    local pad_total=$((width - ${#title}))
+    if (( pad_total < 0 )); then
+        pad_total=0
+    fi
+    local pad_left=$((pad_total / 2))
+    local pad_right=$((pad_total - pad_left))
+
+    printf "%b" "${PMX_ORANGE}${BOLD}"
+    printf '┌'
+    printf '─%.0s' $(seq 1 $width)
+    printf '┐\n'
+    printf '│'
+    printf '%*s' "$pad_left" ''
+    printf "%b%s%b" "${PMX_WHITE}${BOLD}" "$title" "${PMX_ORANGE}${BOLD}"
+    printf '%*s' "$pad_right" ''
+    printf '│\n'
+    printf '└'
+    printf '─%.0s' $(seq 1 $width)
+    printf '┘\n'
+    printf "%b" "$RESET"
+
     echo -e "${PMX_ORANGE_SOFT}$(tr_msg repo_hint)${RESET}"
     echo
     local lang_label
