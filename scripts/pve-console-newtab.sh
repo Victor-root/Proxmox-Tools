@@ -199,7 +199,7 @@ rule() {
 show_banner() {
     clear || true
     local title="Proxmox-Tools by VROOT"
-    local script_title="pve-console-newtab.sh"
+    local script_title="Console New Tab Utility"
     local width=58
     local pad_total
     local pad_left
