@@ -199,9 +199,9 @@ rule() {
 show_banner() {
     clear || true
     echo -e "${PMX_ORANGE}${BOLD}┌──────────────────────────────────────────────────────────┐${RESET}"
-    echo -e "${PMX_ORANGE}${BOLD}│${RESET} ${PMX_WHITE}${BOLD}Proxmox VE${RESET} ${PMX_ORANGE_SOFT}${BOLD}•$(printf ' %.0s' {1..1})$(tr_msg banner_subtitle)${RESET}$(printf ' %.0s' {1..18})${PMX_ORANGE}${BOLD}│${RESET}"
+    echo -e "${PMX_ORANGE}${BOLD}│${RESET} ${PMX_WHITE}${BOLD}Proxmox-Tools by VROOT${RESET}$(printf ' %.0s' {1..24})${PMX_ORANGE}${BOLD}│${RESET}"
     echo -e "${PMX_ORANGE}${BOLD}└──────────────────────────────────────────────────────────┘${RESET}"
-    echo -e "${DIM}${PMX_GREY}$(tr_msg repo_hint)${RESET}"
+    echo -e "${PMX_ORANGE_SOFT}$(tr_msg repo_hint)${RESET}"
     echo
     local lang_label
     if [[ "$APP_LANG" == "fr" ]]; then
