@@ -200,35 +200,46 @@ show_banner() {
     clear || true
     local title="Proxmox-Tools by VROOT"
     local width=58
-    local pad_total=$((width - ${#title}))
+    local inner
+    local pad_total
+    local pad_left
+    local pad_right
+
+    inner="$title"
+    pad_total=$((width - ${#inner}))
     if (( pad_total < 0 )); then
         pad_total=0
     fi
-    local pad_left=$((pad_total / 2))
-    local pad_right=$((pad_total - pad_left))
+    pad_left=$((pad_total / 2))
+    pad_right=$((pad_total - pad_left))
 
     printf "%b" "${PMX_ORANGE}${BOLD}"
     printf '┌'
-    printf '─%.0s' $(seq 1 $width)
-    printf '┐\n'
+    printf '─%.0s' $(seq 1 "$width")
+    printf '┐
+'
     printf '│'
     printf '%*s' "$pad_left" ''
-    printf "%b%s%b" "${PMX_WHITE}${BOLD}" "$title" "${PMX_ORANGE}${BOLD}"
+    printf "%b%s%b" "${PMX_WHITE}${BOLD}" "$inner" "${PMX_ORANGE}${BOLD}"
     printf '%*s' "$pad_right" ''
-    printf '│\n'
+    printf '│
+'
     printf '└'
-    printf '─%.0s' $(seq 1 $width)
-    printf '┘\n'
+    printf '─%.0s' $(seq 1 "$width")
+    printf '┘
+'
     printf "%b" "$RESET"
 
-    echo -e "${PMX_ORANGE_SOFT}$(tr_msg repo_hint)${RESET}"
+    echo -e "${PMX_ORANGE_SOFT}${BOLD}$(tr_msg repo_hint)${RESET}"
     echo
+
     local lang_label
     if [[ "$APP_LANG" == "fr" ]]; then
         lang_label="$(tr_msg lang_fr)"
     else
         lang_label="$(tr_msg lang_en)"
     fi
+
     echo -e "${PMX_GREY}Host:${RESET} ${PMX_WHITE}$(hostname)${RESET}    ${PMX_GREY}$(tr_msg detected_language):${RESET} ${PMX_WHITE}${lang_label}${RESET}"
     echo
 }
