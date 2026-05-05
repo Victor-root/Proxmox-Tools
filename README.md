@@ -44,12 +44,6 @@ Adds a more convenient browser workflow for the Proxmox VE web interface:
 bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-console-newtab.sh)
 ```
 
-#### Alternative method
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-console-newtab.sh -o /tmp/pve-console-newtab.sh && bash /tmp/pve-console-newtab.sh
-```
-
 ---
 
 ### 🌍 Proxmox VE default language manager
@@ -73,12 +67,6 @@ Changes the default **Proxmox VE language** for both the shell and the web inter
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-default-language-i18n)
-```
-
-#### Alternative method
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-default-language-i18n -o /tmp/pve-default-language-i18n && bash /tmp/pve-default-language-i18n
 ```
 
 ---
