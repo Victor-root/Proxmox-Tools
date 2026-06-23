@@ -14,6 +14,9 @@ CLIENT_DIR="${WG_DIR}/clients"
 STATE_FILE="${WG_DIR}/wg-forge.env"
 NFT_FILE="${WG_DIR}/wg-forge.nft"
 NFT_UNIT="/etc/systemd/system/wg-forge-nft.service"
+DDNS_UPDATE="${WG_DIR}/wg-forge-ddns.sh"
+DDNS_UNIT="/etc/systemd/system/wg-forge-ddns.service"
+DDNS_TIMER="/etc/systemd/system/wg-forge-ddns.timer"
 
 DEFAULT_PORT="51820"
 DEFAULT_WG_CIDR="192.168.2.0/24"
@@ -190,6 +193,7 @@ confirm_default_yes() {
 
   IFS= read -r value
   value="${value:-oui}"
+  value="${value,,}"
   [[ "$value" == "oui" || "$value" == "o" || "$value" == "yes" || "$value" == "y" ]]
 }
 
@@ -204,6 +208,7 @@ confirm_default_no() {
 
   IFS= read -r value
   value="${value:-non}"
+  value="${value,,}"
   [[ "$value" == "oui" || "$value" == "o" || "$value" == "yes" || "$value" == "y" ]]
 }
 
@@ -285,10 +290,43 @@ detect_lan_cidr() {
   fi
 }
 
+detect_lan_gateway() {
+  ip route show default 2>/dev/null | awk '{print $3; exit}'
+}
+
+is_cgnat_ip() {
+  # Plage CGNAT 100.64.0.0/10 : IP partagée par l'opérateur, non joignable de l'extérieur.
+  local ipaddr="$1" a b
+  IFS=. read -r a b _ _ <<< "$ipaddr"
+  [[ "$a" =~ ^[0-9]+$ && "$b" =~ ^[0-9]+$ ]] || return 1
+  [[ "$a" == "100" ]] && ((b >= 64 && b <= 127))
+}
+
+human_since() {
+  local s="$1"
+  if ((s < 60)); then
+    printf "%ds" "$s"
+  elif ((s < 3600)); then
+    printf "%dmin" "$((s / 60))"
+  elif ((s < 86400)); then
+    printf "%dh" "$((s / 3600))"
+  else
+    printf "%dj" "$((s / 86400))"
+  fi
+}
+
 validate_port() {
   local port="$1"
   [[ "$port" =~ ^[0-9]+$ ]] || die "Port invalide : $port"
   ((port >= 1 && port <= 65535)) || die "Port hors plage : $port"
+}
+
+validate_endpoint_host() {
+  local host="$1"
+
+  validate_ipv4 "$host" && return 0
+  [[ "$host" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$ ]] && return 0
+  return 1
 }
 
 validate_ipv4() {
@@ -707,7 +745,18 @@ choose_mode() {
       fi
 
       CLIENT_ALLOWED_DEFAULT="${WG_CIDR}, ${LAN_CIDR}"
-      CLIENT_DNS_DEFAULT=""
+
+      local lan_gw
+      lan_gw="$(detect_lan_gateway)"
+      panel "$BLUE" "DNS pour le mode LAN (optionnel)" \
+        "Pour joindre vos machines par leur nom (ex: nas, imprimante) et pas" \
+        "seulement par leur adresse IP, les clients ont besoin d'un DNS local," \
+        "qui est très souvent votre box/routeur."
+      if [[ -n "$lan_gw" ]] && confirm_default_yes "Utiliser ${lan_gw} (votre box) comme DNS des clients ?"; then
+        CLIENT_DNS_DEFAULT="$lan_gw"
+      else
+        CLIENT_DNS_DEFAULT=""
+      fi
       ;;
     3)
       INSTALL_MODE="full"
@@ -772,6 +821,121 @@ ensure_server_public_key_file() {
   fi
 }
 
+collect_duckdns() {
+  local sub token
+
+  panel "$BLUE" "Domaine dynamique DuckDNS (gratuit)" \
+    "Pour suivre une IP qui change, on utilise un nom de domaine gratuit." \
+    "1. Ouvrez ${BOLD}https://www.duckdns.org${RESET} et connectez-vous (Google, GitHub…)." \
+    "2. Créez un sous-domaine, ex. ${BOLD}mon-wg${RESET} → donne mon-wg.duckdns.org." \
+    "3. Copiez le ${BOLD}token${RESET} affiché tout en haut de la page." \
+    "Le script mettra ce domaine à jour vers votre IP toutes les 5 minutes."
+
+  echo
+  sub="$(prompt_free "Sous-domaine DuckDNS (la partie avant .duckdns.org)")"
+  sub="${sub%.duckdns.org}"
+  sub="${sub,,}"
+  if [[ -z "$sub" || ! "$sub" =~ ^[a-z0-9-]+$ ]]; then
+    warn "Sous-domaine vide ou invalide."
+    return 1
+  fi
+
+  token="$(prompt_free "Token DuckDNS")"
+  if [[ -z "$token" ]]; then
+    warn "Token vide."
+    return 1
+  fi
+
+  DDNS_SUB="$sub"
+  DDNS_TOKEN="$token"
+  DDNS_DOMAIN="${sub}.duckdns.org"
+  DDNS_ENABLED="1"
+  return 0
+}
+
+install_duckdns() {
+  cat > "$DDNS_UPDATE" <<EOF
+#!/usr/bin/env bash
+# Mise à jour DuckDNS pour WireGuard Forge
+curl -fsS "https://www.duckdns.org/update?domains=${DDNS_SUB}&token=${DDNS_TOKEN}&ip=" -o /dev/null
+EOF
+  chmod 700 "$DDNS_UPDATE"
+
+  cat > "$DDNS_UNIT" <<EOF
+[Unit]
+Description=WireGuard Forge DuckDNS update
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=${DDNS_UPDATE}
+EOF
+
+  cat > "$DDNS_TIMER" <<EOF
+[Unit]
+Description=WireGuard Forge DuckDNS update timer
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+  systemctl daemon-reload
+  systemctl enable --now wg-forge-ddns.timer
+}
+
+configure_endpoint() {
+  local detected_public_ip="$1"
+  local value
+
+  panel "$BLUE" "Adresse que les clients utiliseront (endpoint)" \
+    "C'est l'adresse par laquelle vos clients joindront ce serveur depuis Internet." \
+    "Si votre IP publique ne change jamais, vous pouvez la garder telle quelle." \
+    "Si elle change (cas fréquent chez les particuliers), un domaine dynamique" \
+    "gratuit type DuckDNS est conseillé : le script peut le configurer pour vous."
+
+  if [[ -n "$detected_public_ip" ]] && is_cgnat_ip "$detected_public_ip"; then
+    panel "$AMBER" "Attention : vous semblez derrière un CGNAT" \
+      "Votre IP publique (${BOLD}${detected_public_ip}${RESET}) est dans la plage 100.64.0.0/10." \
+      "C'est une IP partagée par votre opérateur : le serveur ne sera PAS joignable" \
+      "depuis l'extérieur, même avec une redirection de port." \
+      "Solution : demandez une vraie IP publique à votre FAI (souvent gratuit)." \
+      "Sans ça, seuls les appareils du réseau local pourront se connecter."
+  fi
+
+  echo
+  if confirm_default_no "Votre IP publique change-t-elle (pas d'IP fixe), et voulez-vous un domaine DuckDNS gratuit ?"; then
+    if collect_duckdns; then
+      ENDPOINT_HOST="$DDNS_DOMAIN"
+      success "Endpoint défini sur ${BOLD}${ENDPOINT_HOST}${RESET} (mis à jour automatiquement)."
+      return 0
+    fi
+    warn "Configuration DuckDNS abandonnée, on continue avec une saisie manuelle."
+  fi
+
+  echo
+  if [[ -n "$detected_public_ip" ]]; then
+    value="$(prompt_default "Domaine ou IP publique que les clients utiliseront" "$detected_public_ip")"
+  else
+    value="$(prompt_free "Domaine ou IP publique que les clients utiliseront")"
+  fi
+  [[ -n "$value" ]] || die "Domaine ou IP publique obligatoire."
+
+  if ! validate_endpoint_host "$value"; then
+    warn "« ${value} » ne ressemble pas à une IP ou un domaine valide."
+    if ! confirm_default_no "Garder cette valeur quand même ?"; then
+      die "Endpoint invalide."
+    fi
+  fi
+
+  ENDPOINT_HOST="$value"
+}
+
 install_or_reconfigure_server() {
   require_root
   banner
@@ -807,13 +971,7 @@ install_or_reconfigure_server() {
     "IP du LXC            : ${BOLD}${detected_lxc_ip:-non détectée}${RESET}" \
     "LAN probable         : ${BOLD}${detected_lan}${RESET}"
 
-  echo
-  if [[ -n "$detected_public_ip" ]]; then
-    ENDPOINT_HOST="$(prompt_default "Domaine ou IP publique que les clients utiliseront" "$detected_public_ip")"
-  else
-    ENDPOINT_HOST="$(prompt_free "Domaine ou IP publique que les clients utiliseront")"
-  fi
-  [[ -n "$ENDPOINT_HOST" ]] || die "Domaine ou IP publique obligatoire."
+  configure_endpoint "$detected_public_ip"
 
   LISTEN_PORT="$(prompt_default "Port UDP WireGuard" "$DEFAULT_PORT")"
   validate_port "$LISTEN_PORT"
@@ -905,8 +1063,14 @@ install_or_reconfigure_server() {
 
   step "Activation du service WireGuard" systemctl enable --now "wg-quick@${WG_IF}" || die "Échec démarrage WireGuard."
 
+  if [[ "${DDNS_ENABLED:-0}" == "1" ]]; then
+    step "Installation de la mise à jour DuckDNS" install_duckdns || warn "Échec de la configuration DuckDNS."
+    step "Première mise à jour DuckDNS" systemctl start wg-forge-ddns.service || warn "Mise à jour DuckDNS initiale échouée, elle sera réessayée automatiquement."
+  fi
+
   save_state
   rm -f "$peers_tmp"
+  prune_conf_backups
 
   panel "$GREEN" "Serveur WireGuard installé" \
     "Interface       : ${BOLD}${WG_IF}${RESET}" \
@@ -1156,7 +1320,7 @@ show_qr_if_requested() {
   fi
 
   echo
-  if confirm_default_no "Afficher aussi un QR code pour mobile ?"; then
+  if confirm_default_yes "Afficher le QR code à scanner avec l'app WireGuard sur mobile ?"; then
     echo
     qrencode -t ansiutf8 < "$CONF_FILE"
   fi
@@ -1283,6 +1447,8 @@ add_or_regenerate_client() {
   step "Ajout du peer côté serveur" append_server_peer || die "Échec ajout peer serveur."
   step "Application de la configuration WireGuard" apply_client_or_rollback || die "Échec application. Rollback effectué."
 
+  prune_conf_backups
+
   panel "$GREEN" "Client prêt" \
     "Nom client     : ${BOLD}${NAME}${RESET}" \
     "IP WireGuard   : ${BOLD}${CLIENT_IP}${RESET}" \
@@ -1301,34 +1467,385 @@ add_or_regenerate_client() {
   wg show "$WG_IF"
 }
 
-# ── Statut / aide ─────────────────────────────────────────────────────────────
+# ── Liste / gestion / diagnostic ──────────────────────────────────────────────
 
-show_status() {
+get_client_names() {
+  [[ -d "$CLIENT_DIR" ]] || return 0
+  (
+    shopt -s nullglob
+    for f in "$CLIENT_DIR"/*.conf; do
+      printf "%s\n" "$(basename "${f%.conf}")"
+    done
+  ) | sort
+}
+
+client_ip_from_conf() {
+  local conf="${CLIENT_DIR}/${1}.conf"
+  [[ -f "$conf" ]] || return 0
+  awk -F= '/^[[:space:]]*Address[[:space:]]*=/ {gsub(/[ \t]/,"",$2); sub(/\/.*/,"",$2); print $2; exit}' "$conf"
+}
+
+prune_conf_backups() {
+  local keep=8
+  (
+    shopt -s nullglob
+    set -- "${WG_CONF}".bak.*
+    if (($# > keep)); then
+      printf "%s\n" "$@" | sort | head -n "-${keep}" | while IFS= read -r f; do
+        rm -f "$f"
+      done
+    fi
+  )
+}
+
+choose_existing_client() {
+  local names=() n sel i=1
+  mapfile -t names < <(get_client_names)
+  if ((${#names[@]} == 0)); then
+    return 1
+  fi
+
+  printf "\n" >&2
+  for n in "${names[@]}"; do
+    printf "  %b%d%b) %s\n" "$RED_SOFT" "$i" "$RESET" "$n" >&2
+    i=$((i + 1))
+  done
+  printf "\n" >&2
+
+  sel="$(prompt_free "Numéro ou nom du client")"
+  [[ -n "$sel" ]] || return 1
+
+  if [[ "$sel" =~ ^[0-9]+$ ]] && ((sel >= 1 && sel <= ${#names[@]})); then
+    printf "%s" "${names[$((sel - 1))]}"
+    return 0
+  fi
+
+  for n in "${names[@]}"; do
+    if [[ "$n" == "$sel" ]]; then
+      printf "%s" "$n"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+list_clients() {
+  require_root
+  banner
+  load_state || true
+
+  WG_CIDR="${WG_CIDR:-$DEFAULT_WG_CIDR}"
+  WG_PREFIX="${WG_PREFIX:-$(cidr24_prefix "$WG_CIDR")}"
+
+  local names=()
+  mapfile -t names < <(get_client_names)
+
+  if ((${#names[@]} == 0)); then
+    panel "$AMBER" "Aucun client" \
+      "Aucun client n'a encore été créé." \
+      "Utilisez « Ajouter ou régénérer un client » dans le menu."
+    return 0
+  fi
+
+  declare -A HS
+  local has_iface=0 pub hs
+  if have wg && wg show "$WG_IF" >/dev/null 2>&1; then
+    has_iface=1
+    while IFS=$'\t' read -r pub _psk _ep _aip hs _rx _tx _ka; do
+      if [[ -n "$pub" ]]; then
+        HS["$pub"]="$hs"
+      fi
+    done < <(wg show "$WG_IF" dump 2>/dev/null | tail -n +2)
+  fi
+
+  local now rows=() name ip state
+  now="$(date +%s)"
+  for name in "${names[@]}"; do
+    pub=""
+    if [[ -f "${CLIENT_DIR}/${name}.pub" ]]; then
+      pub="$(read_file_trimmed "${CLIENT_DIR}/${name}.pub")"
+    fi
+    ip="$(client_ip_from_conf "$name")"
+
+    if ((has_iface == 0)); then
+      state="${GRAY}état inconnu (interface arrêtée)${RESET}"
+    else
+      hs="${HS[$pub]:-0}"
+      if [[ "$hs" =~ ^[0-9]+$ ]] && ((hs > 0)) && ((now - hs < 180)); then
+        state="${GREEN}● connecté${RESET}"
+      elif [[ "$hs" =~ ^[0-9]+$ ]] && ((hs > 0)); then
+        state="${GRAY}○ vu il y a $(human_since "$((now - hs))")${RESET}"
+      else
+        state="${GRAY}○ jamais connecté${RESET}"
+      fi
+    fi
+
+    rows+=("$(printf "%b%-20s%b %-16s %s" "$BOLD" "$name" "$RESET" "${ip:-?}" "$state")")
+  done
+
+  panel "$RED" "Clients WireGuard (${#names[@]})" "${rows[@]}"
+  info "« connecté » = échange WireGuard dans les 3 dernières minutes."
+}
+
+show_existing_client() {
+  require_root
+  load_state || true
+  banner
+
+  panel "$RED" "Afficher / re-scanner un client" \
+    "Réaffiche la configuration et le QR code d'un client déjà créé." \
+    "Pratique pour configurer un nouveau téléphone sans tout recommencer."
+
+  local name conf
+  if ! name="$(choose_existing_client)"; then
+    warn "Aucun client à afficher."
+    return 0
+  fi
+
+  conf="${CLIENT_DIR}/${name}.conf"
+  [[ -f "$conf" ]] || die "Fichier introuvable : $conf"
+
+  echo
+  panel "$AMBER" "Configuration client — SECRET" \
+    "Ce bloc contient une clé privée." \
+    "Ne le publiez pas et ne le partagez avec personne." \
+    "Client : ${BOLD}${name}${RESET}" \
+    "Fichier : ${CYAN}${conf}${RESET}"
+  echo
+  printf "%b%s%b\n" "${RED_DARK}" "────────────────────── COPIER À PARTIR D'ICI ──────────────────────" "${RESET}"
+  cat "$conf"
+  printf "%b%s%b\n" "${RED_DARK}" "────────────────────── COPIER JUSQU'ICI ───────────────────────────" "${RESET}"
+
+  if have qrencode; then
+    echo
+    if confirm_default_yes "Afficher le QR code à scanner avec l'app WireGuard sur mobile ?"; then
+      echo
+      qrencode -t ansiutf8 < "$conf"
+    fi
+  fi
+}
+
+revoke_client() {
+  require_root
+  need wg
+  load_state || true
+  banner
+
+  panel "$RED" "Supprimer / révoquer un client" \
+    "Le client choisi est retiré du serveur : il ne pourra plus se connecter." \
+    "Ses fichiers sont déplacés dans une sauvegarde, pas détruits immédiatement."
+
+  [[ -f "$WG_CONF" ]] || die "Serveur non configuré : ${WG_CONF} introuvable."
+
+  local name
+  if ! name="$(choose_existing_client)"; then
+    warn "Aucun client à supprimer."
+    return 0
+  fi
+
+  echo
+  if ! confirm_default_no "Confirmer la suppression de « ${name} » ?"; then
+    warn "Suppression annulée."
+    return 0
+  fi
+
+  local ts backup_dir conf_backup tmp ext
+  ts="$(date +%F_%H%M%S)"
+  backup_dir="${CLIENT_DIR}/.removed-${name}-${ts}"
+  conf_backup="${WG_CONF}.bak.${ts}"
+
+  cp -a "$WG_CONF" "$conf_backup"
+
+  tmp="$(mktemp)"
+  render_conf_without_named_peer "$WG_CONF" "$tmp" "$name"
+  mv "$tmp" "$WG_CONF"
+  chmod 600 "$WG_CONF"
+
+  mkdir -p "$backup_dir"
+  for ext in key pub psk conf; do
+    if [[ -e "${CLIENT_DIR}/${name}.${ext}" ]]; then
+      mv "${CLIENT_DIR}/${name}.${ext}" "$backup_dir/"
+    fi
+  done
+
+  if systemctl is-active --quiet "wg-quick@${WG_IF}"; then
+    sync_wireguard || warn "Synchronisation à chaud échouée ; un redémarrage du service peut être nécessaire."
+  fi
+
+  prune_conf_backups
+
+  panel "$GREEN" "Client supprimé" \
+    "Client retiré   : ${BOLD}${name}${RESET}" \
+    "Sauvegarde conf : ${CYAN}${conf_backup}${RESET}" \
+    "Fichiers client : ${CYAN}${backup_dir}${RESET}"
+}
+
+run_diagnostic() {
+  require_root
+  banner
+  load_state || true
+
+  WG_CIDR="${WG_CIDR:-$DEFAULT_WG_CIDR}"
+  LISTEN_PORT="${LISTEN_PORT:-$DEFAULT_PORT}"
+  OUT_IF="${OUT_IF:-$(detect_default_interface || true)}"
+  LXC_IP="${LXC_IP:-$(detect_lxc_ip "$OUT_IF")}"
+  ENDPOINT_HOST="${ENDPOINT_HOST:-non défini}"
+  INSTALL_MODE="${INSTALL_MODE:-inconnu}"
+
+  panel "$RED" "Diagnostic WireGuard Forge" \
+    "Vérifie que l'essentiel fonctionne et explique chaque point en clair." \
+    "Mode configuré : ${BOLD}${INSTALL_MODE}${RESET}"
+
+  echo
+
+  if systemctl is-active --quiet "wg-quick@${WG_IF}"; then
+    success "Service WireGuard actif (wg-quick@${WG_IF})."
+  else
+    error "Service WireGuard inactif. Démarrez-le ou réinstallez le serveur."
+  fi
+
+  if have ss && ss -lun 2>/dev/null | grep -qE "[:.]${LISTEN_PORT}([^0-9]|\$)"; then
+    success "Port ${LISTEN_PORT}/UDP en écoute."
+  else
+    warn "Port ${LISTEN_PORT}/UDP non détecté en écoute (normal si le service est arrêté)."
+  fi
+
+  local ipf
+  ipf="$(cat /proc/sys/net/ipv4/ip_forward 2>/dev/null || echo 0)"
+  if [[ "$ipf" == "1" ]]; then
+    success "Routage IPv4 activé (nécessaire pour les modes LAN et full tunnel)."
+  elif [[ "$INSTALL_MODE" == "private" ]]; then
+    info "Routage IPv4 désactivé — sans importance en mode privé."
+  else
+    warn "Routage IPv4 désactivé alors que le mode ${INSTALL_MODE} en a besoin."
+  fi
+
+  if [[ "$INSTALL_MODE" != "private" && "$INSTALL_MODE" != "inconnu" ]]; then
+    if have nft && nft list table inet wg_forge >/dev/null 2>&1; then
+      success "Règles de pare-feu/NAT WireGuard Forge présentes."
+    else
+      warn "Règles nftables WireGuard Forge absentes pour le mode ${INSTALL_MODE}."
+    fi
+  fi
+
+  if [[ -f "$DDNS_TIMER" ]]; then
+    if systemctl is-active --quiet wg-forge-ddns.timer; then
+      success "Mise à jour automatique du domaine (DuckDNS) active."
+    else
+      warn "DuckDNS configuré mais le minuteur de mise à jour est arrêté."
+    fi
+  fi
+
+  local names=() now total connected pub hs n
+  mapfile -t names < <(get_client_names)
+  total="${#names[@]}"
+  connected=0
+  now="$(date +%s)"
+
+  if ((total > 0)) && have wg && wg show "$WG_IF" >/dev/null 2>&1; then
+    declare -A HS
+    while IFS=$'\t' read -r pub _psk _ep _aip hs _rx _tx _ka; do
+      if [[ -n "$pub" ]]; then
+        HS["$pub"]="$hs"
+      fi
+    done < <(wg show "$WG_IF" dump 2>/dev/null | tail -n +2)
+
+    for n in "${names[@]}"; do
+      if [[ -f "${CLIENT_DIR}/${n}.pub" ]]; then
+        pub="$(read_file_trimmed "${CLIENT_DIR}/${n}.pub")"
+        hs="${HS[$pub]:-0}"
+        if [[ "$hs" =~ ^[0-9]+$ ]] && ((hs > 0)) && ((now - hs < 180)); then
+          connected=$((connected + 1))
+        fi
+      fi
+    done
+  fi
+
+  if ((total == 0)); then
+    info "Aucun client configuré pour l'instant."
+  else
+    success "${total} client(s) configuré(s), ${connected} connecté(s) à l'instant."
+    if ((connected == 0)); then
+      info "0 connecté est normal si personne n'utilise le VPN en ce moment."
+    fi
+  fi
+
+  echo
+  panel "$AMBER" "À ne pas oublier" \
+    "Endpoint des clients : ${BOLD}${ENDPOINT_HOST}:${LISTEN_PORT}${RESET}" \
+    "La redirection ${BOLD}${LISTEN_PORT}/UDP${RESET} doit pointer vers ${BOLD}${LXC_IP:-IP_DU_LXC}${RESET} sur la box." \
+    "Si rien ne se connecte de l'extérieur : vérifiez cette redirection," \
+    "et que votre FAI vous donne une vraie IP publique (pas de CGNAT)."
+
+  echo
+  if confirm_default_no "Afficher les détails techniques bruts (wg show, systemctl) ?"; then
+    echo
+    if have wg; then
+      wg show "$WG_IF" || true
+    fi
+    echo
+    systemctl status "wg-quick@${WG_IF}" --no-pager 2>/dev/null || true
+  fi
+}
+
+uninstall_forge() {
   require_root
   banner
 
-  load_state || true
-
-  panel "$RED" "Statut WireGuard Forge" \
-    "Configuration serveur : ${CYAN}${WG_CONF}${RESET}" \
-    "État Forge           : ${CYAN}${STATE_FILE}${RESET}" \
-    "Dossier clients      : ${CYAN}${CLIENT_DIR}${RESET}"
+  panel "$AMBER" "Désinstaller WireGuard Forge" \
+    "Arrête WireGuard et retire les réglages réseau (nftables, routage, DuckDNS)." \
+    "Les clés et configurations ne sont effacées que si vous le demandez ensuite."
 
   echo
-  if systemctl list-unit-files "wg-quick@${WG_IF}.service" >/dev/null 2>&1; then
-    systemctl status "wg-quick@${WG_IF}" --no-pager || true
+  if ! confirm_default_no "Arrêter et désinstaller WireGuard Forge ?"; then
+    warn "Désinstallation annulée."
+    return 0
+  fi
+
+  systemctl disable --now "wg-quick@${WG_IF}" >/dev/null 2>&1 || true
+  success "Service WireGuard arrêté."
+
+  disable_nft_rules
+  rm -f "$NFT_FILE" "$NFT_UNIT"
+  success "Règles nftables retirées."
+
+  if [[ -f "$DDNS_TIMER" || -f "$DDNS_UNIT" ]]; then
+    systemctl disable --now wg-forge-ddns.timer >/dev/null 2>&1 || true
+    systemctl disable --now wg-forge-ddns.service >/dev/null 2>&1 || true
+    rm -f "$DDNS_UNIT" "$DDNS_TIMER" "$DDNS_UPDATE"
+    success "Mise à jour DuckDNS retirée."
+  fi
+
+  rm -f /etc/sysctl.d/99-wireguard-forge.conf
+  sysctl --system >/dev/null 2>&1 || true
+  systemctl daemon-reload || true
+  success "Réglage de routage IPv4 propre à Forge retiré."
+
+  echo
+  panel "$AMBER" "Supprimer aussi les clés et configurations ?" \
+    "Cela efface ${CYAN}${WG_DIR}${RESET} : configuration serveur, clés et clients." \
+    "Action irréversible : vos clients existants ne fonctionneront plus jamais."
+
+  if confirm_default_no "Effacer définitivement ${WG_DIR} ?"; then
+    rm -rf "$WG_DIR"
+    success "Configurations et clés supprimées."
   else
-    warn "Service wg-quick@${WG_IF} non trouvé."
+    info "Configurations conservées dans ${WG_DIR}."
   fi
 
   echo
-  if have wg; then
-    wg show "$WG_IF" || true
+  if have apt-get && confirm_default_no "Désinstaller aussi les paquets wireguard-tools et qrencode ?"; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get remove -y wireguard-tools qrencode >/dev/null 2>&1 || true
+    success "Paquets retirés (nftables et iproute2 conservés, utiles au système)."
   fi
 
-  echo
-  ip -br addr show "$WG_IF" 2>/dev/null || true
+  panel "$GREEN" "Désinstallation terminée" \
+    "WireGuard Forge a été retiré de ce conteneur."
 }
+
+# ── Aide ──────────────────────────────────────────────────────────────────────
 
 show_port_forwarding_help() {
   load_state || true
@@ -1374,9 +1891,13 @@ main_menu() {
     echo
     printf "%b1%b) Installer ou reconfigurer le serveur WireGuard\n" "${RED_SOFT}" "${RESET}"
     printf "%b2%b) Ajouter ou régénérer un client\n" "${RED_SOFT}" "${RESET}"
-    printf "%b3%b) Afficher le statut\n" "${RED_SOFT}" "${RESET}"
-    printf "%b4%b) Afficher l'aide redirection de port\n" "${RED_SOFT}" "${RESET}"
-    printf "%b5%b) Quitter\n" "${RED_SOFT}" "${RESET}"
+    printf "%b3%b) Lister les clients et leur état\n" "${RED_SOFT}" "${RESET}"
+    printf "%b4%b) Afficher / re-scanner un client (config + QR)\n" "${RED_SOFT}" "${RESET}"
+    printf "%b5%b) Supprimer un client\n" "${RED_SOFT}" "${RESET}"
+    printf "%b6%b) Diagnostic (vérifier que tout marche)\n" "${RED_SOFT}" "${RESET}"
+    printf "%b7%b) Aide redirection de port\n" "${RED_SOFT}" "${RESET}"
+    printf "%b8%b) Désinstaller WireGuard Forge\n" "${RED_SOFT}" "${RESET}"
+    printf "%b9%b) Quitter\n" "${RED_SOFT}" "${RESET}"
     echo
 
     local choice
@@ -1385,9 +1906,13 @@ main_menu() {
     case "$choice" in
       1) install_or_reconfigure_server ;;
       2) add_or_regenerate_client ;;
-      3) show_status ;;
-      4) banner; show_port_forwarding_help ;;
-      5) echo; success "Au revoir."; exit 0 ;;
+      3) list_clients ;;
+      4) show_existing_client ;;
+      5) revoke_client ;;
+      6) run_diagnostic ;;
+      7) banner; show_port_forwarding_help ;;
+      8) uninstall_forge ;;
+      9) echo; success "Au revoir."; exit 0 ;;
       *) warn "Choix invalide." ;;
     esac
 
