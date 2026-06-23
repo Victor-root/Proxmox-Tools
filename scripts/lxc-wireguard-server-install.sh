@@ -18,7 +18,7 @@ NFT_UNIT="/etc/systemd/system/wg-forge-nft.service"
 DEFAULT_PORT="51820"
 DEFAULT_WG_CIDR="192.168.2.0/24"
 DEFAULT_WG_SERVER_IP="192.168.2.1"
-DEFAULT_CLIENT_RANGE_START="200"
+DEFAULT_CLIENT_RANGE_START="100"
 DEFAULT_CLIENT_RANGE_END="254"
 DEFAULT_KEEPALIVE="25"
 
@@ -654,16 +654,33 @@ EOF
 
 choose_mode() {
   echo
-  panel "$BLUE" "Choix du mode réseau" \
-    "1) Réseau WireGuard privé uniquement" \
-    "   Les appareils WireGuard communiquent entre eux, sans faire passer Internet." \
-    "2) Accès au LAN derrière le serveur" \
-    "   Les clients WireGuard peuvent accéder au réseau local du serveur." \
-    "3) Full tunnel Internet" \
-    "   Tout le trafic Internet des clients passe par le serveur WireGuard."
+  panel "$BLUE" "Choix du mode réseau — le réglage le plus important" \
+    "La question à se poser : une fois connecté en WireGuard, qu'est-ce que le" \
+    "client doit pouvoir atteindre ? Les 3 exemples ci-dessous sont concrets." \
+    "" \
+    "${BOLD}1) Réseau privé entre vos appareils${RESET}  ${DIM}— le plus simple et le plus sûr${RESET}" \
+    "   Seuls les appareils où VOUS installez WireGuard se voient entre eux." \
+    "   ${CYAN}Exemple :${RESET} votre PC se connecte en SSH à un serveur, ou deux serveurs" \
+    "   distants discutent en privé dans un tunnel chiffré." \
+    "   ${GRAY}N'ouvre rien d'autre : ni le reste du réseau, ni Internet via le serveur.${RESET}" \
+    "" \
+    "${BOLD}2) Accès au réseau local (LAN) situé derrière le serveur${RESET}" \
+    "   Le client atteint AUSSI les autres machines du réseau du serveur," \
+    "   même celles sans WireGuard : NAS, imprimante, caméras, interface Proxmox…" \
+    "   ${CYAN}Exemple :${RESET} en déplacement, vous utilisez votre maison ou votre bureau" \
+    "   comme si vous y étiez physiquement." \
+    "   ${GRAY}C'est le VPN « accès à distance » classique.${RESET}" \
+    "" \
+    "${BOLD}3) Full tunnel — TOUT Internet passe par le serveur${RESET}" \
+    "   La totalité du trafic du client (web, applis…) ressort par le serveur." \
+    "   ${CYAN}Exemple :${RESET} sur un Wi-Fi public (hôtel, aéroport) vous chiffrez toute" \
+    "   votre navigation, ou vous surfez avec l'adresse IP publique de chez vous." \
+    "   ${GRAY}Comme un VPN commercial (NordVPN…), mais auto-hébergé. Demande du débit.${RESET}" \
+    "" \
+    "${DIM}Dans le doute, choisissez 1 : vous pourrez relancer ce script pour en changer.${RESET}"
 
   local choice
-  choice="$(prompt_default "Mode réseau" "1")"
+  choice="$(prompt_default "Mode réseau (1, 2 ou 3)" "1")"
 
   case "$choice" in
     1)
@@ -1338,7 +1355,7 @@ show_theory_summary() {
   panel "$BLUE" "Explication rapide pour débutants" \
     "WireGuard crée un réseau privé IP entre le serveur et les clients." \
     "Le serveur écoute en UDP sur un port, souvent 51820." \
-    "Chaque client reçoit une IP WireGuard unique, par exemple 192.168.2.200." \
+    "Chaque client reçoit une IP WireGuard unique, par exemple 192.168.2.100." \
     "AllowedIPs décide ce qui passe dans le tunnel côté client."
 
   panel "$BLUE" "Les trois modes" \
