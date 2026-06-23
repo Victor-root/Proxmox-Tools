@@ -14,9 +14,6 @@ CLIENT_DIR="${WG_DIR}/clients"
 STATE_FILE="${WG_DIR}/wg-forge.env"
 NFT_FILE="${WG_DIR}/wg-forge.nft"
 NFT_UNIT="/etc/systemd/system/wg-forge-nft.service"
-DDNS_UPDATE="${WG_DIR}/wg-forge-ddns.sh"
-DDNS_UNIT="/etc/systemd/system/wg-forge-ddns.service"
-DDNS_TIMER="/etc/systemd/system/wg-forge-ddns.timer"
 
 DEFAULT_PORT="51820"
 DEFAULT_WG_CIDR="192.168.2.0/24"
@@ -826,74 +823,6 @@ ensure_server_public_key_file() {
   fi
 }
 
-collect_duckdns() {
-  local sub token
-
-  panel "$BLUE" "Domaine dynamique DuckDNS (gratuit)" \
-    "Pour suivre une IP qui change, on utilise un nom de domaine gratuit." \
-    "1. Ouvrez ${BOLD}https://www.duckdns.org${RESET} et connectez-vous (Google, GitHub…)." \
-    "2. Créez un sous-domaine, ex. ${BOLD}mon-wg${RESET} → donne mon-wg.duckdns.org." \
-    "3. Copiez le ${BOLD}token${RESET} affiché tout en haut de la page." \
-    "Le script mettra ce domaine à jour vers votre IP toutes les 5 minutes."
-
-  echo
-  sub="$(prompt_free "Sous-domaine DuckDNS (la partie avant .duckdns.org)")"
-  sub="${sub%.duckdns.org}"
-  sub="${sub,,}"
-  if [[ -z "$sub" || ! "$sub" =~ ^[a-z0-9-]+$ ]]; then
-    warn "Sous-domaine vide ou invalide."
-    return 1
-  fi
-
-  token="$(prompt_free "Token DuckDNS")"
-  if [[ -z "$token" ]]; then
-    warn "Token vide."
-    return 1
-  fi
-
-  DDNS_SUB="$sub"
-  DDNS_TOKEN="$token"
-  DDNS_DOMAIN="${sub}.duckdns.org"
-  DDNS_ENABLED="1"
-  return 0
-}
-
-install_duckdns() {
-  cat > "$DDNS_UPDATE" <<EOF
-#!/usr/bin/env bash
-# Mise à jour DuckDNS pour WireGuard Forge
-curl -fsS "https://www.duckdns.org/update?domains=${DDNS_SUB}&token=${DDNS_TOKEN}&ip=" -o /dev/null
-EOF
-  chmod 700 "$DDNS_UPDATE"
-
-  cat > "$DDNS_UNIT" <<EOF
-[Unit]
-Description=WireGuard Forge DuckDNS update
-Wants=network-online.target
-After=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=${DDNS_UPDATE}
-EOF
-
-  cat > "$DDNS_TIMER" <<EOF
-[Unit]
-Description=WireGuard Forge DuckDNS update timer
-
-[Timer]
-OnBootSec=2min
-OnUnitActiveSec=5min
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF
-
-  systemctl daemon-reload
-  systemctl enable --now wg-forge-ddns.timer
-}
-
 verify_endpoint_domain() {
   local host="$1" public_ip="$2" resolved
 
@@ -919,9 +848,7 @@ configure_endpoint() {
 
   panel "$BLUE" "Adresse que les clients utiliseront (endpoint)" \
     "C'est l'adresse par laquelle vos clients joindront ce serveur depuis Internet." \
-    "Si votre IP publique ne change jamais, vous pouvez la garder telle quelle." \
-    "Si elle change (cas fréquent chez les particuliers), un domaine dynamique" \
-    "gratuit type DuckDNS est conseillé : le script peut le configurer pour vous."
+    "Indiquez votre IP publique fixe, ou un nom de domaine qui pointe vers vous."
 
   if [[ -n "$detected_public_ip" ]] && is_cgnat_ip "$detected_public_ip"; then
     panel "$AMBER" "Attention : vous semblez derrière un CGNAT" \
@@ -930,16 +857,6 @@ configure_endpoint() {
       "depuis l'extérieur, même avec une redirection de port." \
       "Solution : demandez une vraie IP publique à votre FAI (souvent gratuit)." \
       "Sans ça, seuls les appareils du réseau local pourront se connecter."
-  fi
-
-  echo
-  if confirm_default_no "Votre IP publique change-t-elle (pas d'IP fixe), et voulez-vous un domaine DuckDNS gratuit ?"; then
-    if collect_duckdns; then
-      ENDPOINT_HOST="$DDNS_DOMAIN"
-      success "Endpoint défini sur ${BOLD}${ENDPOINT_HOST}${RESET} (mis à jour automatiquement)."
-      return 0
-    fi
-    warn "Configuration DuckDNS abandonnée, on continue avec une saisie manuelle."
   fi
 
   echo
@@ -1087,11 +1004,6 @@ install_or_reconfigure_server() {
   fi
 
   step "Activation du service WireGuard" systemctl enable --now "wg-quick@${WG_IF}" || die "Échec démarrage WireGuard."
-
-  if [[ "${DDNS_ENABLED:-0}" == "1" ]]; then
-    step "Installation de la mise à jour DuckDNS" install_duckdns || warn "Échec de la configuration DuckDNS."
-    step "Première mise à jour DuckDNS" systemctl start wg-forge-ddns.service || warn "Mise à jour DuckDNS initiale échouée, elle sera réessayée automatiquement."
-  fi
 
   save_state
   rm -f "$peers_tmp"
@@ -1754,14 +1666,6 @@ run_diagnostic() {
     fi
   fi
 
-  if [[ -f "$DDNS_TIMER" ]]; then
-    if systemctl is-active --quiet wg-forge-ddns.timer; then
-      success "Mise à jour automatique du domaine (DuckDNS) active."
-    else
-      warn "DuckDNS configuré mais le minuteur de mise à jour est arrêté."
-    fi
-  fi
-
   local names=() now total connected pub hs n
   mapfile -t names < <(get_client_names)
   total="${#names[@]}"
@@ -1819,7 +1723,7 @@ uninstall_forge() {
   banner
 
   panel "$AMBER" "Désinstaller WireGuard Forge" \
-    "Cette action arrête WireGuard et retire ses réglages réseau (nftables, routage, DuckDNS)." \
+    "Cette action arrête WireGuard et retire ses réglages réseau (nftables, routage)." \
     "Les clés et configurations ne sont effacées que si vous le demandez ensuite."
 
   echo
@@ -1834,13 +1738,6 @@ uninstall_forge() {
   disable_nft_rules
   rm -f "$NFT_FILE" "$NFT_UNIT"
   success "Règles nftables retirées."
-
-  if [[ -f "$DDNS_TIMER" || -f "$DDNS_UNIT" ]]; then
-    systemctl disable --now wg-forge-ddns.timer >/dev/null 2>&1 || true
-    systemctl disable --now wg-forge-ddns.service >/dev/null 2>&1 || true
-    rm -f "$DDNS_UNIT" "$DDNS_TIMER" "$DDNS_UPDATE"
-    success "Mise à jour DuckDNS retirée."
-  fi
 
   rm -f /etc/sysctl.d/99-wireguard-forge.conf
   sysctl --system >/dev/null 2>&1 || true
