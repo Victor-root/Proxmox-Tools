@@ -105,7 +105,7 @@ banner() {
   printf "%b%s%b\n" "${RED}" "╚███╔███╔╝██║██║  ██║███████╗╚██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝" "${RESET}"
   printf "%b%s%b\n" "${RED}" " ╚══╝╚══╝ ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝" "${RESET}"
   echo
-  printf "  %b%s%b %b— serveur natif LXC + clients%b\n" "${BOLD}${RED_SOFT}" "$APP_NAME" "${RESET}" "${GRAY}" "${RESET}"
+  printf "  %b%s%b %b— votre serveur VPN privé, installé et géré simplement%b\n" "${BOLD}${RED_SOFT}" "$APP_NAME" "${RESET}" "${GRAY}" "${RESET}"
   hr
 }
 
@@ -700,7 +700,7 @@ choose_mode() {
     "   Seuls les appareils où VOUS installez WireGuard se voient entre eux." \
     "   ${CYAN}Exemple :${RESET} votre PC se connecte en SSH à un serveur, ou deux serveurs" \
     "   distants discutent en privé dans un tunnel chiffré." \
-    "   ${GRAY}N'ouvre rien d'autre : ni le reste du réseau, ni Internet via le serveur.${RESET}" \
+    "   ${GRAY}Aucun autre accès : ni au reste du réseau, ni à Internet via le serveur.${RESET}" \
     "" \
     "${BOLD}2) Accès au réseau local (LAN) situé derrière le serveur${RESET}" \
     "   Le client atteint AUSSI les autres machines du réseau du serveur," \
@@ -1594,7 +1594,7 @@ show_existing_client() {
   banner
 
   panel "$RED" "Afficher / re-scanner un client" \
-    "Réaffiche la configuration et le QR code d'un client déjà créé." \
+    "Cette option réaffiche la configuration et le QR code d'un client déjà créé." \
     "Pratique pour configurer un nouveau téléphone sans tout recommencer."
 
   local name conf
@@ -1694,7 +1694,7 @@ run_diagnostic() {
   INSTALL_MODE="${INSTALL_MODE:-inconnu}"
 
   panel "$RED" "Diagnostic WireGuard Forge" \
-    "Vérifie que l'essentiel fonctionne et explique chaque point en clair." \
+    "Ce diagnostic vérifie l'essentiel et explique chaque point en clair." \
     "Mode configuré : ${BOLD}${INSTALL_MODE}${RESET}"
 
   echo
@@ -1794,7 +1794,7 @@ uninstall_forge() {
   banner
 
   panel "$AMBER" "Désinstaller WireGuard Forge" \
-    "Arrête WireGuard et retire les réglages réseau (nftables, routage, DuckDNS)." \
+    "Cette action arrête WireGuard et retire ses réglages réseau (nftables, routage, DuckDNS)." \
     "Les clés et configurations ne sont effacées que si vous le demandez ensuite."
 
   echo
