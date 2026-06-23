@@ -302,6 +302,11 @@ is_cgnat_ip() {
   [[ "$a" == "100" ]] && ((b >= 64 && b <= 127))
 }
 
+resolve_host_ipv4() {
+  # Résout un nom de domaine en IPv4 via le résolveur système (getent, toujours présent).
+  getent ahostsv4 "$1" 2>/dev/null | awk '{print $1; exit}' || true
+}
+
 human_since() {
   local s="$1"
   if ((s < 60)); then
@@ -889,6 +894,25 @@ EOF
   systemctl enable --now wg-forge-ddns.timer
 }
 
+verify_endpoint_domain() {
+  local host="$1" public_ip="$2" resolved
+
+  if validate_ipv4 "$host"; then
+    return 0
+  fi
+  [[ -n "$public_ip" ]] || return 0
+
+  resolved="$(resolve_host_ipv4 "$host")"
+  if [[ -z "$resolved" ]]; then
+    warn "Le domaine ${host} ne se résout pas encore (DNS non configuré ou propagation en cours)."
+  elif [[ "$resolved" == "$public_ip" ]]; then
+    success "Le domaine ${host} pointe bien vers ce serveur (${resolved})."
+  else
+    warn "Le domaine ${host} pointe vers ${resolved}, alors que votre IP publique est ${public_ip}."
+    info "Vérifiez l'enregistrement DNS (A) de ${host} s'il doit cibler ce serveur."
+  fi
+}
+
 configure_endpoint() {
   local detected_public_ip="$1"
   local value
@@ -934,6 +958,7 @@ configure_endpoint() {
   fi
 
   ENDPOINT_HOST="$value"
+  verify_endpoint_domain "$ENDPOINT_HOST" "$detected_public_ip"
 }
 
 install_or_reconfigure_server() {
