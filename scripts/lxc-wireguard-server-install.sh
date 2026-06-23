@@ -1363,7 +1363,7 @@ add_or_regenerate_client() {
     "Endpoint actuel : ${BOLD}${ENDPOINT_HOST}:${LISTEN_PORT}${RESET}"
 
   echo
-  NAME="$(prompt_free "Nom du client, ex: PC-SAV, PVE-MIRIAD, phone-victor")"
+  NAME="$(prompt_free "Nom du client, ex: pc-portable, telephone, tablette")"
   NAME="${NAME:-}"
 
   [[ -n "$NAME" ]] || die "Nom vide."
