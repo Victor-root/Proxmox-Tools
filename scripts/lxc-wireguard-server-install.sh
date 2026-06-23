@@ -3,7 +3,7 @@ set -Eeuo pipefail
 umask 077
 
 # ──────────────────────────────────────────────────────────────────────────────
-# WireGuard Forge — installateur serveur + gestionnaire de clients
+# Installation, configuration et gestion d'un serveur WireGuard
 # Thème rouge WireGuard
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -11,9 +11,9 @@ WG_IF="wg0"
 WG_DIR="/etc/wireguard"
 WG_CONF="${WG_DIR}/${WG_IF}.conf"
 CLIENT_DIR="${WG_DIR}/clients"
-STATE_FILE="${WG_DIR}/wg-forge.env"
-NFT_FILE="${WG_DIR}/wg-forge.nft"
-NFT_UNIT="/etc/systemd/system/wg-forge-nft.service"
+STATE_FILE="${WG_DIR}/wg-server.env"
+NFT_FILE="${WG_DIR}/wg-server.nft"
+NFT_UNIT="/etc/systemd/system/wg-server-nft.service"
 
 DEFAULT_PORT="51820"
 DEFAULT_WG_CIDR="192.168.2.0/24"
@@ -22,7 +22,7 @@ DEFAULT_CLIENT_RANGE_START="100"
 DEFAULT_CLIENT_RANGE_END="254"
 DEFAULT_KEEPALIVE="25"
 
-APP_NAME="WireGuard Forge"
+APP_NAME="Installation, configuration et gestion du serveur WireGuard"
 
 # ── Couleurs ──────────────────────────────────────────────────────────────────
 
@@ -102,7 +102,7 @@ banner() {
   printf "%b%s%b\n" "${RED}" "╚███╔███╔╝██║██║  ██║███████╗╚██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝" "${RESET}"
   printf "%b%s%b\n" "${RED}" " ╚══╝╚══╝ ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝" "${RESET}"
   echo
-  printf "  %b%s%b %b— votre serveur VPN privé, installé et géré simplement%b\n" "${BOLD}${RED_SOFT}" "$APP_NAME" "${RESET}" "${GRAY}" "${RESET}"
+  printf "  %b%s%b\n" "${BOLD}${RED_SOFT}" "$APP_NAME" "${RESET}"
   hr
 }
 
@@ -613,7 +613,7 @@ write_nft_config() {
   local need_nat="$1"
 
   cat > "$NFT_FILE" <<EOF
-table inet wg_forge {
+table inet wg_server {
   chain forward {
     type filter hook forward priority filter; policy accept;
 
@@ -628,7 +628,7 @@ EOF
   if [[ "$need_nat" == "1" ]]; then
     cat >> "$NFT_FILE" <<EOF
 
-table ip wg_forge_nat {
+table ip wg_server_nat {
   chain postrouting {
     type nat hook postrouting priority srcnat; policy accept;
 
@@ -644,18 +644,18 @@ EOF
 write_nft_unit() {
   cat > "$NFT_UNIT" <<EOF
 [Unit]
-Description=WireGuard Forge nftables rules
+Description=Règles nftables du serveur WireGuard
 Wants=network-online.target
 After=network-online.target
 Before=wg-quick@${WG_IF}.service
 
 [Service]
 Type=oneshot
-ExecStartPre=-/usr/sbin/nft delete table inet wg_forge
-ExecStartPre=-/usr/sbin/nft delete table ip wg_forge_nat
+ExecStartPre=-/usr/sbin/nft delete table inet wg_server
+ExecStartPre=-/usr/sbin/nft delete table ip wg_server_nat
 ExecStart=/usr/sbin/nft -f ${NFT_FILE}
-ExecStop=-/usr/sbin/nft delete table inet wg_forge
-ExecStop=-/usr/sbin/nft delete table ip wg_forge_nat
+ExecStop=-/usr/sbin/nft delete table inet wg_server
+ExecStop=-/usr/sbin/nft delete table ip wg_server_nat
 RemainAfterExit=yes
 
 [Install]
@@ -665,23 +665,23 @@ EOF
 
 enable_nft_rules() {
   systemctl daemon-reload
-  systemctl enable --now wg-forge-nft.service
+  systemctl enable --now wg-server-nft.service
 }
 
 disable_nft_rules() {
-  if systemctl list-unit-files wg-forge-nft.service >/dev/null 2>&1; then
-    systemctl disable --now wg-forge-nft.service >/dev/null 2>&1 || true
+  if systemctl list-unit-files wg-server-nft.service >/dev/null 2>&1; then
+    systemctl disable --now wg-server-nft.service >/dev/null 2>&1 || true
   fi
 
   if have nft; then
-    nft delete table inet wg_forge >/dev/null 2>&1 || true
-    nft delete table ip wg_forge_nat >/dev/null 2>&1 || true
+    nft delete table inet wg_server >/dev/null 2>&1 || true
+    nft delete table ip wg_server_nat >/dev/null 2>&1 || true
   fi
 }
 
 configure_sysctl() {
-  cat > /etc/sysctl.d/99-wireguard-forge.conf <<'EOF'
-# WireGuard Forge
+  cat > /etc/sysctl.d/99-wireguard-server.conf <<'EOF'
+# Serveur WireGuard
 # Autorise le routage IPv4. Nécessaire pour permettre aux clients WireGuard
 # de communiquer entre eux et, selon le mode choisi, vers le LAN ou Internet.
 net.ipv4.ip_forward=1
@@ -991,16 +991,16 @@ install_or_reconfigure_server() {
   fi
 
   if [[ "$INSTALL_MODE" == "private" ]]; then
-    step "Désactivation des anciennes règles nftables WireGuard Forge" disable_nft_rules || true
+    step "Désactivation des anciennes règles nftables" disable_nft_rules || true
     rm -f "$NFT_FILE"
   elif [[ "$INSTALL_MODE" == "lan" && "$LAN_NAT" == "0" ]]; then
     step "Écriture des règles nftables de routage LAN sans NAT" write_nft_config "0" || die "Échec écriture nftables."
-    step "Installation du service nftables WireGuard Forge" write_nft_unit || die "Échec service nftables."
-    step "Activation des règles nftables WireGuard Forge" enable_nft_rules || die "Échec activation nftables."
+    step "Installation du service nftables" write_nft_unit || die "Échec service nftables."
+    step "Activation des règles nftables" enable_nft_rules || die "Échec activation nftables."
   else
     step "Écriture des règles nftables avec NAT/MASQUERADE" write_nft_config "1" || die "Échec écriture nftables."
-    step "Installation du service nftables WireGuard Forge" write_nft_unit || die "Échec service nftables."
-    step "Activation des règles nftables WireGuard Forge" enable_nft_rules || die "Échec activation nftables."
+    step "Installation du service nftables" write_nft_unit || die "Échec service nftables."
+    step "Activation des règles nftables" enable_nft_rules || die "Échec activation nftables."
   fi
 
   step "Activation du service WireGuard" systemctl enable --now "wg-quick@${WG_IF}" || die "Échec démarrage WireGuard."
@@ -1630,7 +1630,7 @@ run_diagnostic() {
   ENDPOINT_HOST="${ENDPOINT_HOST:-non défini}"
   INSTALL_MODE="${INSTALL_MODE:-inconnu}"
 
-  panel "$RED" "Diagnostic WireGuard Forge" \
+  panel "$RED" "Diagnostic du serveur WireGuard" \
     "Ce diagnostic vérifie l'essentiel et explique chaque point en clair." \
     "Mode configuré : ${BOLD}${INSTALL_MODE}${RESET}"
 
@@ -1659,10 +1659,10 @@ run_diagnostic() {
   fi
 
   if [[ "$INSTALL_MODE" != "private" && "$INSTALL_MODE" != "inconnu" ]]; then
-    if have nft && nft list table inet wg_forge >/dev/null 2>&1; then
-      success "Règles de pare-feu/NAT WireGuard Forge présentes."
+    if have nft && nft list table inet wg_server >/dev/null 2>&1; then
+      success "Règles de pare-feu/NAT du serveur WireGuard présentes."
     else
-      warn "Règles nftables WireGuard Forge absentes pour le mode ${INSTALL_MODE}."
+      warn "Règles nftables du serveur WireGuard absentes pour le mode ${INSTALL_MODE}."
     fi
   fi
 
@@ -1718,16 +1718,16 @@ run_diagnostic() {
   fi
 }
 
-uninstall_forge() {
+uninstall_server() {
   require_root
   banner
 
-  panel "$AMBER" "Désinstaller WireGuard Forge" \
+  panel "$AMBER" "Désinstaller le serveur WireGuard" \
     "Cette action arrête WireGuard et retire ses réglages réseau (nftables, routage)." \
     "Les clés et configurations ne sont effacées que si vous le demandez ensuite."
 
   echo
-  if ! confirm_default_no "Arrêter et désinstaller WireGuard Forge ?"; then
+  if ! confirm_default_no "Arrêter et désinstaller le serveur WireGuard ?"; then
     warn "Désinstallation annulée."
     return 0
   fi
@@ -1739,10 +1739,10 @@ uninstall_forge() {
   rm -f "$NFT_FILE" "$NFT_UNIT"
   success "Règles nftables retirées."
 
-  rm -f /etc/sysctl.d/99-wireguard-forge.conf
+  rm -f /etc/sysctl.d/99-wireguard-server.conf
   sysctl --system >/dev/null 2>&1 || true
   systemctl daemon-reload || true
-  success "Réglage de routage IPv4 propre à Forge retiré."
+  success "Réglage de routage IPv4 du serveur WireGuard retiré."
 
   echo
   panel "$AMBER" "Supprimer aussi les clés et configurations ?" \
@@ -1764,7 +1764,7 @@ uninstall_forge() {
   fi
 
   panel "$GREEN" "Désinstallation terminée" \
-    "WireGuard Forge a été retiré de ce conteneur."
+    "Le serveur WireGuard a été désinstallé de ce conteneur."
 }
 
 # ── Aide ──────────────────────────────────────────────────────────────────────
@@ -1818,7 +1818,7 @@ main_menu() {
     printf "%b5%b) Supprimer un client\n" "${RED_SOFT}" "${RESET}"
     printf "%b6%b) Diagnostic (vérifier que tout marche)\n" "${RED_SOFT}" "${RESET}"
     printf "%b7%b) Aide redirection de port\n" "${RED_SOFT}" "${RESET}"
-    printf "%b8%b) Désinstaller WireGuard Forge\n" "${RED_SOFT}" "${RESET}"
+    printf "%b8%b) Désinstaller le serveur WireGuard\n" "${RED_SOFT}" "${RESET}"
     printf "%b9%b) Quitter\n" "${RED_SOFT}" "${RESET}"
     echo
 
@@ -1833,7 +1833,7 @@ main_menu() {
       5) revoke_client ;;
       6) run_diagnostic ;;
       7) banner; show_port_forwarding_help ;;
-      8) uninstall_forge ;;
+      8) uninstall_server ;;
       9) echo; success "Au revoir."; exit 0 ;;
       *) warn "Choix invalide." ;;
     esac
