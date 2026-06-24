@@ -1855,7 +1855,7 @@ show_port_forwarding_help() {
 }
 
 show_theory_summary() {
-  panel "$BLUE" "Explication rapide pour débutants" \
+  panel "$BLUE" "Comment ça marche" \
     "WireGuard crée un réseau privé IP entre le serveur et les clients." \
     "Le serveur écoute en UDP sur un port, souvent 51820." \
     "Chaque client reçoit une IP WireGuard unique, par exemple 192.168.2.100." \
