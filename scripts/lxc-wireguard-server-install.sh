@@ -1084,8 +1084,16 @@ validate_client_ip() {
   server_last="$(awk -F. '{print $4}' <<< "$WG_SERVER_IP")"
 
   ((octet >= 2 && octet <= 254)) || die "IP client hors limites : $ipaddr"
-  [[ "$octet" == "$server_last" ]] && die "IP interdite : elle correspond à l'IP WireGuard du serveur."
-  is_used_octet "$octet" && die "IP déjà utilisée dans ${WG_CONF} : ${ipaddr}/32"
+
+  if [[ "$octet" == "$server_last" ]]; then
+    die "IP interdite : elle correspond à l'IP WireGuard du serveur."
+  fi
+
+  if is_used_octet "$octet"; then
+    die "IP déjà utilisée dans ${WG_CONF} : ${ipaddr}/32"
+  fi
+
+  return 0
 }
 
 client_has_files() {
