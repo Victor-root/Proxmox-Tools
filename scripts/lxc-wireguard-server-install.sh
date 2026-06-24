@@ -434,22 +434,22 @@ save_state() {
   chmod 700 "$WG_DIR"
 
   {
-    printf "WG_IF=%s\n" "$(quote_env "$WG_IF")"
-    printf "ENDPOINT_HOST=%s\n" "$(quote_env "$ENDPOINT_HOST")"
-    printf "LISTEN_PORT=%s\n" "$(quote_env "$LISTEN_PORT")"
-    printf "WG_CIDR=%s\n" "$(quote_env "$WG_CIDR")"
-    printf "WG_PREFIX=%s\n" "$(quote_env "$WG_PREFIX")"
-    printf "WG_SERVER_IP=%s\n" "$(quote_env "$WG_SERVER_IP")"
-    printf "OUT_IF=%s\n" "$(quote_env "$OUT_IF")"
-    printf "LXC_IP=%s\n" "$(quote_env "$LXC_IP")"
-    printf "INSTALL_MODE=%s\n" "$(quote_env "$INSTALL_MODE")"
+    printf "WG_IF=%s\n" "$(quote_env "${WG_IF:-wg0}")"
+    printf "ENDPOINT_HOST=%s\n" "$(quote_env "${ENDPOINT_HOST:-}")"
+    printf "LISTEN_PORT=%s\n" "$(quote_env "${LISTEN_PORT:-}")"
+    printf "WG_CIDR=%s\n" "$(quote_env "${WG_CIDR:-}")"
+    printf "WG_PREFIX=%s\n" "$(quote_env "${WG_PREFIX:-}")"
+    printf "WG_SERVER_IP=%s\n" "$(quote_env "${WG_SERVER_IP:-}")"
+    printf "OUT_IF=%s\n" "$(quote_env "${OUT_IF:-}")"
+    printf "LXC_IP=%s\n" "$(quote_env "${LXC_IP:-}")"
+    printf "INSTALL_MODE=%s\n" "$(quote_env "${INSTALL_MODE:-}")"
     printf "LAN_CIDR=%s\n" "$(quote_env "${LAN_CIDR:-}")"
     printf "LAN_NAT=%s\n" "$(quote_env "${LAN_NAT:-0}")"
-    printf "CLIENT_ALLOWED_DEFAULT=%s\n" "$(quote_env "$CLIENT_ALLOWED_DEFAULT")"
+    printf "CLIENT_ALLOWED_DEFAULT=%s\n" "$(quote_env "${CLIENT_ALLOWED_DEFAULT:-}")"
     printf "CLIENT_DNS_DEFAULT=%s\n" "$(quote_env "${CLIENT_DNS_DEFAULT:-}")"
-    printf "CLIENT_RANGE_START=%s\n" "$(quote_env "$CLIENT_RANGE_START")"
-    printf "CLIENT_RANGE_END=%s\n" "$(quote_env "$CLIENT_RANGE_END")"
-    printf "DEFAULT_KEEPALIVE=%s\n" "$(quote_env "$DEFAULT_KEEPALIVE")"
+    printf "CLIENT_RANGE_START=%s\n" "$(quote_env "${CLIENT_RANGE_START:-}")"
+    printf "CLIENT_RANGE_END=%s\n" "$(quote_env "${CLIENT_RANGE_END:-}")"
+    printf "DEFAULT_KEEPALIVE=%s\n" "$(quote_env "${DEFAULT_KEEPALIVE:-25}")"
   } > "$STATE_FILE"
 
   chmod 600 "$STATE_FILE"
@@ -1285,9 +1285,14 @@ add_or_regenerate_client() {
   need wg-quick
   need systemctl
 
+  local state_existed=1
+  [[ -f "$STATE_FILE" ]] || state_existed=0
+
   load_state
   [[ -f "$WG_CONF" ]] || die "Serveur non configuré : ${WG_CONF} introuvable."
-  [[ -f "$STATE_FILE" ]] || warn "Fichier d'état ${STATE_FILE} introuvable. Le script va déduire une partie de la configuration."
+  if ((state_existed == 0)); then
+    warn "Aucune configuration mémorisée : quelques réglages vont être demandés, puis enregistrés pour les prochaines fois."
+  fi
 
   mkdir -p "$CLIENT_DIR"
   chmod 700 "$CLIENT_DIR"
@@ -1427,6 +1432,12 @@ add_or_regenerate_client() {
   step "Application de la configuration WireGuard" apply_client_or_rollback || die "Échec application. Rollback effectué."
 
   prune_conf_backups
+
+  if ((state_existed == 0)); then
+    if save_state; then
+      success "Configuration mémorisée dans ${STATE_FILE} : l'endpoint et les réglages ne seront plus redemandés."
+    fi
+  fi
 
   panel "$GREEN" "Client prêt" \
     "Nom client     : ${BOLD}${NAME}${RESET}" \
