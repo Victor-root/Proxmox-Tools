@@ -1271,6 +1271,14 @@ show_qr_if_requested() {
   fi
 }
 
+read_conf_listen_port() {
+  awk -F= '/^[[:space:]]*ListenPort[[:space:]]*=/ {gsub(/[ \t\r]/,"",$2); print $2; exit}' "$WG_CONF" 2>/dev/null || true
+}
+
+read_conf_server_ip() {
+  awk -F= '/^[[:space:]]*Address[[:space:]]*=/ {gsub(/[ \t\r]/,"",$2); split($2,a,","); sub(/\/.*/,"",a[1]); print a[1]; exit}' "$WG_CONF" 2>/dev/null || true
+}
+
 add_or_regenerate_client() {
   require_root
   need wg
@@ -1284,16 +1292,42 @@ add_or_regenerate_client() {
   mkdir -p "$CLIENT_DIR"
   chmod 700 "$CLIENT_DIR"
 
+  # Réseau WireGuard : on privilégie l'état, sinon on lit le wg0.conf existant.
+  if [[ -z "${WG_CIDR:-}" ]]; then
+    local conf_server_ip
+    conf_server_ip="$(read_conf_server_ip)"
+    if validate_ipv4 "$conf_server_ip"; then
+      WG_SERVER_IP="${WG_SERVER_IP:-$conf_server_ip}"
+      WG_PREFIX="$(cidr24_prefix "${conf_server_ip}/24")"
+      WG_CIDR="${WG_PREFIX}.0/24"
+    fi
+  fi
   WG_CIDR="${WG_CIDR:-$DEFAULT_WG_CIDR}"
   validate_wireguard_cidr24 "$WG_CIDR"
   WG_PREFIX="${WG_PREFIX:-$(cidr24_prefix "$WG_CIDR")}"
   WG_SERVER_IP="${WG_SERVER_IP:-${WG_PREFIX}.1}"
-  ENDPOINT_HOST="${ENDPOINT_HOST:-$(detect_public_ip || true)}"
-  if [[ -z "$ENDPOINT_HOST" ]]; then
-    ENDPOINT_HOST="$(prompt_free "Domaine ou IP publique que les clients utiliseront")"
-    [[ -n "$ENDPOINT_HOST" ]] || die "Domaine ou IP publique obligatoire."
+
+  # Port d'écoute : état, sinon wg0.conf, sinon défaut.
+  if [[ -z "${LISTEN_PORT:-}" ]]; then
+    LISTEN_PORT="$(read_conf_listen_port)"
   fi
   LISTEN_PORT="${LISTEN_PORT:-$DEFAULT_PORT}"
+
+  # Endpoint : information CÔTÉ CLIENT, absente du wg0.conf du serveur.
+  # Si on ne la connaît pas (pas d'état), on la demande, l'IP publique servant de défaut.
+  if [[ -z "${ENDPOINT_HOST:-}" ]]; then
+    local detected_ip
+    detected_ip="$(detect_public_ip || true)"
+    echo
+    if [[ -n "$detected_ip" ]]; then
+      ENDPOINT_HOST="$(prompt_default "Domaine ou IP publique que les clients utiliseront" "$detected_ip")"
+    else
+      ENDPOINT_HOST="$(prompt_free "Domaine ou IP publique que les clients utiliseront")"
+    fi
+    [[ -n "$ENDPOINT_HOST" ]] || die "Domaine ou IP publique obligatoire."
+    verify_endpoint_domain "$ENDPOINT_HOST" "$detected_ip"
+  fi
+
   CLIENT_ALLOWED_DEFAULT="${CLIENT_ALLOWED_DEFAULT:-$WG_CIDR}"
   CLIENT_RANGE_START="${CLIENT_RANGE_START:-$DEFAULT_CLIENT_RANGE_START}"
   CLIENT_RANGE_END="${CLIENT_RANGE_END:-$DEFAULT_CLIENT_RANGE_END}"
