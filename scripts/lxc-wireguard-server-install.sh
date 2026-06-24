@@ -21,6 +21,7 @@ DEFAULT_WG_SERVER_IP="192.168.2.1"
 DEFAULT_CLIENT_RANGE_START="100"
 DEFAULT_CLIENT_RANGE_END="254"
 DEFAULT_KEEPALIVE="25"
+DEFAULT_MTU="1420"
 
 APP_NAME="Installation, configuration et gestion du serveur WireGuard"
 
@@ -450,6 +451,7 @@ save_state() {
     printf "CLIENT_RANGE_START=%s\n" "$(quote_env "${CLIENT_RANGE_START:-}")"
     printf "CLIENT_RANGE_END=%s\n" "$(quote_env "${CLIENT_RANGE_END:-}")"
     printf "DEFAULT_KEEPALIVE=%s\n" "$(quote_env "${DEFAULT_KEEPALIVE:-25}")"
+    printf "DEFAULT_MTU=%s\n" "$(quote_env "${DEFAULT_MTU:-1420}")"
   } > "$STATE_FILE"
 
   chmod 600 "$STATE_FILE"
@@ -1175,6 +1177,9 @@ write_client_config() {
     echo "[Interface]"
     echo "PrivateKey = ${client_priv}"
     echo "Address = ${CLIENT_IP}"
+    if [[ -n "${CLIENT_MTU:-}" ]]; then
+      echo "MTU = ${CLIENT_MTU}"
+    fi
     if [[ -n "${CLIENT_DNS:-}" ]]; then
       echo "DNS = ${CLIENT_DNS}"
     fi
@@ -1337,6 +1342,7 @@ add_or_regenerate_client() {
   CLIENT_RANGE_START="${CLIENT_RANGE_START:-$DEFAULT_CLIENT_RANGE_START}"
   CLIENT_RANGE_END="${CLIENT_RANGE_END:-$DEFAULT_CLIENT_RANGE_END}"
   DEFAULT_KEEPALIVE="${DEFAULT_KEEPALIVE:-25}"
+  DEFAULT_MTU="${DEFAULT_MTU:-1420}"
 
   SERVER_PUB="$(get_server_public_key)"
 
@@ -1395,7 +1401,11 @@ add_or_regenerate_client() {
     CLIENT_DNS="$(prompt_default "DNS côté client, vide pour ne rien mettre" "")"
   fi
 
+  CLIENT_MTU="$(prompt_default "MTU" "$DEFAULT_MTU")"
+
   [[ "$CLIENT_KEEPALIVE" =~ ^[0-9]+$ ]] || die "PersistentKeepalive doit être un nombre."
+  [[ "$CLIENT_MTU" =~ ^[0-9]+$ ]] || die "Le MTU doit être un nombre."
+  ((CLIENT_MTU >= 1280 && CLIENT_MTU <= 1500)) || die "MTU hors plage (1280-1500) : $CLIENT_MTU"
 
   if [[ "$CLIENT_ALLOWED" == *"0.0.0.0/0"* || "$CLIENT_ALLOWED" == *"::/0"* ]]; then
     panel "$AMBER" "Full tunnel dans le profil client" \
@@ -1417,6 +1427,7 @@ add_or_regenerate_client() {
     "Endpoint       : ${BOLD}${ENDPOINT_HOST}:${LISTEN_PORT}${RESET}" \
     "AllowedIPs     : ${CYAN}${CLIENT_ALLOWED}${RESET}" \
     "DNS            : ${CYAN}${CLIENT_DNS:-aucun}${RESET}" \
+    "MTU            : ${CYAN}${CLIENT_MTU}${RESET}" \
     "Fichier client : ${CYAN}${CONF_FILE}${RESET}"
 
   echo
