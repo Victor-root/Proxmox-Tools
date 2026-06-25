@@ -71,6 +71,33 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 
 ---
 
+### 🔐 WireGuard VPN server installer & client manager (LXC)
+
+**Script:** `lxc-wireguard-server-install.sh`
+
+Installs and manages a native **WireGuard VPN server** inside a Debian/Ubuntu **LXC** on Proxmox (no Docker), through an interactive menu:
+
+* 🧭 guided install with **3 clear network modes**: private network, LAN access, full Internet tunnel
+* 👤 full client lifecycle: **add**, **list** (with live connection state), **show / re-scan** (config + QR code), **revoke**
+* 🩺 **diagnostic** that checks the service, UDP port, IPv4 routing, firewall rules and connected clients — in plain language
+* 🌐 endpoint by **public IP or domain**, with a **CGNAT** warning and a check that the domain points to the server
+* 🧱 automatic **nftables** rules and IPv4 forwarding for LAN / full-tunnel modes
+* 🔧 per-client tunables: AllowedIPs, DNS, PersistentKeepalive, **MTU** (default 1420)
+* 🧠 remembers your settings (endpoint, port, network) after the first run
+* 💾 built-in **backup / restore** of the whole configuration
+* 🧹 clean **uninstall**
+* 📋 interactive menu
+
+#### Run it directly
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/lxc-wireguard-server-install.sh)
+```
+
+> ⚠️ Run it as **root inside the target LXC** (not on the Proxmox host). On an **unprivileged** container, WireGuard needs `/dev/net/tun` passed through — the script detects this and shows the exact `pct set` commands to run on the host if needed.
+
+---
+
 ## 📂 Repository philosophy
 
 Each script lives as its **own file** inside the `scripts/` directory.
