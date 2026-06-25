@@ -323,6 +323,11 @@ validate_port() {
   ((port >= 1 && port <= 65535)) || die "Port hors plage : $port"
 }
 
+port_in_use() {
+  have ss || return 1
+  ss -lun 2>/dev/null | grep -qE "[:.]${1}([^0-9]|\$)"
+}
+
 validate_endpoint_host() {
   local host="$1"
 
@@ -918,6 +923,17 @@ install_or_reconfigure_server() {
 
   LISTEN_PORT="$(prompt_default "Port UDP WireGuard" "$DEFAULT_PORT")"
   validate_port "$LISTEN_PORT"
+
+  if port_in_use "$LISTEN_PORT"; then
+    if [[ -f "$WG_CONF" ]]; then
+      info "Le port ${LISTEN_PORT}/UDP est déjà en écoute (probablement votre WireGuard actuel, normal en reconfiguration)."
+    else
+      warn "Le port ${LISTEN_PORT}/UDP semble déjà utilisé par un autre service sur ce serveur."
+      if ! confirm_default_no "Continuer quand même avec ce port ?"; then
+        die "Choisissez un autre port puis relancez."
+      fi
+    fi
+  fi
 
   OUT_IF="$(prompt_default "Interface réseau sortante du LXC" "$detected_out_if")"
   [[ -n "$OUT_IF" ]] || die "Interface sortante obligatoire."
@@ -1816,6 +1832,127 @@ run_diagnostic() {
   fi
 }
 
+backup_config() {
+  require_root
+  banner
+
+  panel "$RED" "Sauvegarde de la configuration" \
+    "Crée une archive de ${CYAN}${WG_DIR}${RESET} : configuration serveur, clés et clients." \
+    "Gardez-la en lieu sûr : elle contient des clés privées."
+
+  [[ -d "$WG_DIR" ]] || die "Rien à sauvegarder : ${WG_DIR} introuvable."
+
+  local ts dest parent base
+  ts="$(date +%F_%H%M%S)"
+  echo
+  dest="$(prompt_default "Chemin de l'archive à créer" "/root/wireguard-backup-${ts}.tar.gz")"
+  [[ -n "$dest" ]] || die "Chemin vide."
+
+  parent="$(dirname "$WG_DIR")"
+  base="$(basename "$WG_DIR")"
+
+  step "Création de l'archive" tar -czf "$dest" -C "$parent" "$base" || die "Échec de la sauvegarde."
+  chmod 600 "$dest" 2>/dev/null || true
+
+  panel "$GREEN" "Sauvegarde créée" \
+    "Archive : ${CYAN}${dest}${RESET}" \
+    "Contenu : configuration, clés serveur et clients." \
+    "À récupérer hors du serveur, par ex. : ${DIM}scp root@IP_DU_LXC:${dest} .${RESET}"
+}
+
+restore_config() {
+  require_root
+  banner
+
+  panel "$AMBER" "Restauration de la configuration" \
+    "Remplace ${CYAN}${WG_DIR}${RESET} par le contenu d'une archive de sauvegarde." \
+    "La configuration actuelle sera d'abord sauvegardée par sécurité."
+
+  local src base parent
+  echo
+  src="$(prompt_free "Chemin de l'archive à restaurer (.tar.gz)")"
+  [[ -n "$src" ]] || die "Chemin vide."
+  [[ -f "$src" ]] || die "Archive introuvable : $src"
+
+  base="$(basename "$WG_DIR")"
+  parent="$(dirname "$WG_DIR")"
+
+  if ! tar -tzf "$src" 2>/dev/null | grep -qE "(^|/)${base}/wg0\.conf\$"; then
+    die "Archive invalide : ${base}/wg0.conf introuvable dedans."
+  fi
+
+  echo
+  if ! confirm_default_no "Restaurer cette archive et écraser ${WG_DIR} ?"; then
+    die "Annulé."
+  fi
+
+  local ts safety=""
+  ts="$(date +%F_%H%M%S)"
+  if [[ -d "$WG_DIR" ]]; then
+    safety="$(dirname "$src")/wireguard-avant-restauration-${ts}.tar.gz"
+    if ! tar -czf "$safety" -C "$parent" "$base" 2>/dev/null; then
+      safety=""
+    fi
+    if [[ -n "$safety" ]]; then
+      info "Configuration actuelle sauvegardée : ${CYAN}${safety}${RESET}"
+    fi
+  fi
+
+  local was_active=0
+  if systemctl is-active --quiet "wg-quick@${WG_IF}"; then
+    was_active=1
+    step "Arrêt de WireGuard" systemctl stop "wg-quick@${WG_IF}" || true
+  fi
+
+  rm -rf "$WG_DIR"
+  if ! tar -xzf "$src" -C "$parent" 2>/dev/null; then
+    error "Échec de l'extraction de l'archive."
+    if [[ -n "$safety" && -f "$safety" ]]; then
+      rm -rf "$WG_DIR"
+      tar -xzf "$safety" -C "$parent" 2>/dev/null || true
+      warn "Ancienne configuration remise en place."
+    fi
+    die "Restauration échouée."
+  fi
+  chmod 700 "$WG_DIR" 2>/dev/null || true
+
+  success "Configuration restaurée depuis ${src}."
+
+  if [[ -f "$NFT_FILE" && -f "$NFT_UNIT" ]]; then
+    systemctl restart wg-server-nft.service >/dev/null 2>&1 || true
+  fi
+
+  if ((was_active == 1)); then
+    step "Redémarrage de WireGuard" systemctl start "wg-quick@${WG_IF}" || warn "WireGuard n'a pas redémarré, vérifiez la configuration restaurée."
+  else
+    info "Lancez « systemctl enable --now wg-quick@${WG_IF} » pour démarrer le serveur restauré."
+  fi
+
+  panel "$GREEN" "Restauration terminée" \
+    "Source : ${CYAN}${src}${RESET}" \
+    "Cible  : ${CYAN}${WG_DIR}${RESET}"
+}
+
+manage_backup() {
+  require_root
+  banner
+
+  panel "$RED" "Sauvegarde / restauration de la configuration" \
+    "1) Sauvegarder la configuration dans une archive" \
+    "2) Restaurer une configuration depuis une archive" \
+    "3) Retour au menu principal"
+
+  local choice
+  choice="$(prompt_default "Votre choix" "1")"
+
+  case "$choice" in
+    1) backup_config ;;
+    2) restore_config ;;
+    3) return 0 ;;
+    *) warn "Choix invalide." ;;
+  esac
+}
+
 uninstall_server() {
   require_root
   banner
@@ -1916,8 +2053,9 @@ main_menu() {
     printf "%b5%b) Supprimer un client\n" "${RED_SOFT}" "${RESET}"
     printf "%b6%b) Diagnostic (vérifier que tout marche)\n" "${RED_SOFT}" "${RESET}"
     printf "%b7%b) Aide redirection de port\n" "${RED_SOFT}" "${RESET}"
-    printf "%b8%b) Désinstaller le serveur WireGuard\n" "${RED_SOFT}" "${RESET}"
-    printf "%b9%b) Quitter\n" "${RED_SOFT}" "${RESET}"
+    printf "%b8%b) Sauvegarde / restauration de la configuration\n" "${RED_SOFT}" "${RESET}"
+    printf "%b9%b) Désinstaller le serveur WireGuard\n" "${RED_SOFT}" "${RESET}"
+    printf "%b10%b) Quitter\n" "${RED_SOFT}" "${RESET}"
     echo
 
     local choice
@@ -1931,8 +2069,9 @@ main_menu() {
       5) revoke_client ;;
       6) run_diagnostic ;;
       7) banner; show_port_forwarding_help ;;
-      8) uninstall_server ;;
-      9) echo; success "Au revoir."; exit 0 ;;
+      8) manage_backup ;;
+      9) uninstall_server ;;
+      10) echo; success "Au revoir."; exit 0 ;;
       *) warn "Choix invalide." ;;
     esac
 
