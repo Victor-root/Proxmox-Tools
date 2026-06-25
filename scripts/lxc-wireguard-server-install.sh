@@ -1470,14 +1470,49 @@ add_or_regenerate_client() {
 
 # ── Liste / gestion / diagnostic ──────────────────────────────────────────────
 
+read_conf_peer_names_in_order() {
+  [[ -f "$WG_CONF" ]] || return 0
+  awk '
+    function trim(s) { sub(/^[[:space:]]*#[[:space:]]*/, "", s); sub(/[[:space:]]+$/, "", s); return s }
+    /^[[:space:]]*#[[:space:]]*[^[:space:]]/ { print trim($0) }
+  ' "$WG_CONF" 2>/dev/null || true
+}
+
 get_client_names() {
   [[ -d "$CLIENT_DIR" ]] || return 0
-  (
+
+  # Ensemble des clients connus (ceux qui ont un fichier .conf).
+  local f name known_list=" "
+  local -a known=()
+  while IFS= read -r name; do
+    [[ -n "$name" ]] || continue
+    known+=("$name")
+    known_list+="${name} "
+  done < <(
     shopt -s nullglob
     for f in "$CLIENT_DIR"/*.conf; do
-      printf "%s\n" "$(basename "${f%.conf}")"
+      basename "${f%.conf}"
     done
-  ) | sort
+  )
+
+  ((${#known[@]} > 0)) || return 0
+
+  # 1) Dans l'ordre d'apparition des marqueurs « # nom » du wg0.conf.
+  local emitted=" "
+  while IFS= read -r name; do
+    [[ -n "$name" ]] || continue
+    [[ "$known_list" == *" ${name} "* ]] || continue
+    [[ "$emitted" == *" ${name} "* ]] && continue
+    emitted+="${name} "
+    printf "%s\n" "$name"
+  done < <(read_conf_peer_names_in_order)
+
+  # 2) Clients connus mais absents du wg0.conf : à la fin, triés.
+  local -a rest=()
+  for name in "${known[@]}"; do
+    [[ "$emitted" == *" ${name} "* ]] || rest+=("$name")
+  done
+  ((${#rest[@]} == 0)) || printf "%s\n" "${rest[@]}" | sort
 }
 
 client_ip_from_conf() {
