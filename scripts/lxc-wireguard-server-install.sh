@@ -17,7 +17,6 @@ NFT_UNIT="/etc/systemd/system/wg-server-nft.service"
 
 DEFAULT_PORT="51820"
 DEFAULT_WG_CIDR="192.168.2.0/24"
-DEFAULT_WG_SERVER_IP="192.168.2.1"
 DEFAULT_CLIENT_RANGE_START="100"
 DEFAULT_CLIENT_RANGE_END="254"
 DEFAULT_KEEPALIVE="25"
@@ -230,7 +229,7 @@ trim_stdin() {
 
 read_file_trimmed() {
   local file="$1"
-  cat "$file" | trim_stdin
+  trim_stdin < "$file"
 }
 
 quote_env() {
