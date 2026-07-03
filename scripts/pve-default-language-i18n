@@ -1941,51 +1941,85 @@ tr_msg() {
 }
 
 # ------------------------------------------------------------
-# Colors (Proxmox-inspired)
+# Colors (Proxmox-inspired) — same visual engine as
+# lxc-wireguard-server-install.sh, orange as the accent color.
 # ------------------------------------------------------------
-# Same visual theme as the existing Proxmox-Tools script, but using
-# xterm-256 colors instead of truecolor. This avoids broken output such as
-# ";2;230;106;0m" on Proxmox console/noVNC while keeping a real orange.
 if [[ -t 1 ]]; then
     RESET='\033[0m'
     BOLD='\033[1m'
     DIM='\033[2m'
     PMX_ORANGE='\033[38;5;166m'
+    PMX_ORANGE_DARK='\033[38;5;130m'
     PMX_ORANGE_SOFT='\033[38;5;208m'
     PMX_RED='\033[38;5;124m'
     PMX_AMBER='\033[38;5;214m'
     PMX_GREEN='\033[38;5;70m'
+    PMX_CYAN='\033[38;5;73m'
     PMX_BLUE='\033[38;5;67m'
     PMX_GREY='\033[38;5;244m'
-    PMX_WHITE='\033[38;5;255m'
 else
     RESET=''
     BOLD=''
     DIM=''
     PMX_ORANGE=''
+    PMX_ORANGE_DARK=''
     PMX_ORANGE_SOFT=''
     PMX_RED=''
     PMX_AMBER=''
     PMX_GREEN=''
+    PMX_CYAN=''
     PMX_BLUE=''
     PMX_GREY=''
-    PMX_WHITE=''
 fi
 
-icon_info() { printf "%b›%b" "$PMX_BLUE" "$RESET"; }
-icon_ok() { printf "%b✓%b" "$PMX_GREEN" "$RESET"; }
-icon_warn() { printf "%b⚠%b" "$PMX_AMBER" "$RESET"; }
-icon_err() { printf "%b✗%b" "$PMX_RED" "$RESET"; }
+term_width() {
+    local cols
+    cols="$(tput cols 2>/dev/null || echo 80)"
+    [[ -z "$cols" || "$cols" -lt 50 ]] && cols=80
+    [[ "$cols" -gt 92 ]] && cols=92
+    echo "$cols"
+}
 
-say_info() { echo -e "$(icon_info) ${PMX_WHITE}$*${RESET}"; }
-say_ok() { echo -e "$(icon_ok) ${PMX_WHITE}$*${RESET}"; }
-say_err() { echo -e "$(icon_err) ${PMX_WHITE}$*${RESET}"; }
+hr() {
+    local cols
+    cols="$(term_width)"
+    printf "%b" "${PMX_ORANGE_DARK}"
+    printf "%*s\n" "$cols" "" | tr ' ' '─'
+    printf "%b" "${RESET}"
+}
 
-rule() {
-    printf "%b" "$PMX_GREY"
-    printf '─%.0s' {1..58}
-    printf "%b
-" "$RESET"
+rule() { hr; }
+
+panel() {
+    local color="$1"
+    local title="$2"
+    shift 2
+
+    echo
+    printf "%b┌%b %b%b%s%b\n" "$color" "$RESET" "$BOLD" "$color" "$title" "$RESET"
+    while (($#)); do
+        printf "%b│%b %b\n" "$color" "$RESET" "$1"
+        shift
+    done
+    printf "%b└%b\n" "$color" "$RESET"
+}
+
+say_info() { printf "%b›%b %b\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$*"; }
+say_ok()   { printf "%b✓%b %b\n" "${PMX_GREEN}" "${RESET}" "$*"; }
+say_err()  { printf "%b✗%b %b\n" "${PMX_RED}" "${RESET}" "$*" >&2; }
+
+prompt_default() {
+    local label="$1"
+    local default="$2"
+    local value
+
+    printf "%b?%b %b%s%b %b[%s]%b : " \
+        "${PMX_ORANGE_SOFT}" "${RESET}" \
+        "${BOLD}" "$label" "${RESET}" \
+        "${DIM}" "$default" "${RESET}" >&2
+
+    IFS= read -r value
+    printf "%s" "${value:-$default}"
 }
 
 native_lang_name() {
@@ -2096,66 +2130,32 @@ detect_default_code() {
 }
 
 show_ssh_warning() {
-    rule
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg ssh_warning_title)${RESET}"
-    echo -e "${PMX_WHITE}$(tr_msg ssh_warning_body)${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg latest_backup_hint):${RESET} ${PMX_WHITE}$(tr_msg menu_option_2)${RESET}"
-    rule
+    panel "$PMX_AMBER" "$(tr_msg ssh_warning_title)" \
+        "$(tr_msg ssh_warning_body)" \
+        "$(tr_msg latest_backup_hint): $(tr_msg menu_option_2)"
     echo
 }
 
-show_banner() {
+banner() {
     clear || true
-
-    local title="Proxmox-Tools by VROOT"
-    local script_title
-    script_title="$(tr_msg script_title)"
-
-    local width=58
-    local pad_total pad_left pad_right
-
-    printf "%b" "${PMX_ORANGE}${BOLD}"
-    printf '┌'
-    printf '─%.0s' $(seq 1 "$width")
-    printf '┐
-'
-
-    pad_total=$((width - ${#title}))
-    (( pad_total < 0 )) && pad_total=0
-    pad_left=$((pad_total / 2))
-    pad_right=$((pad_total - pad_left))
-    printf '│'
-    printf '%*s' "$pad_left" ''
-    printf "%b%s%b" "${PMX_WHITE}${BOLD}" "$title" "${PMX_ORANGE}${BOLD}"
-    printf '%*s' "$pad_right" ''
-    printf '│
-'
-
-    printf '│'
-    printf '%*s' "$width" ''
-    printf '│
-'
-
-    pad_total=$((width - ${#script_title}))
-    (( pad_total < 0 )) && pad_total=0
-    pad_left=$((pad_total / 2))
-    pad_right=$((pad_total - pad_left))
-    printf '│'
-    printf '%*s' "$pad_left" ''
-    printf "%b%s%b" "${PMX_ORANGE_SOFT}${BOLD}" "$script_title" "${PMX_ORANGE}${BOLD}"
-    printf '%*s' "$pad_right" ''
-    printf '│
-'
-
-    printf '└'
-    printf '─%.0s' $(seq 1 "$width")
-    printf '┘
-'
-    printf "%b" "$RESET"
-
-    echo -e "${PMX_ORANGE_SOFT}${BOLD}$(tr_msg repo_hint)${RESET}"
     echo
-    echo -e "${PMX_GREY}$(tr_msg label_host):${RESET} ${PMX_WHITE}$(hostname)${RESET} ${PMX_GREY}$(tr_msg detected_language):${RESET} ${PMX_WHITE}$(native_lang_name "$APP_LANG")${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██████╗ ██████╗  ██████╗ ██╗  ██╗███╗   ███╗ ██████╗ ██╗  ██╗' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██╔══██╗██╔══██╗██╔═══██╗╚██╗██╔╝████╗ ████║██╔═══██╗╚██╗██╔╝' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██████╔╝██████╔╝██║   ██║ ╚███╔╝ ██╔████╔██║██║   ██║ ╚███╔╝ ' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██╔═══╝ ██╔══██╗██║   ██║ ██╔██╗ ██║╚██╔╝██║██║   ██║ ██╔██╗ ' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██║     ██║  ██║╚██████╔╝██╔╝ ██╗██║ ╚═╝ ██║╚██████╔╝██╔╝ ██╗' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝' "${RESET}"
+    echo
+    printf "  %b%s%b\n" "${BOLD}${PMX_ORANGE_SOFT}" "$1" "${RESET}"
+    hr
+}
+
+show_banner() {
+    banner "$(tr_msg script_title)"
+
+    panel "$PMX_BLUE" "$(tr_msg repo_hint)" \
+        "$(tr_msg label_host): ${BOLD}$(hostname)${RESET}" \
+        "$(tr_msg detected_language): ${BOLD}$(native_lang_name "$APP_LANG")${RESET}"
     echo
 
     show_ssh_warning
@@ -2186,19 +2186,16 @@ require_files() {
 }
 
 show_warning_and_confirm() {
-    echo
-    rule
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg warning_title)${RESET}"
-    echo
-    echo -e "${PMX_WHITE}• $(tr_msg warning_body_1)${RESET}"
-    echo -e "${PMX_WHITE}• $(tr_msg warning_body_2)${RESET}"
-    echo -e "${PMX_WHITE}• $(tr_msg warning_body_3)${RESET}"
-    echo -e "${PMX_WHITE}• $(tr_msg warning_body_4)${RESET}"
-    rule
+    panel "$PMX_AMBER" "$(tr_msg warning_title)" \
+        "$(tr_msg warning_body_1)" \
+        "$(tr_msg warning_body_2)" \
+        "$(tr_msg warning_body_3)" \
+        "$(tr_msg warning_body_4)"
     echo
 
     local answer
-    read -r -p "$(tr_msg type_yes): " answer
+    printf "%b?%b %b%s%b : " "${PMX_AMBER}" "${RESET}" "${BOLD}" "$(tr_msg type_yes)" "${RESET}"
+    read -r answer
 
     if [[ "$answer" != "yes" ]]; then
         say_info "$(tr_msg cancelled)"
@@ -2286,7 +2283,7 @@ restore_from_manifest() {
         timedatectl set-timezone "$(cat "$TIMEZONE_FILE")" >/dev/null 2>&1 || true
     fi
 
-    say_ok "$(tr_msg restore_done): $dir"
+    say_ok "$(tr_msg restore_done): ${PMX_CYAN}${dir}${RESET}"
 }
 
 restore_latest() {
@@ -2310,18 +2307,18 @@ interactive_restore_menu() {
         return
     fi
 
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg available_backups)${RESET}"
-    echo
-
+    local lines=()
     local i=1
     local b
 
     for b in "${backups[@]}"; do
-        echo -e " ${PMX_ORANGE_SOFT}${i})${RESET} ${PMX_WHITE}${b}${RESET}"
+        lines+=("${PMX_ORANGE_SOFT}${i})${RESET} ${b}")
         ((i++))
     done
 
-    echo -e " ${PMX_GREY}q) $(tr_msg cancelled)${RESET}"
+    lines+=("${PMX_GREY}q) $(tr_msg cancelled)${RESET}")
+
+    panel "$PMX_ORANGE" "$(tr_msg available_backups)" "${lines[@]}"
     echo
 
     local choice
@@ -2350,20 +2347,22 @@ interactive_restore_menu() {
 }
 
 show_backups() {
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg available_backups)${RESET}"
+    panel "$PMX_ORANGE" "$(tr_msg available_backups)"
     echo
     list_backups_raw || true
     pause
 }
 
 show_languages() {
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg supported_languages)${RESET}"
+    panel "$PMX_ORANGE" "$(tr_msg supported_languages)"
     echo
 
     local code
     for code in "${LANG_CODES[@]}"; do
-        printf " ${PMX_ORANGE_SOFT}%-6s${RESET} ${PMX_WHITE}%-24s${RESET} ${PMX_GREY}%s${RESET}
-"             "$code" "$(native_lang_name "$code")" "$(locale_for_code "$code")"
+        printf " %b%-6s%b %-24s %b%s%b\n" \
+            "${PMX_ORANGE_SOFT}" "$code" "${RESET}" \
+            "$(native_lang_name "$code")" \
+            "${PMX_GREY}" "$(locale_for_code "$code")" "${RESET}"
     done
 }
 
@@ -2502,8 +2501,7 @@ choose_and_apply() {
     say_info "$(tr_msg detected_default): $detected_code ($(native_lang_name "$detected_code"), $(locale_for_code "$detected_code"))"
     echo
 
-    read -r -p "$(tr_msg choose_language) [$detected_code]: " code
-    code="${code:-$detected_code}"
+    code="$(prompt_default "$(tr_msg choose_language)" "$detected_code")"
 
     if ! is_supported_code "$code"; then
         say_err "$(tr_msg unsupported_language): $code"
@@ -2512,8 +2510,7 @@ choose_and_apply() {
     fi
 
     locale_name="$(locale_for_code "$code")"
-    read -r -p "$(tr_msg choose_locale) [$locale_name]: " answer
-    locale_name="${answer:-$locale_name}"
+    locale_name="$(prompt_default "$(tr_msg choose_locale)" "$locale_name")"
 
     default_timezone="$(timezone_for_code "$code")"
     current_timezone="$(timedatectl show -p Timezone --value 2>/dev/null || true)"
@@ -2522,22 +2519,19 @@ choose_and_apply() {
         default_timezone="$current_timezone"
     fi
 
-    read -r -p "$(tr_msg choose_timezone) [$default_timezone]: " timezone
-    timezone="${timezone:-$default_timezone}"
+    timezone="$(prompt_default "$(tr_msg choose_timezone)" "$default_timezone")"
 
     lang_priority="$(language_priority_for_code "$code")"
 
-    echo
-    rule
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg summary_title)${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg label_pve_ui_language):${RESET} ${PMX_WHITE}${code}${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg label_system_locale):${RESET} ${PMX_WHITE}${locale_name}${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg label_language_priority):${RESET} ${PMX_WHITE}${lang_priority}${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg label_timezone):${RESET} ${PMX_WHITE}${timezone}${RESET}"
-    rule
+    panel "$PMX_ORANGE" "$(tr_msg summary_title)" \
+        "$(tr_msg label_pve_ui_language): ${BOLD}${code}${RESET}" \
+        "$(tr_msg label_system_locale): ${BOLD}${locale_name}${RESET}" \
+        "$(tr_msg label_language_priority): ${BOLD}${lang_priority}${RESET}" \
+        "$(tr_msg label_timezone): ${BOLD}${timezone}${RESET}"
     echo
 
-    read -r -p "$(tr_msg confirm_apply) ? [$(tr_msg yes_no_default_no)]: " answer
+    printf "%b?%b %b%s ? [%s]%b : " "${PMX_AMBER}" "${RESET}" "${BOLD}" "$(tr_msg confirm_apply)" "$(tr_msg yes_no_default_no)" "${RESET}"
+    read -r answer
     if ! is_yes "$answer"; then
         say_info "$(tr_msg cancelled)"
         pause
@@ -2547,7 +2541,7 @@ choose_and_apply() {
     show_warning_and_confirm || { pause; return; }
 
     backup_dir="$(create_backup)"
-    say_info "$(tr_msg backup_created): $backup_dir"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
     set_system_locale "$locale_name" "$lang_priority"
     say_ok "$(tr_msg locale_generated): $locale_name"
@@ -2567,10 +2561,11 @@ choose_and_apply() {
     echo
     say_ok "$(tr_msg config_applied)"
     say_info "$(tr_msg relogin_needed)"
-    say_info "$(tr_msg backup_used): $backup_dir"
+    say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
 
     echo
-    read -r -p "$(tr_msg reboot_question) ? [$(tr_msg yes_no_default_no)]: " answer
+    printf "%b?%b %b%s ? [%s]%b : " "${PMX_AMBER}" "${RESET}" "${BOLD}" "$(tr_msg reboot_question)" "$(tr_msg yes_no_default_no)" "${RESET}"
+    read -r answer
     if is_yes "$answer"; then
         reboot
     else
@@ -2609,16 +2604,15 @@ show_status() {
         generated_status="$(tr_msg status_missing)"
     fi
 
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg status_title)${RESET}"
-    echo
-    echo -e "${PMX_GREY}/etc/pve/datacenter.cfg language:${RESET} ${PMX_WHITE}${dc_lang}${RESET}"
-    echo -e "${PMX_GREY}/etc/default/locale LANG:${RESET} ${PMX_WHITE}${locale_value}${RESET}"
-    echo -e "${PMX_GREY}/etc/default/locale LC_ALL:${RESET} ${PMX_WHITE}${default_lc_all_value}${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg label_current_shell_lang):${RESET} ${PMX_WHITE}${current_shell}${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg label_current_shell_lc_all):${RESET} ${PMX_WHITE}${current_lc_all}${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg label_generated_locale):${RESET} ${PMX_WHITE}${generated_status}${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg label_timezone):${RESET} ${PMX_WHITE}${tz_value}${RESET}"
-    echo -e "${PMX_GREY}$(tr_msg label_shell_profile):${RESET} ${PMX_WHITE}${profile_status}${RESET}"
+    panel "$PMX_ORANGE" "$(tr_msg status_title)" \
+        "/etc/pve/datacenter.cfg language: ${BOLD}${dc_lang}${RESET}" \
+        "/etc/default/locale LANG: ${BOLD}${locale_value}${RESET}" \
+        "/etc/default/locale LC_ALL: ${BOLD}${default_lc_all_value}${RESET}" \
+        "$(tr_msg label_current_shell_lang): ${BOLD}${current_shell}${RESET}" \
+        "$(tr_msg label_current_shell_lc_all): ${BOLD}${current_lc_all}${RESET}" \
+        "$(tr_msg label_generated_locale): ${BOLD}${generated_status}${RESET}" \
+        "$(tr_msg label_timezone): ${BOLD}${tz_value}${RESET}" \
+        "$(tr_msg label_shell_profile): ${BOLD}${profile_status}${RESET}"
 }
 
 main_menu() {
@@ -2626,13 +2620,13 @@ main_menu() {
         detect_lang
         show_banner
 
-        echo -e " ${PMX_ORANGE_SOFT}1)${RESET} ${PMX_WHITE}$(tr_msg menu_apply)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}2)${RESET} ${PMX_WHITE}$(tr_msg menu_restore_latest)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}3)${RESET} ${PMX_WHITE}$(tr_msg menu_restore_select)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}4)${RESET} ${PMX_WHITE}$(tr_msg menu_status)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}5)${RESET} ${PMX_WHITE}$(tr_msg menu_languages)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}6)${RESET} ${PMX_WHITE}$(tr_msg menu_backups)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}7)${RESET} ${PMX_WHITE}$(tr_msg menu_quit)${RESET}"
+        printf " %b1)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_apply)"
+        printf " %b2)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_restore_latest)"
+        printf " %b3)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_restore_select)"
+        printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
+        printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_languages)"
+        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
         local choice

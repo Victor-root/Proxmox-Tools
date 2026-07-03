@@ -149,8 +149,11 @@ tr_msg() {
     esac
 }
 
+APP_NAME="$(tr_msg banner_subtitle)"
+
 # ------------------------------------------------------------
-# Colors (Proxmox-inspired)
+# Colors (Proxmox-inspired) — same visual engine as
+# lxc-wireguard-server-install.sh, orange as the accent color.
 # ------------------------------------------------------------
 
 if [[ -t 1 ]]; then
@@ -159,99 +162,83 @@ if [[ -t 1 ]]; then
     DIM='\033[2m'
 
     PMX_ORANGE='\033[38;5;166m'
+    PMX_ORANGE_DARK='\033[38;5;130m'
     PMX_ORANGE_SOFT='\033[38;5;208m'
     PMX_RED='\033[38;5;124m'
     PMX_AMBER='\033[38;5;214m'
     PMX_GREEN='\033[38;5;70m'
+    PMX_CYAN='\033[38;5;73m'
     PMX_BLUE='\033[38;5;67m'
     PMX_GREY='\033[38;5;244m'
-    PMX_WHITE='\033[38;5;255m'
 else
     RESET=''
     BOLD=''
     DIM=''
 
     PMX_ORANGE=''
+    PMX_ORANGE_DARK=''
     PMX_ORANGE_SOFT=''
     PMX_RED=''
     PMX_AMBER=''
     PMX_GREEN=''
+    PMX_CYAN=''
     PMX_BLUE=''
     PMX_GREY=''
-    PMX_WHITE=''
 fi
 
-icon_info()  { printf "%b›%b"  "$PMX_BLUE" "$RESET"; }
-icon_ok()    { printf "%b✓%b"  "$PMX_GREEN" "$RESET"; }
-icon_warn()  { printf "%b⚠%b"  "$PMX_AMBER" "$RESET"; }
-icon_err()   { printf "%b✗%b"  "$PMX_RED" "$RESET"; }
-icon_arrow() { printf "%b➜%b"  "$PMX_ORANGE_SOFT" "$RESET"; }
+term_width() {
+    local cols
+    cols="$(tput cols 2>/dev/null || echo 80)"
+    [[ -z "$cols" || "$cols" -lt 50 ]] && cols=80
+    [[ "$cols" -gt 92 ]] && cols=92
+    echo "$cols"
+}
 
-say_info() { echo -e "$(icon_info) ${PMX_WHITE}$*${RESET}"; }
-say_ok()   { echo -e "$(icon_ok) ${PMX_WHITE}$*${RESET}"; }
-say_warn() { echo -e "$(icon_warn) ${PMX_WHITE}$*${RESET}"; }
-say_err()  { echo -e "$(icon_err) ${PMX_WHITE}$*${RESET}"; }
+hr() {
+    local cols
+    cols="$(term_width)"
+    printf "%b" "${PMX_ORANGE_DARK}"
+    printf "%*s\n" "$cols" "" | tr ' ' '─'
+    printf "%b" "${RESET}"
+}
 
-rule() {
-    printf "%b" "$PMX_GREY"
-    printf '─%.0s' {1..58}
-    printf "%b\n" "$RESET"
+rule() { hr; }
+
+panel() {
+    local color="$1"
+    local title="$2"
+    shift 2
+
+    echo
+    printf "%b┌%b %b%b%s%b\n" "$color" "$RESET" "$BOLD" "$color" "$title" "$RESET"
+    while (($#)); do
+        printf "%b│%b %b\n" "$color" "$RESET" "$1"
+        shift
+    done
+    printf "%b└%b\n" "$color" "$RESET"
+}
+
+say_info() { printf "%b›%b %b\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$*"; }
+say_ok()   { printf "%b✓%b %b\n" "${PMX_GREEN}" "${RESET}" "$*"; }
+say_warn() { printf "%b⚠%b %b\n" "${PMX_AMBER}" "${RESET}" "$*"; }
+say_err()  { printf "%b✗%b %b\n" "${PMX_RED}" "${RESET}" "$*" >&2; }
+
+banner() {
+    clear || true
+    echo
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██████╗ ██████╗  ██████╗ ██╗  ██╗███╗   ███╗ ██████╗ ██╗  ██╗' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██╔══██╗██╔══██╗██╔═══██╗╚██╗██╔╝████╗ ████║██╔═══██╗╚██╗██╔╝' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██████╔╝██████╔╝██║   ██║ ╚███╔╝ ██╔████╔██║██║   ██║ ╚███╔╝ ' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██╔═══╝ ██╔══██╗██║   ██║ ██╔██╗ ██║╚██╔╝██║██║   ██║ ██╔██╗ ' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '██║     ██║  ██║╚██████╔╝██╔╝ ██╗██║ ╚═╝ ██║╚██████╔╝██╔╝ ██╗' "${RESET}"
+    printf "%b%s%b\n" "${PMX_ORANGE}" '╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝' "${RESET}"
+    echo
+    printf "  %b%s%b\n" "${BOLD}${PMX_ORANGE_SOFT}" "$APP_NAME" "${RESET}"
+    hr
 }
 
 show_banner() {
-    clear || true
-    local title="Proxmox-Tools by VROOT"
-    local script_title="Console New Tab Utility"
-    local width=58
-    local pad_total
-    local pad_left
-    local pad_right
-
-    printf "%b" "${PMX_ORANGE}${BOLD}"
-    printf '┌'
-    printf '─%.0s' $(seq 1 "$width")
-    printf '┐
-'
-
-    pad_total=$((width - ${#title}))
-    if (( pad_total < 0 )); then
-        pad_total=0
-    fi
-    pad_left=$((pad_total / 2))
-    pad_right=$((pad_total - pad_left))
-    printf '│'
-    printf '%*s' "$pad_left" ''
-    printf "%b%s%b" "${PMX_WHITE}${BOLD}" "$title" "${PMX_ORANGE}${BOLD}"
-    printf '%*s' "$pad_right" ''
-    printf '│
-'
-
-    printf '│'
-    printf '%*s' "$width" ''
-    printf '│
-'
-
-    pad_total=$((width - ${#script_title}))
-    if (( pad_total < 0 )); then
-        pad_total=0
-    fi
-    pad_left=$((pad_total / 2))
-    pad_right=$((pad_total - pad_left))
-    printf '│'
-    printf '%*s' "$pad_left" ''
-    printf "%b%s%b" "${PMX_ORANGE_SOFT}${BOLD}" "$script_title" "${PMX_ORANGE}${BOLD}"
-    printf '%*s' "$pad_right" ''
-    printf '│
-'
-
-    printf '└'
-    printf '─%.0s' $(seq 1 "$width")
-    printf '┘
-'
-    printf "%b" "$RESET"
-
-    echo -e "${PMX_ORANGE_SOFT}${BOLD}$(tr_msg repo_hint)${RESET}"
-    echo
+    banner
 
     local lang_label
     if [[ "$APP_LANG" == "fr" ]]; then
@@ -260,7 +247,9 @@ show_banner() {
         lang_label="$(tr_msg lang_en)"
     fi
 
-    echo -e "${PMX_GREY}Host:${RESET} ${PMX_WHITE}$(hostname)${RESET}    ${PMX_GREY}$(tr_msg detected_language):${RESET} ${PMX_WHITE}${lang_label}${RESET}"
+    panel "$PMX_BLUE" "$(tr_msg repo_hint)" \
+        "Host: ${BOLD}$(hostname)${RESET}" \
+        "$(tr_msg detected_language): ${BOLD}${lang_label}${RESET}"
     echo
 }
 
@@ -284,16 +273,14 @@ require_files() {
 }
 
 show_warning_and_confirm() {
+    panel "$PMX_AMBER" "$(tr_msg warning_title)" \
+        "$(tr_msg warning_body_1)" \
+        "$(tr_msg warning_body_2)" \
+        "$(tr_msg warning_body_3)"
+
     echo
-    rule
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg warning_title)${RESET}"
-    echo
-    echo -e "${PMX_WHITE}• $(tr_msg warning_body_1)${RESET}"
-    echo -e "${PMX_WHITE}• $(tr_msg warning_body_2)${RESET}"
-    echo -e "${PMX_WHITE}• $(tr_msg warning_body_3)${RESET}"
-    rule
-    echo
-    read -r -p "$(tr_msg type_yes): " answer
+    printf "%b?%b %b%s%b : " "${PMX_AMBER}" "${RESET}" "${BOLD}" "$(tr_msg type_yes)" "${RESET}"
+    read -r answer
     if [[ "$answer" != "yes" ]]; then
         say_info "$(tr_msg cancelled)"
         return 1
@@ -332,7 +319,7 @@ create_backup() {
 }
 
 show_status() {
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg status_title)${RESET}"
+    panel "$PMX_ORANGE" "$(tr_msg status_title)"
     echo
     PM_FILE="$PM_FILE" PX_FILE="$PX_FILE" python3 <<'PY'
 from pathlib import Path
@@ -384,7 +371,7 @@ apply_patch() {
     show_warning_and_confirm || return 0
 
     backup_dir="$(create_backup)"
-    say_info "$(tr_msg backup_created): $backup_dir"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
     PM_FILE="$PM_FILE" PX_FILE="$PX_FILE" python3 <<'PY'
 from pathlib import Path
@@ -878,7 +865,7 @@ PY
     echo
     say_ok "$(tr_msg patch_applied)"
     say_info "$(tr_msg hard_refresh)"
-    say_info "$(tr_msg backup_used): $backup_dir"
+    say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
 }
 
 restore_specific() {
@@ -892,7 +879,7 @@ restore_specific() {
 
     say_info "$(tr_msg restart_proxy)"
     systemctl restart pveproxy
-    say_ok "$(tr_msg restore_done): $dir"
+    say_ok "$(tr_msg restore_done): ${PMX_CYAN}${dir}${RESET}"
 }
 
 restore_latest() {
@@ -914,14 +901,15 @@ interactive_restore_menu() {
         return
     fi
 
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg available_backups)${RESET}"
-    echo
+    local lines=()
     local i=1
     for b in "${backups[@]}"; do
-        echo -e "  ${PMX_ORANGE_SOFT}${i})${RESET} ${PMX_WHITE}${b}${RESET}"
+        lines+=("${PMX_ORANGE_SOFT}${i})${RESET} ${b}")
         ((i++))
     done
-    echo -e "  ${PMX_GREY}q) $(tr_msg cancelled)${RESET}"
+    lines+=("${PMX_GREY}q) $(tr_msg cancelled)${RESET}")
+
+    panel "$PMX_ORANGE" "$(tr_msg available_backups)" "${lines[@]}"
     echo
 
     read -r -p "$(tr_msg choose_backup_number): " choice
@@ -949,7 +937,7 @@ interactive_restore_menu() {
 }
 
 show_backups() {
-    echo -e "${PMX_ORANGE}${BOLD}$(tr_msg available_backups)${RESET}"
+    panel "$PMX_ORANGE" "$(tr_msg available_backups)"
     echo
     list_backups_raw || true
     pause
@@ -958,12 +946,12 @@ show_backups() {
 main_menu() {
     while true; do
         show_banner
-        echo -e " ${PMX_ORANGE_SOFT}1)${RESET} ${PMX_WHITE}$(tr_msg menu_apply)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}2)${RESET} ${PMX_WHITE}$(tr_msg menu_restore_latest)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}3)${RESET} ${PMX_WHITE}$(tr_msg menu_restore_select)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}4)${RESET} ${PMX_WHITE}$(tr_msg menu_status)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}5)${RESET} ${PMX_WHITE}$(tr_msg menu_backups)${RESET}"
-        echo -e " ${PMX_ORANGE_SOFT}6)${RESET} ${PMX_WHITE}$(tr_msg menu_quit)${RESET}"
+        printf " %b1)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_apply)"
+        printf " %b2)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_restore_latest)"
+        printf " %b3)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_restore_select)"
+        printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
+        printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
+        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
         read -r -p "$(tr_msg choose_option) [1-6]: " choice
