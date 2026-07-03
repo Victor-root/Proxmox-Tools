@@ -158,13 +158,14 @@ if [[ -t 1 ]]; then
     BOLD='\033[1m'
     DIM='\033[2m'
 
-    PMX_ORANGE='\033[38;2;230;106;0m'
-    PMX_ORANGE_SOFT='\033[38;2;255;167;79m'
-    PMX_RED='\033[38;2;181;56;44m'
-    PMX_GREEN='\033[38;2;78;154;6m'
-    PMX_BLUE='\033[38;2;52;101;164m'
-    PMX_GREY='\033[38;2;120;120;120m'
-    PMX_WHITE='\033[38;2;245;245;245m'
+    PMX_ORANGE='\033[38;5;166m'
+    PMX_ORANGE_SOFT='\033[38;5;208m'
+    PMX_RED='\033[38;5;124m'
+    PMX_AMBER='\033[38;5;214m'
+    PMX_GREEN='\033[38;5;70m'
+    PMX_BLUE='\033[38;5;67m'
+    PMX_GREY='\033[38;5;244m'
+    PMX_WHITE='\033[38;5;255m'
 else
     RESET=''
     BOLD=''
@@ -173,16 +174,17 @@ else
     PMX_ORANGE=''
     PMX_ORANGE_SOFT=''
     PMX_RED=''
+    PMX_AMBER=''
     PMX_GREEN=''
     PMX_BLUE=''
     PMX_GREY=''
     PMX_WHITE=''
 fi
 
-icon_info()  { printf "%bℹ%b"  "$PMX_BLUE" "$RESET"; }
-icon_ok()    { printf "%b✔%b"  "$PMX_GREEN" "$RESET"; }
-icon_warn()  { printf "%b⚠%b"  "$PMX_ORANGE" "$RESET"; }
-icon_err()   { printf "%b✖%b"  "$PMX_RED" "$RESET"; }
+icon_info()  { printf "%b›%b"  "$PMX_BLUE" "$RESET"; }
+icon_ok()    { printf "%b✓%b"  "$PMX_GREEN" "$RESET"; }
+icon_warn()  { printf "%b⚠%b"  "$PMX_AMBER" "$RESET"; }
+icon_err()   { printf "%b✗%b"  "$PMX_RED" "$RESET"; }
 icon_arrow() { printf "%b➜%b"  "$PMX_ORANGE_SOFT" "$RESET"; }
 
 say_info() { echo -e "$(icon_info) ${PMX_WHITE}$*${RESET}"; }
