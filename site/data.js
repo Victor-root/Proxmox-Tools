@@ -306,6 +306,7 @@ const BANNERS = {
 const UI = {
     navScripts: { en: 'Scripts', fr: 'Les scripts' },
     navNews: { en: "What's new", fr: 'Nouveautés' },
+    navHowto: { en: 'How to run', fr: 'Comment lancer' },
     navTrust: { en: 'Is it safe', fr: 'Est-ce sûr' },
 
     langLabel: { en: 'Language', fr: 'Langue' },
@@ -350,10 +351,9 @@ const UI = {
     },
     cardRunOn: { en: 'Run it on', fr: 'À lancer' },
     cardCopyLabel: { en: 'Copy this line into your shell', fr: 'Copiez cette ligne dans votre shell' },
-    cardCopy: { en: 'Copy', fr: 'Copier' },
+    cardCopy: { en: 'Copy the command', fr: 'Copier la commande' },
     cardCopied: { en: 'Copied', fr: 'Copié' },
     cardSource: { en: 'Read the source on GitHub', fr: 'Lire le code sur GitHub' },
-    cardHistory: { en: 'History', fr: 'Historique' },
     copyOk: { en: 'Command copied, paste it as root', fr: 'Commande copiée, collez-la en root' },
     copyFail: { en: 'Copy failed, select the line by hand', fr: 'Copie impossible, sélectionnez la ligne à la main' },
 

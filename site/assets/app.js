@@ -140,13 +140,13 @@
         return '<pre>' + out.join('\n') + '</pre>';
     }
 
-    /* KDE Breeze window buttons: minimise, maximise, close, on the right */
+    /* Window buttons: chevron down, chevron up, cross, on the right */
     function windowButtons() {
         return [
             '<span class="term-btns" aria-hidden="true">',
-            '  <span class="term-btn min"><svg viewBox="0 0 12 12"><path d="M2.5 6.5h7"/></svg></span>',
-            '  <span class="term-btn max"><svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" rx="1"/></svg></span>',
-            '  <span class="term-btn close"><svg viewBox="0 0 12 12"><path d="M3 3l6 6M9 3l-6 6"/></svg></span>',
+            '  <span class="term-btn min"><svg viewBox="0 0 16 16"><path d="M4 6.5l4 4 4-4"/></svg></span>',
+            '  <span class="term-btn max"><svg viewBox="0 0 16 16"><path d="M4 9.5l4-4 4 4"/></svg></span>',
+            '  <span class="term-btn close"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></span>',
             '</span>',
         ].join('\n');
     }
@@ -175,12 +175,14 @@
             '        <span class="run-label">' + esc(tr(UI.cardCopyLabel)) + '</span>',
             '        <div class="run-box">',
             '          <div class="run-cmd"><code><span class="c-cmd">bash</span> &lt;(<span class="c-cmd">curl</span> -fsSL <span class="c-url">' + esc(RAW_BASE + script.file) + '</span>)</code></div>',
-            '          <button class="copy" type="button" data-cmd="' + esc(cmd) + '">' + esc(tr(UI.cardCopy)) + '</button>',
+            '          <button class="copy" type="button" data-cmd="' + esc(cmd) + '" title="' + esc(tr(UI.cardCopy)) + '" aria-label="' + esc(tr(UI.cardCopy)) + '">',
+            '            <svg class="ico-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5.5 15H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h8.5A1.5 1.5 0 0 1 15 5v.5"/></svg>',
+            '            <svg class="ico-done" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5 10-10"/></svg>',
+            '          </button>',
             '        </div>',
             '      </div>',
             '      <div class="card-links">',
             '        <a href="' + BLOB_BASE + encodeURIComponent(script.file) + '" rel="noopener">' + esc(tr(UI.cardSource)) + '</a>',
-            '        <a href="' + REPO_URL + '/commits/' + SITE.branch + '/' + SITE.scriptsDir + '/' + encodeURIComponent(script.file) + '" rel="noopener">' + esc(tr(UI.cardHistory)) + '</a>',
             '      </div>',
             '    </div>',
             '    <div class="term-side">',
@@ -245,13 +247,9 @@
             btn.addEventListener('click', async () => {
                 const ok = await copy(btn.dataset.cmd);
                 if (!ok) { toast(tr(UI.copyFail)); return; }
-                btn.textContent = tr(UI.cardCopied);
                 btn.classList.add('done');
                 toast(tr(UI.copyOk));
-                setTimeout(() => {
-                    btn.textContent = tr(UI.cardCopy);
-                    btn.classList.remove('done');
-                }, 1800);
+                setTimeout(() => btn.classList.remove('done'), 1800);
             });
         });
     }

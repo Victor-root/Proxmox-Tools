@@ -51,12 +51,16 @@
         </g>
         <circle cx="44" cy="44.5" r="4" fill="#160e06"/>
       </svg>
-      <span class="brand-name">Proxmox<span class="brand-accent">-Tools</span></span>
+      <span class="brand-text">
+        <span class="brand-name">Proxmox<span class="brand-accent">-Tools</span></span>
+        <span class="brand-by">by Victor-root</span>
+      </span>
     </a>
 
     <nav class="topnav" aria-label="Main">
-      <a href="#scripts" data-i18n="navScripts">Scripts</a>
       <a href="#news" data-i18n="navNews">What's new</a>
+      <a href="#howto" data-i18n="navHowto">How to run</a>
+      <a href="#scripts" data-i18n="navScripts">Scripts</a>
       <a href="#trust" data-i18n="navTrust">Is it safe</a>
     </nav>
 
@@ -93,19 +97,20 @@
 
   <section class="hero">
     <div class="wrap hero-inner">
-      <p class="eyebrow"><span class="dot"></span> <span data-i18n="heroEyebrow">Open source shell scripts</span></p>
-      <h1><span data-i18n="heroTitle1">Small tools that make</span> <br><span class="grad">Proxmox VE</span> <span data-i18n="heroTitle2">less annoying.</span></h1>
-      <p class="lede" data-i18n="heroLede"></p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="#scripts" data-i18n="heroBtnScripts">Browse the scripts</a>
-        <a class="btn btn-ghost" id="hero-repo" href="#" rel="noopener" data-i18n="heroBtnSource">Read the source</a>
+      <div class="hero-text">
+        <p class="eyebrow"><span class="dot"></span> <span data-i18n="heroEyebrow">Open source shell scripts</span></p>
+        <h1><span data-i18n="heroTitle1">Small tools that make</span> <span class="grad">Proxmox VE</span> <span data-i18n="heroTitle2">less annoying.</span></h1>
+        <p class="lede" data-i18n="heroLede"></p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#scripts" data-i18n="heroBtnScripts">Browse the scripts</a>
+          <a class="btn btn-ghost" id="hero-repo" href="#" rel="noopener" data-i18n="heroBtnSource">Read the source</a>
+        </div>
       </div>
       <ul class="hero-facts">
         <li><strong id="fact-count">0</strong><span data-i18n="factScripts">scripts</span></li>
         <li><strong>0</strong><span data-i18n="factDeps">dependencies</span></li>
         <li><strong>AGPL</strong><span data-i18n="factLicense">no fork of Proxmox</span></li>
       </ul>
-      <p class="hero-by"><span data-i18n="footerBy">Built by</span> <a id="hero-author" href="#" rel="noopener">Victor-root</a></p>
     </div>
     <div class="hero-glow" aria-hidden="true"></div>
   </section>
@@ -124,16 +129,6 @@
         <h3><span class="ico" aria-hidden="true">⟲</span> <span data-i18n="trust3Title"></span></h3>
         <p data-i18n="trust3Body"></p>
       </div>
-    </div>
-  </section>
-
-  <section class="section" id="scripts">
-    <div class="wrap">
-      <header class="section-head">
-        <h2 data-i18n="scriptsTitle">The scripts</h2>
-        <p data-i18n="scriptsLede"></p>
-      </header>
-      <div class="cards" id="cards"></div>
     </div>
   </section>
 
@@ -159,6 +154,16 @@
         <li><span class="step-n">3</span><h3 data-i18n="step3Title"></h3><p data-i18n="step3Body"></p></li>
       </ol>
       <p class="howto-note" data-i18n="howtoNote"></p>
+    </div>
+  </section>
+
+  <section class="section section-alt" id="scripts">
+    <div class="wrap">
+      <header class="section-head">
+        <h2 data-i18n="scriptsTitle">The scripts</h2>
+        <p data-i18n="scriptsLede"></p>
+      </header>
+      <div class="cards" id="cards"></div>
     </div>
   </section>
 
