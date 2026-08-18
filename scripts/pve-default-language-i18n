@@ -2628,10 +2628,13 @@ show_languages() {
 
     local code
     for code in "${LANG_CODES[@]}"; do
-        printf " %b%-6s%b %-24s %b%s%b\n" \
+        # The native name comes last on purpose: a terminal gives no fixed
+        # width to non latin scripts, so padding after it would misalign
+        # every following column.
+        printf " %b%-6s%b %b%-13s%b %s\n" \
             "${PMX_ORANGE_SOFT}" "$code" "${RESET}" \
-            "$(native_lang_name "$code")" \
-            "${PMX_GREY}" "$(locale_for_code "$code")" "${RESET}"
+            "${PMX_GREY}" "$(locale_for_code "$code")" "${RESET}" \
+            "$(native_lang_name "$code")"
     done
 }
 
