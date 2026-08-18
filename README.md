@@ -79,6 +79,12 @@ Changes the default **Proxmox VE language** for both the shell and the web inter
 
 > ⚠️ Keep an active **root SSH session** open while running this script, in case the Proxmox VE web interface does not restart correctly.
 
+#### Version compatibility
+
+Checked against the official Proxmox VE sources: the system locale mechanism and the `language` key of `/etc/pve/datacenter.cfg` are identical from **8.x to 9.2**, so this script behaves the same on both.
+
+Proxmox VE only accepts a fixed list of languages for its web interface. For a language it does not offer (Galician, Hungarian), the system locale is still applied and `datacenter.cfg` is left untouched, with a clear warning, instead of writing a value Proxmox would silently drop.
+
 #### Run it directly
 
 ```bash

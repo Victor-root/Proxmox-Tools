@@ -76,6 +76,7 @@ ar|profile_updated|تم تحديث ملف shell الشخصي
 ar|timezone_updated|تم تحديث المنطقة الزمنية
 ar|ntp_enabled|تم تفعيل NTP
 ar|web_language_updated|تم تحديث لغة ويب Proxmox VE
+ar|web_language_unsupported|غير متاحة في Proxmox VE، تُركت دون تغيير
 ar|reboot_question|إعادة التشغيل الآن
 ar|reboot_later|تم تخطي إعادة التشغيل. افتح جلسة جديدة أو أعد التشغيل لاحقاً.
 ar|not_set|غير مضبوط
@@ -146,6 +147,7 @@ ca|profile_updated|Perfil de shell actualitzat
 ca|timezone_updated|Zona horària actualitzada
 ca|ntp_enabled|NTP activat
 ca|web_language_updated|Llengua web de Proxmox VE actualitzada
+ca|web_language_unsupported|No oferta per Proxmox VE, es manté sense canvis
 ca|reboot_question|Reiniciar ara
 ca|reboot_later|Reinici omès. Obre una nova sessió o reinicia més tard.
 ca|not_set|No definit
@@ -216,6 +218,7 @@ da|profile_updated|Shell-profil opdateret
 da|timezone_updated|Tidszone opdateret
 da|ntp_enabled|NTP aktiveret
 da|web_language_updated|Proxmox VE web-sprog opdateret
+da|web_language_unsupported|Ikke tilbudt af Proxmox VE, efterladt uændret
 da|reboot_question|Genstart nu
 da|reboot_later|Genstart sprunget over. Åbn en ny session eller genstart senere.
 da|not_set|Ikke sat
@@ -286,6 +289,7 @@ de|profile_updated|Shell-Profil aktualisiert
 de|timezone_updated|Zeitzone aktualisiert
 de|ntp_enabled|NTP aktiviert
 de|web_language_updated|Proxmox VE-Websprache aktualisiert
+de|web_language_unsupported|Von Proxmox VE nicht angeboten, unverändert gelassen
 de|reboot_question|Jetzt neu starten
 de|reboot_later|Neustart übersprungen. Öffnen Sie eine neue Sitzung oder starten Sie später neu.
 de|not_set|Nicht gesetzt
@@ -356,6 +360,7 @@ en|profile_updated|Shell profile updated
 en|timezone_updated|Timezone updated
 en|ntp_enabled|NTP enabled
 en|web_language_updated|Proxmox VE web language updated
+en|web_language_unsupported|Not offered by Proxmox VE, left unchanged
 en|reboot_question|Reboot now
 en|reboot_later|Reboot skipped. Open a new session or reboot later.
 en|not_set|Not set
@@ -426,6 +431,7 @@ es|profile_updated|Perfil de shell actualizado
 es|timezone_updated|Zona horaria actualizada
 es|ntp_enabled|NTP activado
 es|web_language_updated|Idioma web de Proxmox VE actualizado
+es|web_language_unsupported|No ofrecido por Proxmox VE, se deja sin cambios
 es|reboot_question|Reiniciar ahora
 es|reboot_later|Reinicio omitido. Abre una nueva sesión o reinicia más tarde.
 es|not_set|No definido
@@ -496,6 +502,7 @@ eu|profile_updated|Shell profila eguneratu da
 eu|timezone_updated|Ordu-eremua eguneratu da
 eu|ntp_enabled|NTP gaituta
 eu|web_language_updated|Proxmox VE web hizkuntza eguneratu da
+eu|web_language_unsupported|Proxmox VE-k ez du eskaintzen, aldatu gabe utzita
 eu|reboot_question|Berrabiarazi orain
 eu|reboot_later|Berrabiaraztea saltatu da. Ireki saio berria edo berrabiarazi geroago.
 eu|not_set|Ezarri gabe
@@ -566,6 +573,7 @@ fa|profile_updated|پروفایل shell به‌روزرسانی شد
 fa|timezone_updated|منطقه زمانی به‌روزرسانی شد
 fa|ntp_enabled|NTP فعال شد
 fa|web_language_updated|زبان وب Proxmox VE به‌روزرسانی شد
+fa|web_language_unsupported|توسط Proxmox VE ارائه نمی‌شود، بدون تغییر باقی ماند
 fa|reboot_question|اکنون راه‌اندازی مجدد شود
 fa|reboot_later|راه‌اندازی مجدد رد شد. نشست جدید باز کنید یا بعداً راه‌اندازی مجدد کنید.
 fa|not_set|تنظیم نشده
@@ -636,6 +644,7 @@ fr|profile_updated|Profil shell mis à jour
 fr|timezone_updated|Fuseau horaire mis à jour
 fr|ntp_enabled|NTP activé
 fr|web_language_updated|Langue web Proxmox VE mise à jour
+fr|web_language_unsupported|Non proposée par Proxmox VE, laissée inchangée
 fr|reboot_question|Redémarrer maintenant
 fr|reboot_later|Redémarrage ignoré. Pensez à ouvrir une nouvelle session ou redémarrer plus tard.
 fr|not_set|Non défini
@@ -706,6 +715,7 @@ gl|profile_updated|Perfil shell actualizado
 gl|timezone_updated|Fuso horario actualizado
 gl|ntp_enabled|NTP activado
 gl|web_language_updated|Idioma web de Proxmox VE actualizado
+gl|web_language_unsupported|Non ofrecido por Proxmox VE, déixase sen cambios
 gl|reboot_question|Reiniciar agora
 gl|reboot_later|Reinicio omitido. Abre unha nova sesión ou reinicia máis tarde.
 gl|not_set|Non definido
@@ -776,6 +786,7 @@ he|profile_updated|פרופיל shell עודכן
 he|timezone_updated|אזור הזמן עודכן
 he|ntp_enabled|NTP הופעל
 he|web_language_updated|שפת הווב של Proxmox VE עודכנה
+he|web_language_unsupported|לא נתמכת ב-Proxmox VE, נשארה ללא שינוי
 he|reboot_question|לאתחל עכשיו
 he|reboot_later|האתחול דולג. פתח סשן חדש או אתחל מאוחר יותר.
 he|not_set|לא מוגדר
@@ -846,6 +857,7 @@ hu|profile_updated|Shell profil frissítve
 hu|timezone_updated|Időzóna frissítve
 hu|ntp_enabled|NTP engedélyezve
 hu|web_language_updated|Proxmox VE webnyelv frissítve
+hu|web_language_unsupported|A Proxmox VE nem kínálja, változatlan marad
 hu|reboot_question|Újraindítás most
 hu|reboot_later|Újraindítás kihagyva. Nyiss új munkamenetet vagy indíts újra később.
 hu|not_set|Nincs beállítva
@@ -916,6 +928,7 @@ it|profile_updated|Profilo shell aggiornato
 it|timezone_updated|Fuso orario aggiornato
 it|ntp_enabled|NTP abilitato
 it|web_language_updated|Lingua web Proxmox VE aggiornata
+it|web_language_unsupported|Non offerta da Proxmox VE, lasciata invariata
 it|reboot_question|Riavviare ora
 it|reboot_later|Riavvio saltato. Apri una nuova sessione o riavvia più tardi.
 it|not_set|Non impostato
@@ -986,6 +999,7 @@ ja|profile_updated|シェルプロファイルを更新しました
 ja|timezone_updated|タイムゾーンを更新しました
 ja|ntp_enabled|NTPを有効化しました
 ja|web_language_updated|Proxmox VE Web言語を更新しました
+ja|web_language_unsupported|Proxmox VE では提供されていないため、変更されません
 ja|reboot_question|今すぐ再起動
 ja|reboot_later|再起動をスキップしました。新しいセッションを開くか後で再起動してください。
 ja|not_set|未設定
@@ -1056,6 +1070,7 @@ kr|profile_updated|shell 프로필 업데이트됨
 kr|timezone_updated|시간대 업데이트됨
 kr|ntp_enabled|NTP 활성화됨
 kr|web_language_updated|Proxmox VE 웹 언어 업데이트됨
+kr|web_language_unsupported|Proxmox VE에서 제공하지 않으므로 변경되지 않습니다
 kr|reboot_question|지금 재부팅
 kr|reboot_later|재부팅을 건너뜀. 새 세션을 열거나 나중에 재부팅하세요.
 kr|not_set|설정 안 됨
@@ -1126,6 +1141,7 @@ nb|profile_updated|Shell-profil oppdatert
 nb|timezone_updated|Tidssone oppdatert
 nb|ntp_enabled|NTP aktivert
 nb|web_language_updated|Proxmox VE webspråk oppdatert
+nb|web_language_unsupported|Ikke tilbudt av Proxmox VE, latt uendret
 nb|reboot_question|Start på nytt nå
 nb|reboot_later|Omstart hoppet over. Åpne en ny økt eller start på nytt senere.
 nb|not_set|Ikke satt
@@ -1196,6 +1212,7 @@ nl|profile_updated|Shellprofiel bijgewerkt
 nl|timezone_updated|Tijdzone bijgewerkt
 nl|ntp_enabled|NTP ingeschakeld
 nl|web_language_updated|Proxmox VE-webtaal bijgewerkt
+nl|web_language_unsupported|Niet aangeboden door Proxmox VE, ongewijzigd gelaten
 nl|reboot_question|Nu herstarten
 nl|reboot_later|Herstart overgeslagen. Open een nieuwe sessie of herstart later.
 nl|not_set|Niet ingesteld
@@ -1266,6 +1283,7 @@ nn|profile_updated|Shell-profil oppdatert
 nn|timezone_updated|Tidssone oppdatert
 nn|ntp_enabled|NTP aktivert
 nn|web_language_updated|Proxmox VE webspråk oppdatert
+nn|web_language_unsupported|Ikkje tilbydd av Proxmox VE, late uendra
 nn|reboot_question|Start på nytt no
 nn|reboot_later|Omstart hoppa over. Opn ei ny økt eller start på nytt seinare.
 nn|not_set|Ikkje sett
@@ -1336,6 +1354,7 @@ pl|profile_updated|Profil shell zaktualizowany
 pl|timezone_updated|Strefa czasowa zaktualizowana
 pl|ntp_enabled|NTP włączone
 pl|web_language_updated|Język web Proxmox VE zaktualizowany
+pl|web_language_unsupported|Niedostępny w Proxmox VE, pozostawiono bez zmian
 pl|reboot_question|Uruchomić ponownie teraz
 pl|reboot_later|Restart pominięty. Otwórz nową sesję lub zrestartuj później.
 pl|not_set|Nie ustawiono
@@ -1406,6 +1425,7 @@ pt_BR|profile_updated|Perfil do shell atualizado
 pt_BR|timezone_updated|Fuso horário atualizado
 pt_BR|ntp_enabled|NTP ativado
 pt_BR|web_language_updated|Idioma web do Proxmox VE atualizado
+pt_BR|web_language_unsupported|Não oferecido pelo Proxmox VE, mantido sem alterações
 pt_BR|reboot_question|Reiniciar agora
 pt_BR|reboot_later|Reinício ignorado. Abra uma nova sessão ou reinicie depois.
 pt_BR|not_set|Não definido
@@ -1476,6 +1496,7 @@ ru|profile_updated|Профиль shell обновлён
 ru|timezone_updated|Часовой пояс обновлён
 ru|ntp_enabled|NTP включён
 ru|web_language_updated|Язык веб-интерфейса Proxmox VE обновлён
+ru|web_language_unsupported|Не поддерживается Proxmox VE, оставлено без изменений
 ru|reboot_question|Перезагрузить сейчас
 ru|reboot_later|Перезагрузка пропущена. Откройте новую сессию или перезагрузитесь позже.
 ru|not_set|Не задано
@@ -1546,6 +1567,7 @@ sl|profile_updated|Shell profil posodobljen
 sl|timezone_updated|Časovni pas posodobljen
 sl|ntp_enabled|NTP omogočen
 sl|web_language_updated|Spletni jezik Proxmox VE posodobljen
+sl|web_language_unsupported|Proxmox VE tega jezika ne ponuja, ostane nespremenjen
 sl|reboot_question|Ponovno zaženi zdaj
 sl|reboot_later|Ponovni zagon preskočen. Odprite novo sejo ali ponovno zaženite pozneje.
 sl|not_set|Ni nastavljeno
@@ -1616,6 +1638,7 @@ sv|profile_updated|Shellprofil uppdaterad
 sv|timezone_updated|Tidszon uppdaterad
 sv|ntp_enabled|NTP aktiverat
 sv|web_language_updated|Proxmox VE webbspråk uppdaterat
+sv|web_language_unsupported|Erbjuds inte av Proxmox VE, lämnas oförändrad
 sv|reboot_question|Starta om nu
 sv|reboot_later|Omstart hoppades över. Öppna en ny session eller starta om senare.
 sv|not_set|Inte angivet
@@ -1686,6 +1709,7 @@ tr|profile_updated|Shell profili güncellendi
 tr|timezone_updated|Saat dilimi güncellendi
 tr|ntp_enabled|NTP etkinleştirildi
 tr|web_language_updated|Proxmox VE web dili güncellendi
+tr|web_language_unsupported|Proxmox VE tarafından sunulmuyor, değiştirilmedi
 tr|reboot_question|Şimdi yeniden başlat
 tr|reboot_later|Yeniden başlatma atlandı. Yeni oturum açın veya daha sonra yeniden başlatın.
 tr|not_set|Ayarlı değil
@@ -1756,6 +1780,7 @@ zh_CN|profile_updated|shell 配置已更新
 zh_CN|timezone_updated|时区已更新
 zh_CN|ntp_enabled|NTP 已启用
 zh_CN|web_language_updated|Proxmox VE 网页语言已更新
+zh_CN|web_language_unsupported|Proxmox VE 不提供该语言，保持不变
 zh_CN|reboot_question|现在重启
 zh_CN|reboot_later|已跳过重启。请打开新会话或稍后重启。
 zh_CN|not_set|未设置
@@ -1826,6 +1851,7 @@ zh_TW|profile_updated|shell 設定檔已更新
 zh_TW|timezone_updated|時區已更新
 zh_TW|ntp_enabled|NTP 已啟用
 zh_TW|web_language_updated|Proxmox VE 網頁語言已更新
+zh_TW|web_language_unsupported|Proxmox VE 不提供該語言，保持不變
 zh_TW|reboot_question|現在重新啟動
 zh_TW|reboot_later|已略過重新啟動。請開啟新工作階段或稍後重新啟動。
 zh_TW|not_set|未設定
@@ -1849,15 +1875,31 @@ LANG_CODES=(
     ar ca da de en es eu fa fr gl he hu it ja kr nb nl nn pl pt_BR ru sl sv tr zh_CN zh_TW
 )
 
-is_supported_code() {
+# Languages accepted by Proxmox VE for the 'language' key of datacenter.cfg.
+# Mirrors the enum of PVE::DataCenterConfig; any other value is rejected on
+# read, so writing one would leave the web interface in English.
+PVE_WEB_LANG_CODES=(
+    ar ca da de en es eu fa fr hr he it ja ka kr nb nl nn pl pt_BR ru sl sv tr ukr zh_CN zh_TW
+)
+
+contains_code() {
     local code="$1"
+    shift
     local item
 
-    for item in "${LANG_CODES[@]}"; do
+    for item in "$@"; do
         [[ "$item" == "$code" ]] && return 0
     done
 
     return 1
+}
+
+is_supported_code() {
+    contains_code "$1" "${LANG_CODES[@]}"
+}
+
+is_pve_web_language() {
+    contains_code "$1" "${PVE_WEB_LANG_CODES[@]}"
 }
 
 normalize_locale_to_code() {
@@ -2006,6 +2048,7 @@ panel() {
 
 say_info() { printf "%b›%b %b\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$*"; }
 say_ok()   { printf "%b✓%b %b\n" "${PMX_GREEN}" "${RESET}" "$*"; }
+say_warn() { printf "%b⚠%b %b\n" "${PMX_AMBER}" "${RESET}" "$*"; }
 say_err()  { printf "%b✗%b %b\n" "${PMX_RED}" "${RESET}" "$*" >&2; }
 
 prompt_default() {
@@ -2492,7 +2535,7 @@ is_yes() {
 }
 
 choose_and_apply() {
-    local detected_code code locale_name lang_priority timezone default_timezone current_timezone answer backup_dir
+    local detected_code code locale_name lang_priority timezone default_timezone current_timezone answer backup_dir web_language_value
 
     detected_code="$(detect_default_code)"
 
@@ -2523,8 +2566,14 @@ choose_and_apply() {
 
     lang_priority="$(language_priority_for_code "$code")"
 
+    if is_pve_web_language "$code"; then
+        web_language_value="$code"
+    else
+        web_language_value="$(tr_msg web_language_unsupported)"
+    fi
+
     panel "$PMX_ORANGE" "$(tr_msg summary_title)" \
-        "$(tr_msg label_pve_ui_language): ${BOLD}${code}${RESET}" \
+        "$(tr_msg label_pve_ui_language): ${BOLD}${web_language_value}${RESET}" \
         "$(tr_msg label_system_locale): ${BOLD}${locale_name}${RESET}" \
         "$(tr_msg label_language_priority): ${BOLD}${lang_priority}${RESET}" \
         "$(tr_msg label_timezone): ${BOLD}${timezone}${RESET}"
@@ -2552,8 +2601,12 @@ choose_and_apply() {
     say_ok "$(tr_msg timezone_updated): $timezone"
     say_ok "$(tr_msg ntp_enabled)"
 
-    set_web_language "$code"
-    say_ok "$(tr_msg web_language_updated): language: $code"
+    if is_pve_web_language "$code"; then
+        set_web_language "$code"
+        say_ok "$(tr_msg web_language_updated): language: $code"
+    else
+        say_warn "$(tr_msg label_pve_ui_language): $(tr_msg web_language_unsupported)"
+    fi
 
     say_info "$(tr_msg restart_proxy)"
     systemctl restart pveproxy.service
