@@ -38,9 +38,21 @@ Adds a more convenient browser workflow for the Proxmox VE web interface:
 * ♻️ built-in **restore** options
 * 📋 interactive menu
 
-> ✅ Verified against the Proxmox VE sources from **pve-manager 9.2.0 to 9.2.11** and **proxmox-widget-toolkit 5.2.0 to 5.2.8**.
-> Each of the two patched files is checked and patched on its own, so a Proxmox update that refreshes only one of them can simply be re-patched.
-> If a future Proxmox release changes the console code, the script stops with a clear message and leaves both files untouched.
+#### Version compatibility
+
+Checked against the official Proxmox VE sources:
+
+| Proxmox VE | Status |
+| --- | --- |
+| **9.x** (`pve-manager` 9.0.0 to 9.2.11) | ✅ supported |
+| **8.4.2 and newer** (with `proxmox-widget-toolkit` 4.3.12+) | ✅ supported |
+| **8.4.1 and older** (8.0, 8.1, 8.2, 8.3) | ❌ not supported |
+
+Proxmox re-formatted its JavaScript sources in June 2025, so the code blocks this patch targets only match releases published after that change.
+
+On an unsupported release the script stops with a clear message, creates no backup and leaves both files untouched, so nothing can break.
+
+Each of the two patched files is also checked and patched on its own: a Proxmox update that refreshes only one of the two packages can simply be re-patched.
 
 #### Run it directly
 
