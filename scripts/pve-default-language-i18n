@@ -803,6 +803,77 @@ he|label_generated_locale|locale שנוצר
 he|label_shell_profile|עקיפת פרופיל shell
 he|status_ok|OK
 he|status_missing|חסר
+hr|script_title|Alat za zadani jezik
+hr|repo_hint|Interaktivna konfiguracija jezika za Proxmox VE
+hr|ssh_warning_title|Sigurnosni savjet
+hr|ssh_warning_body|Držite SSH sesiju otvorenom tijekom operacije, u slučaju da se web sučelje Proxmox VE ne pokrene ispravno.
+hr|latest_backup_hint|Za vraćanje zadnje sigurnosne kopije putem SSH-a
+hr|menu_option_2|opcija izbornika 2
+hr|menu_apply|Primijeni zadani jezik
+hr|menu_restore_latest|Vrati zadnju sigurnosnu kopiju
+hr|menu_restore_select|Vrati iz odabrane sigurnosne kopije
+hr|menu_status|Prikaži trenutno stanje
+hr|menu_languages|Prikaži podržane jezike
+hr|menu_backups|Prikaži sigurnosne kopije
+hr|menu_quit|Izlaz
+hr|choose_option|Odaberite opciju
+hr|press_enter|Pritisnite Enter za nastavak...
+hr|cancelled|Operacija otkazana.
+hr|running_as_root|Ova skripta mora se pokrenuti kao root.
+hr|file_not_found|Datoteka nije pronađena
+hr|directory_not_found|Direktorij nije pronađen
+hr|missing_command|Potrebna naredba nije pronađena
+hr|backup_created|Sigurnosna kopija stvorena
+hr|restart_proxy|Ponovno pokretanje pveproxy...
+hr|config_applied|Konfiguracija uspješno primijenjena.
+hr|relogin_needed|Otvorite novu shell sesiju ili ponovno pokrenite sustav da se locale primijeni svugdje.
+hr|backup_used|Korištena sigurnosna kopija
+hr|no_backup_found|Nije pronađena nijedna sigurnosna kopija.
+hr|restore_done|Vraćanje dovršeno iz
+hr|invalid_choice|Nevažeći izbor.
+hr|selection_out_of_range|Odabir izvan raspona.
+hr|restore_cancelled|Vraćanje otkazano.
+hr|detected_language|Otkriveni jezik
+hr|status_title|Stanje zadanog jezika
+hr|available_backups|Dostupne sigurnosne kopije
+hr|choose_backup_number|Odaberite broj sigurnosne kopije za vraćanje
+hr|bye|Doviđenja.
+hr|warning_title|UPOZORENJE
+hr|warning_body_1|Ova skripta mijenja locale sustava Debian/Proxmox VE.
+hr|warning_body_2|Također mijenja zadani jezik web sučelja u /etc/pve/datacenter.cfg.
+hr|warning_body_3|Automatska sigurnosna kopija stvara se prije svake promjene.
+hr|warning_body_4|Držite SSH pristup otvorenim kako biste mogli vratiti postavke ako web sučelje postane nedostupno.
+hr|type_yes|Upišite 'yes' za nastavak
+hr|supported_languages|Podržani jezici
+hr|detected_default|Otkrivena zadana vrijednost
+hr|choose_language|Kod jezika za primjenu
+hr|choose_locale|Locale sustava za primjenu
+hr|choose_timezone|Vremenska zona za primjenu
+hr|confirm_apply|Primijeni ovu konfiguraciju
+hr|unsupported_language|Nepodržani jezik
+hr|locale_generated|Locale generiran
+hr|locale_updated|Locale sustava ažuriran
+hr|profile_updated|Shell profil ažuriran
+hr|timezone_updated|Vremenska zona ažurirana
+hr|ntp_enabled|NTP omogućen
+hr|web_language_updated|Jezik web sučelja Proxmox VE ažuriran
+hr|web_language_unsupported|Proxmox VE ne nudi ovaj jezik, ostaje nepromijenjen
+hr|reboot_question|Ponovno pokrenuti sada
+hr|reboot_later|Ponovno pokretanje preskočeno. Otvorite novu sesiju ili pokrenite sustav kasnije.
+hr|not_set|Nije postavljeno
+hr|yes_no_default_no|d/N
+hr|summary_title|Sažetak
+hr|label_host|Poslužitelj
+hr|label_pve_ui_language|Jezik web sučelja PVE
+hr|label_system_locale|Locale sustava
+hr|label_language_priority|LANGUAGE prioritet
+hr|label_timezone|Vremenska zona
+hr|label_current_shell_lang|Trenutni shell LANG
+hr|label_current_shell_lc_all|Trenutni shell LC_ALL
+hr|label_generated_locale|Generirani locale
+hr|label_shell_profile|Zamjena shell profila
+hr|status_ok|OK
+hr|status_missing|NEDOSTAJE
 hu|script_title|Alapértelmezett nyelv eszköz
 hu|repo_hint|Interaktív Proxmox VE nyelvbeállítás
 hu|ssh_warning_title|Biztonsági tanács
@@ -1016,6 +1087,77 @@ ja|label_generated_locale|生成済み locale
 ja|label_shell_profile|シェルプロファイル上書き
 ja|status_ok|OK
 ja|status_missing|不足
+ka|script_title|ნაგულისხმევი ენის ხელსაწყო
+ka|repo_hint|Proxmox VE-ის ენის ინტერაქტიული კონფიგურაცია
+ka|ssh_warning_title|უსაფრთხოების რჩევა
+ka|ssh_warning_body|ოპერაციის დროს დატოვეთ SSH სესია ღიად, იმ შემთხვევისთვის თუ Proxmox VE-ის ვებინტერფეისი სწორად არ გადაიტვირთება.
+ka|latest_backup_hint|ბოლო სარეზერვო ასლის SSH-ით აღსადგენად
+ka|menu_option_2|მენიუს პუნქტი 2
+ka|menu_apply|ნაგულისხმევი ენის გამოყენება
+ka|menu_restore_latest|ბოლო სარეზერვო ასლის აღდგენა
+ka|menu_restore_select|არჩეული სარეზერვო ასლიდან აღდგენა
+ka|menu_status|მიმდინარე მდგომარეობის ჩვენება
+ka|menu_languages|მხარდაჭერილი ენების ჩვენება
+ka|menu_backups|სარეზერვო ასლების ჩვენება
+ka|menu_quit|გასვლა
+ka|choose_option|აირჩიეთ ვარიანტი
+ka|press_enter|გასაგრძელებლად დააჭირეთ Enter...
+ka|cancelled|ოპერაცია გაუქმდა.
+ka|running_as_root|ეს სკრიპტი უნდა გაეშვას root-ის უფლებებით.
+ka|file_not_found|ფაილი ვერ მოიძებნა
+ka|directory_not_found|დირექტორია ვერ მოიძებნა
+ka|missing_command|საჭირო ბრძანება ვერ მოიძებნა
+ka|backup_created|სარეზერვო ასლი შეიქმნა
+ka|restart_proxy|pveproxy-ის გადატვირთვა...
+ka|config_applied|კონფიგურაცია წარმატებით გამოყენდა.
+ka|relogin_needed|გახსენით ახალი shell სესია ან გადატვირთეთ სისტემა, რომ locale ყველგან გამოყენებულ იქნას.
+ka|backup_used|გამოყენებული სარეზერვო ასლი
+ka|no_backup_found|სარეზერვო ასლი ვერ მოიძებნა.
+ka|restore_done|აღდგენა დასრულდა აქედან
+ka|invalid_choice|არასწორი არჩევანი.
+ka|selection_out_of_range|არჩევანი დიაპაზონს გარეთაა.
+ka|restore_cancelled|აღდგენა გაუქმდა.
+ka|detected_language|აღმოჩენილი ენა
+ka|status_title|ნაგულისხმევი ენის მდგომარეობა
+ka|available_backups|ხელმისაწვდომი სარეზერვო ასლები
+ka|choose_backup_number|აირჩიეთ აღსადგენი სარეზერვო ასლის ნომერი
+ka|bye|ნახვამდის.
+ka|warning_title|გაფრთხილება
+ka|warning_body_1|ეს სკრიპტი ცვლის Debian/Proxmox VE-ის სისტემურ locale-ს.
+ka|warning_body_2|ის ასევე ცვლის ვებინტერფეისის ნაგულისხმევ ენას ფაილში /etc/pve/datacenter.cfg.
+ka|warning_body_3|ნებისმიერი ცვლილების წინ იქმნება ავტომატური სარეზერვო ასლი.
+ka|warning_body_4|დატოვეთ SSH წვდომა ღიად, რომ შეძლოთ აღდგენა თუ ვებინტერფეისი მიუწვდომელი გახდება.
+ka|type_yes|გასაგრძელებლად აკრიფეთ 'yes'
+ka|supported_languages|მხარდაჭერილი ენები
+ka|detected_default|აღმოჩენილი ნაგულისხმევი
+ka|choose_language|გამოსაყენებელი ენის კოდი
+ka|choose_locale|გამოსაყენებელი სისტემური locale
+ka|choose_timezone|გამოსაყენებელი დროის სარტყელი
+ka|confirm_apply|გამოვიყენოთ ეს კონფიგურაცია
+ka|unsupported_language|მხარდაუჭერელი ენა
+ka|locale_generated|Locale გენერირებულია
+ka|locale_updated|სისტემური locale განახლდა
+ka|profile_updated|Shell პროფილი განახლდა
+ka|timezone_updated|დროის სარტყელი განახლდა
+ka|ntp_enabled|NTP ჩართულია
+ka|web_language_updated|Proxmox VE-ის ვებინტერფეისის ენა განახლდა
+ka|web_language_unsupported|Proxmox VE არ გთავაზობთ ამ ენას, უცვლელი დარჩა
+ka|reboot_question|გადავტვირთოთ ახლა
+ka|reboot_later|გადატვირთვა გამოტოვებულია. გახსენით ახალი სესია ან მოგვიანებით გადატვირთეთ.
+ka|not_set|დაყენებული არ არის
+ka|yes_no_default_no|დ/N
+ka|summary_title|შეჯამება
+ka|label_host|ჰოსტი
+ka|label_pve_ui_language|PVE ვებინტერფეისის ენა
+ka|label_system_locale|სისტემური locale
+ka|label_language_priority|LANGUAGE პრიორიტეტი
+ka|label_timezone|დროის სარტყელი
+ka|label_current_shell_lang|მიმდინარე shell LANG
+ka|label_current_shell_lc_all|მიმდინარე shell LC_ALL
+ka|label_generated_locale|გენერირებული locale
+ka|label_shell_profile|Shell პროფილის გადაფარვა
+ka|status_ok|OK
+ka|status_missing|აკლია
 kr|script_title|기본 언어 유틸리티
 kr|repo_hint|Proxmox VE 대화형 언어 설정
 kr|ssh_warning_title|안전 안내
@@ -1726,6 +1868,77 @@ tr|label_generated_locale|Oluşturulan locale
 tr|label_shell_profile|Shell profil geçersiz kılma
 tr|status_ok|OK
 tr|status_missing|EKSİK
+ukr|script_title|Утиліта мови за замовчуванням
+ukr|repo_hint|Інтерактивне налаштування мови для Proxmox VE
+ukr|ssh_warning_title|Порада з безпеки
+ukr|ssh_warning_body|Тримайте сесію SSH відкритою під час операції, на випадок якщо вебінтерфейс Proxmox VE не перезапуститься коректно.
+ukr|latest_backup_hint|Щоб відновити останню резервну копію через SSH
+ukr|menu_option_2|пункт меню 2
+ukr|menu_apply|Застосувати мову за замовчуванням
+ukr|menu_restore_latest|Відновити останню резервну копію
+ukr|menu_restore_select|Відновити з обраної резервної копії
+ukr|menu_status|Показати поточний стан
+ukr|menu_languages|Показати підтримувані мови
+ukr|menu_backups|Показати резервні копії
+ukr|menu_quit|Вихід
+ukr|choose_option|Оберіть опцію
+ukr|press_enter|Натисніть Enter для продовження...
+ukr|cancelled|Операцію скасовано.
+ukr|running_as_root|Цей скрипт треба запускати від root.
+ukr|file_not_found|Файл не знайдено
+ukr|directory_not_found|Каталог не знайдено
+ukr|missing_command|Потрібну команду не знайдено
+ukr|backup_created|Резервну копію створено
+ukr|restart_proxy|Перезапуск pveproxy...
+ukr|config_applied|Конфігурацію успішно застосовано.
+ukr|relogin_needed|Відкрийте нову сесію shell або перезавантажте систему, щоб locale застосувалася всюди.
+ukr|backup_used|Використана резервна копія
+ukr|no_backup_found|Резервних копій не знайдено.
+ukr|restore_done|Відновлення завершено з
+ukr|invalid_choice|Невірний вибір.
+ukr|selection_out_of_range|Вибір поза межами діапазону.
+ukr|restore_cancelled|Відновлення скасовано.
+ukr|detected_language|Виявлена мова
+ukr|status_title|Стан мови за замовчуванням
+ukr|available_backups|Доступні резервні копії
+ukr|choose_backup_number|Оберіть номер резервної копії для відновлення
+ukr|bye|До побачення.
+ukr|warning_title|ПОПЕРЕДЖЕННЯ
+ukr|warning_body_1|Цей скрипт змінює системну locale Debian/Proxmox VE.
+ukr|warning_body_2|Він також змінює мову вебінтерфейсу за замовчуванням у /etc/pve/datacenter.cfg.
+ukr|warning_body_3|Перед будь-якою зміною створюється автоматична резервна копія.
+ukr|warning_body_4|Тримайте доступ SSH відкритим, щоб мати змогу відновити систему, якщо вебінтерфейс стане недоступним.
+ukr|type_yes|Введіть 'yes' для продовження
+ukr|supported_languages|Підтримувані мови
+ukr|detected_default|Виявлене значення за замовчуванням
+ukr|choose_language|Код мови для застосування
+ukr|choose_locale|Системна locale для застосування
+ukr|choose_timezone|Часовий пояс для застосування
+ukr|confirm_apply|Застосувати цю конфігурацію
+ukr|unsupported_language|Непідтримувана мова
+ukr|locale_generated|Locale згенеровано
+ukr|locale_updated|Системну locale оновлено
+ukr|profile_updated|Профіль shell оновлено
+ukr|timezone_updated|Часовий пояс оновлено
+ukr|ntp_enabled|NTP увімкнено
+ukr|web_language_updated|Мову вебінтерфейсу Proxmox VE оновлено
+ukr|web_language_unsupported|Proxmox VE не пропонує цю мову, залишено без змін
+ukr|reboot_question|Перезавантажити зараз
+ukr|reboot_later|Перезавантаження пропущено. Відкрийте нову сесію або перезавантажте пізніше.
+ukr|not_set|Не встановлено
+ukr|yes_no_default_no|т/N
+ukr|summary_title|Підсумок
+ukr|label_host|Хост
+ukr|label_pve_ui_language|Мова вебінтерфейсу PVE
+ukr|label_system_locale|Системна locale
+ukr|label_language_priority|Пріоритет LANGUAGE
+ukr|label_timezone|Часовий пояс
+ukr|label_current_shell_lang|Поточний shell LANG
+ukr|label_current_shell_lc_all|Поточний shell LC_ALL
+ukr|label_generated_locale|Згенерована locale
+ukr|label_shell_profile|Перевизначення профілю shell
+ukr|status_ok|OK
+ukr|status_missing|ВІДСУТНЄ
 zh_CN|script_title|默认语言工具
 zh_CN|repo_hint|Proxmox VE 语言交互配置
 zh_CN|ssh_warning_title|安全建议
@@ -1872,7 +2085,7 @@ I18N_DATA
 }
 
 LANG_CODES=(
-    ar ca da de en es eu fa fr gl he hu it ja kr nb nl nn pl pt_BR ru sl sv tr zh_CN zh_TW
+    ar ca da de en es eu fa fr gl he hr hu it ja ka kr nb nl nn pl pt_BR ru sl sv tr ukr zh_CN zh_TW
 )
 
 # Languages accepted by Proxmox VE for the 'language' key of datacenter.cfg.
@@ -1920,9 +2133,11 @@ normalize_locale_to_code() {
         fr*) echo "fr" ;;
         gl*) echo "gl" ;;
         he*|iw*) echo "he" ;;
+        hr*) echo "hr" ;;
         hu*) echo "hu" ;;
         it*) echo "it" ;;
         ja*) echo "ja" ;;
+        ka*) echo "ka" ;;
         ko*|kr*) echo "kr" ;;
         nb*) echo "nb" ;;
         nn*) echo "nn" ;;
@@ -1934,6 +2149,7 @@ normalize_locale_to_code() {
         sl*) echo "sl" ;;
         sv*) echo "sv" ;;
         tr*) echo "tr" ;;
+        uk*) echo "ukr" ;;
         zh_cn*) echo "zh_CN" ;;
         zh_tw*) echo "zh_TW" ;;
         zh*) echo "zh_CN" ;;
@@ -2078,9 +2294,11 @@ native_lang_name() {
         fr) echo "Français" ;;
         gl) echo "Galego" ;;
         he) echo "עברית" ;;
+        hr) echo "Hrvatski" ;;
         hu) echo "Magyar" ;;
         it) echo "Italiano" ;;
         ja) echo "日本語" ;;
+        ka) echo "ქართული" ;;
         kr) echo "한국어" ;;
         nb) echo "Norsk bokmål" ;;
         nl) echo "Nederlands" ;;
@@ -2091,6 +2309,7 @@ native_lang_name() {
         sl) echo "Slovenščina" ;;
         sv) echo "Svenska" ;;
         tr) echo "Türkçe" ;;
+        ukr) echo "Українська" ;;
         zh_CN) echo "简体中文" ;;
         zh_TW) echo "繁體中文" ;;
         *) echo "$1" ;;
@@ -2110,9 +2329,11 @@ locale_for_code() {
         fr) echo "fr_FR.UTF-8" ;;
         gl) echo "gl_ES.UTF-8" ;;
         he) echo "he_IL.UTF-8" ;;
+        hr) echo "hr_HR.UTF-8" ;;
         hu) echo "hu_HU.UTF-8" ;;
         it) echo "it_IT.UTF-8" ;;
         ja) echo "ja_JP.UTF-8" ;;
+        ka) echo "ka_GE.UTF-8" ;;
         kr) echo "ko_KR.UTF-8" ;;
         nb) echo "nb_NO.UTF-8" ;;
         nl) echo "nl_NL.UTF-8" ;;
@@ -2123,6 +2344,7 @@ locale_for_code() {
         sl) echo "sl_SI.UTF-8" ;;
         sv) echo "sv_SE.UTF-8" ;;
         tr) echo "tr_TR.UTF-8" ;;
+        ukr) echo "uk_UA.UTF-8" ;;
         zh_CN) echo "zh_CN.UTF-8" ;;
         zh_TW) echo "zh_TW.UTF-8" ;;
         *) echo "" ;;
@@ -2135,6 +2357,7 @@ language_priority_for_code() {
         zh_CN) echo "zh_CN:zh" ;;
         zh_TW) echo "zh_TW:zh" ;;
         kr) echo "ko_KR:ko" ;;
+        ukr) echo "uk_UA:uk" ;;
         en) echo "en_US:en" ;;
         *) echo "$(locale_for_code "$1" | cut -d. -f1):${1%%_*}" ;;
     esac
@@ -2150,9 +2373,11 @@ timezone_for_code() {
         fa) echo "Asia/Tehran" ;;
         fr) echo "Europe/Paris" ;;
         he) echo "Asia/Jerusalem" ;;
+        hr) echo "Europe/Zagreb" ;;
         hu) echo "Europe/Budapest" ;;
         it) echo "Europe/Rome" ;;
         ja) echo "Asia/Tokyo" ;;
+        ka) echo "Asia/Tbilisi" ;;
         kr) echo "Asia/Seoul" ;;
         nb|nn) echo "Europe/Oslo" ;;
         nl) echo "Europe/Amsterdam" ;;
@@ -2162,6 +2387,7 @@ timezone_for_code() {
         sl) echo "Europe/Ljubljana" ;;
         sv) echo "Europe/Stockholm" ;;
         tr) echo "Europe/Istanbul" ;;
+        ukr) echo "Europe/Kyiv" ;;
         zh_CN) echo "Asia/Shanghai" ;;
         zh_TW) echo "Asia/Taipei" ;;
         *) echo "UTC" ;;
@@ -2529,7 +2755,7 @@ current_default_lc_all() {
 is_yes() {
     local answer="${1,,}"
     case "$answer" in
-        y|yes|o|oui|s|si|sí|j|ja|e|evet|t|tak|d|da|i|igen|b|bai|a|ano|是|да) return 0 ;;
+        y|yes|o|oui|s|si|sí|j|ja|e|evet|t|tak|d|da|i|igen|b|bai|a|ano|是|да|т|так|დ|დიახ) return 0 ;;
         *) return 1 ;;
     esac
 }
