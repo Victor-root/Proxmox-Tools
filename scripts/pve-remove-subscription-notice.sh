@@ -78,6 +78,9 @@ tr_msg() {
         fr:restart_proxy) echo "Redémarrage de pveproxy..." ;;
         en:restart_proxy) echo "Restarting pveproxy..." ;;
 
+        fr:restart_proxy_wait) echo "Cela peut prendre jusqu'à une minute, l'interface web reste injoignable pendant ce temps. C'est normal, ne coupez pas le script." ;;
+        en:restart_proxy_wait) echo "This can take up to a minute, the web interface stays unreachable meanwhile. This is expected, do not interrupt the script." ;;
+
         fr:patch_applied) echo "Patch appliqué avec succès." ;;
         en:patch_applied) echo "Patch applied successfully." ;;
 
@@ -364,6 +367,12 @@ show_warning_and_confirm() {
 # Patch state
 # ------------------------------------------------------------
 
+restart_pveproxy() {
+    say_info "$(tr_msg restart_proxy)"
+    printf "  %b%s%b\n" "${PMX_GREY}" "$(tr_msg restart_proxy_wait)" "${RESET}"
+    systemctl restart pveproxy.service
+}
+
 is_patched() {
     grep -qF "$PATCH_MARKER" "$PX_FILE"
 }
@@ -509,8 +518,7 @@ apply_patch() {
         return 1
     fi
 
-    say_info "$(tr_msg restart_proxy)"
-    systemctl restart pveproxy.service
+    restart_pveproxy
     echo
     say_ok "$(tr_msg patch_applied)"
     say_info "$(tr_msg hard_refresh)"
@@ -552,8 +560,7 @@ restore_specific() {
 
     cp -av "$dir/$(basename "$PX_FILE")" "$PX_FILE"
 
-    say_info "$(tr_msg restart_proxy)"
-    systemctl restart pveproxy.service
+    restart_pveproxy
     say_ok "$(tr_msg restore_done): ${PMX_CYAN}${dir}${RESET}"
 
     if hook_is_enabled; then

@@ -44,6 +44,7 @@ ar|directory_not_found|المجلد غير موجود
 ar|missing_command|الأمر المطلوب غير موجود
 ar|backup_created|تم إنشاء النسخة الاحتياطية
 ar|restart_proxy|إعادة تشغيل pveproxy...
+ar|restart_proxy_wait|قد يستغرق ذلك حتى دقيقة، وتبقى واجهة الويب غير متاحة خلال هذه الفترة. هذا أمر طبيعي، لا توقف السكربت.
 ar|config_applied|تم تطبيق الإعدادات بنجاح.
 ar|relogin_needed|افتح جلسة shell جديدة أو أعد التشغيل لتطبيق locale في كل مكان.
 ar|backup_used|النسخة الاحتياطية المستخدمة
@@ -115,6 +116,7 @@ ca|directory_not_found|Directori no trobat
 ca|missing_command|Ordre requerida no trobada
 ca|backup_created|Còpia creada
 ca|restart_proxy|Reiniciant pveproxy...
+ca|restart_proxy_wait|Això pot trigar fins a un minut i la interfície web es manté inaccessible mentrestant. És normal, no interrompeu l'script.
 ca|config_applied|Configuració aplicada correctament.
 ca|relogin_needed|Obre una nova sessió de shell o reinicia per veure la locale aplicada arreu.
 ca|backup_used|Còpia usada
@@ -186,6 +188,7 @@ da|directory_not_found|Mappe ikke fundet
 da|missing_command|Påkrævet kommando ikke fundet
 da|backup_created|Backup oprettet
 da|restart_proxy|Genstarter pveproxy...
+da|restart_proxy_wait|Det kan tage op til et minut, og webgrænsefladen er utilgængelig imens. Det er normalt, afbryd ikke scriptet.
 da|config_applied|Konfiguration anvendt korrekt.
 da|relogin_needed|Åbn en ny shell-session eller genstart for at anvende locale overalt.
 da|backup_used|Brugt backup
@@ -257,6 +260,7 @@ de|directory_not_found|Verzeichnis nicht gefunden
 de|missing_command|Erforderlicher Befehl nicht gefunden
 de|backup_created|Backup erstellt
 de|restart_proxy|pveproxy wird neu gestartet...
+de|restart_proxy_wait|Das kann bis zu einer Minute dauern, die Weboberfläche bleibt währenddessen nicht erreichbar. Das ist normal, brechen Sie das Skript nicht ab.
 de|config_applied|Konfiguration erfolgreich angewendet.
 de|relogin_needed|Öffnen Sie eine neue Shell-Sitzung oder starten Sie neu, damit die Locale überall gilt.
 de|backup_used|Verwendetes Backup
@@ -328,6 +332,7 @@ en|directory_not_found|Directory not found
 en|missing_command|Required command not found
 en|backup_created|Backup created
 en|restart_proxy|Restarting pveproxy...
+en|restart_proxy_wait|This can take up to a minute, the web interface stays unreachable meanwhile. This is expected, do not interrupt the script.
 en|config_applied|Configuration applied successfully.
 en|relogin_needed|Open a new shell session, or reboot, to see the locale applied everywhere.
 en|backup_used|Backup used
@@ -399,6 +404,7 @@ es|directory_not_found|Directorio no encontrado
 es|missing_command|Comando requerido no encontrado
 es|backup_created|Copia creada
 es|restart_proxy|Reiniciando pveproxy...
+es|restart_proxy_wait|Esto puede tardar hasta un minuto y la interfaz web permanece inaccesible mientras tanto. Es normal, no interrumpas el script.
 es|config_applied|Configuración aplicada correctamente.
 es|relogin_needed|Abre una nueva sesión de shell, o reinicia, para ver la locale aplicada en todas partes.
 es|backup_used|Copia usada
@@ -470,6 +476,7 @@ eu|directory_not_found|Direktorioa ez da aurkitu
 eu|missing_command|Beharrezko komandoa ez da aurkitu
 eu|backup_created|Backup-a sortu da
 eu|restart_proxy|pveproxy berrabiarazten...
+eu|restart_proxy_wait|Honek minutu bat arte iraun dezake eta web interfazea eskuraezin egongo da bitartean. Normala da, ez eten scripta.
 eu|config_applied|Konfigurazioa ondo aplikatu da.
 eu|relogin_needed|Ireki shell saio berri bat edo berrabiarazi locale nonahi aplikatzeko.
 eu|backup_used|Erabilitako backup-a
@@ -541,6 +548,7 @@ fa|directory_not_found|پوشه پیدا نشد
 fa|missing_command|دستور لازم پیدا نشد
 fa|backup_created|پشتیبان ساخته شد
 fa|restart_proxy|در حال راه‌اندازی مجدد pveproxy...
+fa|restart_proxy_wait|این کار ممکن است تا یک دقیقه طول بکشد و رابط وب در این مدت در دسترس نیست. این طبیعی است، اسکریپت را قطع نکنید.
 fa|config_applied|پیکربندی با موفقیت اعمال شد.
 fa|relogin_needed|یک نشست shell جدید باز کنید یا راه‌اندازی مجدد کنید تا locale همه‌جا اعمال شود.
 fa|backup_used|پشتیبان استفاده‌شده
@@ -612,6 +620,7 @@ fr|directory_not_found|Dossier introuvable
 fr|missing_command|Commande requise introuvable
 fr|backup_created|Backup créé
 fr|restart_proxy|Redémarrage de pveproxy...
+fr|restart_proxy_wait|Cela peut prendre jusqu'à une minute, l'interface web reste injoignable pendant ce temps. C'est normal, ne coupez pas le script.
 fr|config_applied|Configuration appliquée avec succès.
 fr|relogin_needed|Ouvrez une nouvelle session shell, ou redémarrez, pour voir la locale appliquée partout.
 fr|backup_used|Backup utilisé
@@ -683,6 +692,7 @@ gl|directory_not_found|Directorio non atopado
 gl|missing_command|Comando requirido non atopado
 gl|backup_created|Copia creada
 gl|restart_proxy|Reiniciando pveproxy...
+gl|restart_proxy_wait|Isto pode tardar ata un minuto e a interface web permanece inaccesible mentres tanto. É normal, non interrompas o script.
 gl|config_applied|Configuración aplicada correctamente.
 gl|relogin_needed|Abre unha nova sesión shell ou reinicia para aplicar a locale en todas partes.
 gl|backup_used|Copia usada
@@ -754,6 +764,7 @@ he|directory_not_found|תיקייה לא נמצאה
 he|missing_command|פקודה נדרשת לא נמצאה
 he|backup_created|גיבוי נוצר
 he|restart_proxy|מפעיל מחדש את pveproxy...
+he|restart_proxy_wait|זה עשוי להימשך עד דקה, וממשק הרשת נשאר בלתי זמין בינתיים. זה נורמלי, אל תפסיק את הסקריפט.
 he|config_applied|ההגדרה הוחלה בהצלחה.
 he|relogin_needed|פתח סשן shell חדש או אתחל כדי להחיל את locale בכל מקום.
 he|backup_used|גיבוי בשימוש
@@ -825,6 +836,7 @@ hr|directory_not_found|Direktorij nije pronađen
 hr|missing_command|Potrebna naredba nije pronađena
 hr|backup_created|Sigurnosna kopija stvorena
 hr|restart_proxy|Ponovno pokretanje pveproxy...
+hr|restart_proxy_wait|Ovo može potrajati do jedne minute, a web sučelje je u međuvremenu nedostupno. To je normalno, nemojte prekidati skriptu.
 hr|config_applied|Konfiguracija uspješno primijenjena.
 hr|relogin_needed|Otvorite novu shell sesiju ili ponovno pokrenite sustav da se locale primijeni svugdje.
 hr|backup_used|Korištena sigurnosna kopija
@@ -896,6 +908,7 @@ hu|directory_not_found|Könyvtár nem található
 hu|missing_command|Szükséges parancs nem található
 hu|backup_created|Mentés létrehozva
 hu|restart_proxy|pveproxy újraindítása...
+hu|restart_proxy_wait|Ez akár egy percig is eltarthat, a webes felület addig nem érhető el. Ez normális, ne szakítsa meg a szkriptet.
 hu|config_applied|Konfiguráció sikeresen alkalmazva.
 hu|relogin_needed|Nyiss új shell-munkamenetet vagy indítsd újra, hogy a locale mindenhol érvényesüljön.
 hu|backup_used|Használt mentés
@@ -967,6 +980,7 @@ it|directory_not_found|Cartella non trovata
 it|missing_command|Comando richiesto non trovato
 it|backup_created|Backup creato
 it|restart_proxy|Riavvio di pveproxy...
+it|restart_proxy_wait|Questa operazione può richiedere fino a un minuto e l'interfaccia web resta irraggiungibile nel frattempo. È normale, non interrompere lo script.
 it|config_applied|Configurazione applicata con successo.
 it|relogin_needed|Apri una nuova sessione shell o riavvia per applicare la locale ovunque.
 it|backup_used|Backup usato
@@ -1038,6 +1052,7 @@ ja|directory_not_found|ディレクトリが見つかりません
 ja|missing_command|必要なコマンドが見つかりません
 ja|backup_created|バックアップを作成しました
 ja|restart_proxy|pveproxyを再起動しています...
+ja|restart_proxy_wait|これには最大1分かかることがあり、その間はWebインターフェースに接続できません。正常な動作です。スクリプトを中断しないでください。
 ja|config_applied|設定を正常に適用しました。
 ja|relogin_needed|localeを全体に適用するには、新しいシェルセッションを開くか再起動してください。
 ja|backup_used|使用したバックアップ
@@ -1109,6 +1124,7 @@ ka|directory_not_found|დირექტორია ვერ მოიძე�
 ka|missing_command|საჭირო ბრძანება ვერ მოიძებნა
 ka|backup_created|სარეზერვო ასლი შეიქმნა
 ka|restart_proxy|pveproxy-ის გადატვირთვა...
+ka|restart_proxy_wait|ამას შეიძლება ერთ წუთამდე დასჭირდეს და ვებინტერფეისი ამ დროს მიუწვდომელი იქნება. ეს ნორმალურია, ნუ შეწყვეტთ სკრიპტს.
 ka|config_applied|კონფიგურაცია წარმატებით გამოყენდა.
 ka|relogin_needed|გახსენით ახალი shell სესია ან გადატვირთეთ სისტემა, რომ locale ყველგან გამოყენებულ იქნას.
 ka|backup_used|გამოყენებული სარეზერვო ასლი
@@ -1180,6 +1196,7 @@ kr|directory_not_found|디렉터리를 찾을 수 없습니다
 kr|missing_command|필요한 명령을 찾을 수 없습니다
 kr|backup_created|백업 생성됨
 kr|restart_proxy|pveproxy 재시작 중...
+kr|restart_proxy_wait|최대 1분 정도 걸릴 수 있으며 그동안 웹 인터페이스에 접속할 수 없습니다. 정상적인 동작이니 스크립트를 중단하지 마십시오.
 kr|config_applied|설정이 성공적으로 적용되었습니다.
 kr|relogin_needed|locale이 모든 곳에 적용되도록 새 shell 세션을 열거나 재부팅하세요.
 kr|backup_used|사용한 백업
@@ -1251,6 +1268,7 @@ nb|directory_not_found|Mappe ikke funnet
 nb|missing_command|Påkrevd kommando ikke funnet
 nb|backup_created|Backup opprettet
 nb|restart_proxy|Starter pveproxy på nytt...
+nb|restart_proxy_wait|Dette kan ta opptil ett minutt, og webgrensesnittet er utilgjengelig i mellomtiden. Det er normalt, ikke avbryt skriptet.
 nb|config_applied|Konfigurasjon brukt.
 nb|relogin_needed|Åpne en ny shell-økt eller start på nytt for å bruke locale overalt.
 nb|backup_used|Backup brukt
@@ -1322,6 +1340,7 @@ nl|directory_not_found|Map niet gevonden
 nl|missing_command|Vereiste opdracht niet gevonden
 nl|backup_created|Back-up gemaakt
 nl|restart_proxy|pveproxy wordt herstart...
+nl|restart_proxy_wait|Dit kan tot een minuut duren en de webinterface blijft ondertussen onbereikbaar. Dat is normaal, onderbreek het script niet.
 nl|config_applied|Configuratie succesvol toegepast.
 nl|relogin_needed|Open een nieuwe shellsessie of herstart om de locale overal toe te passen.
 nl|backup_used|Gebruikte back-up
@@ -1393,6 +1412,7 @@ nn|directory_not_found|Mappe ikkje funnen
 nn|missing_command|Påkravd kommando ikkje funnen
 nn|backup_created|Backup oppretta
 nn|restart_proxy|Startar pveproxy på nytt...
+nn|restart_proxy_wait|Dette kan ta opptil eitt minutt, og webgrensesnittet er utilgjengeleg i mellomtida. Det er normalt, ikkje avbryt skriptet.
 nn|config_applied|Konfigurasjon brukt.
 nn|relogin_needed|Opn ei ny shell-økt eller start på nytt for å bruke locale overalt.
 nn|backup_used|Backup brukt
@@ -1464,6 +1484,7 @@ pl|directory_not_found|Nie znaleziono katalogu
 pl|missing_command|Nie znaleziono wymaganej komendy
 pl|backup_created|Kopia utworzona
 pl|restart_proxy|Ponowne uruchamianie pveproxy...
+pl|restart_proxy_wait|Może to potrwać do minuty, a interfejs webowy pozostaje w tym czasie niedostępny. To normalne, nie przerywaj skryptu.
 pl|config_applied|Konfiguracja zastosowana pomyślnie.
 pl|relogin_needed|Otwórz nową sesję shell lub zrestartuj, aby locale działało wszędzie.
 pl|backup_used|Użyta kopia
@@ -1535,6 +1556,7 @@ pt_BR|directory_not_found|Diretório não encontrado
 pt_BR|missing_command|Comando necessário não encontrado
 pt_BR|backup_created|Backup criado
 pt_BR|restart_proxy|Reiniciando pveproxy...
+pt_BR|restart_proxy_wait|Isso pode levar até um minuto e a interface web fica inacessível nesse período. É normal, não interrompa o script.
 pt_BR|config_applied|Configuração aplicada com sucesso.
 pt_BR|relogin_needed|Abra uma nova sessão de shell ou reinicie para ver a locale aplicada em todos os lugares.
 pt_BR|backup_used|Backup usado
@@ -1606,6 +1628,7 @@ ru|directory_not_found|Каталог не найден
 ru|missing_command|Требуемая команда не найдена
 ru|backup_created|Бэкап создан
 ru|restart_proxy|Перезапуск pveproxy...
+ru|restart_proxy_wait|Это может занять до минуты, веб-интерфейс в это время недоступен. Это нормально, не прерывайте скрипт.
 ru|config_applied|Конфигурация успешно применена.
 ru|relogin_needed|Откройте новую shell-сессию или перезагрузитесь, чтобы locale применился везде.
 ru|backup_used|Использован бэкап
@@ -1677,6 +1700,7 @@ sl|directory_not_found|Mapa ni najdena
 sl|missing_command|Zahtevan ukaz ni najden
 sl|backup_created|Varnostna kopija ustvarjena
 sl|restart_proxy|Ponovni zagon pveproxy...
+sl|restart_proxy_wait|To lahko traja do ene minute, spletni vmesnik je medtem nedosegljiv. To je normalno, ne prekinjajte skripte.
 sl|config_applied|Konfiguracija uspešno uporabljena.
 sl|relogin_needed|Odprite novo shell sejo ali ponovno zaženite, da bo locale uporabljen povsod.
 sl|backup_used|Uporabljena varnostna kopija
@@ -1748,6 +1772,7 @@ sv|directory_not_found|Katalog hittades inte
 sv|missing_command|Nödvändigt kommando hittades inte
 sv|backup_created|Backup skapad
 sv|restart_proxy|Startar om pveproxy...
+sv|restart_proxy_wait|Det här kan ta upp till en minut och webbgränssnittet är otillgängligt under tiden. Det är normalt, avbryt inte skriptet.
 sv|config_applied|Konfigurationen har tillämpats.
 sv|relogin_needed|Öppna en ny shell-session eller starta om för att locale ska gälla överallt.
 sv|backup_used|Använd backup
@@ -1819,6 +1844,7 @@ tr|directory_not_found|Dizin bulunamadı
 tr|missing_command|Gerekli komut bulunamadı
 tr|backup_created|Yedek oluşturuldu
 tr|restart_proxy|pveproxy yeniden başlatılıyor...
+tr|restart_proxy_wait|Bu bir dakikaya kadar sürebilir, bu sırada web arayüzü erişilemez durumda kalır. Bu normaldir, betiği kesmeyin.
 tr|config_applied|Yapılandırma başarıyla uygulandı.
 tr|relogin_needed|Locale her yerde geçerli olsun diye yeni bir shell oturumu açın veya yeniden başlatın.
 tr|backup_used|Kullanılan yedek
@@ -1890,6 +1916,7 @@ ukr|directory_not_found|Каталог не знайдено
 ukr|missing_command|Потрібну команду не знайдено
 ukr|backup_created|Резервну копію створено
 ukr|restart_proxy|Перезапуск pveproxy...
+ukr|restart_proxy_wait|Це може зайняти до хвилини, вебінтерфейс у цей час недоступний. Це нормально, не перериайте скрипт.
 ukr|config_applied|Конфігурацію успішно застосовано.
 ukr|relogin_needed|Відкрийте нову сесію shell або перезавантажте систему, щоб locale застосувалася всюди.
 ukr|backup_used|Використана резервна копія
@@ -1961,6 +1988,7 @@ zh_CN|directory_not_found|未找到目录
 zh_CN|missing_command|未找到所需命令
 zh_CN|backup_created|备份已创建
 zh_CN|restart_proxy|正在重启 pveproxy...
+zh_CN|restart_proxy_wait|这可能需要长达一分钟，在此期间无法访问 Web 界面。这是正常现象，请勿中断脚本。
 zh_CN|config_applied|配置已成功应用。
 zh_CN|relogin_needed|打开新的 shell 会话或重启，以便 locale 在所有地方生效。
 zh_CN|backup_used|使用的备份
@@ -2032,6 +2060,7 @@ zh_TW|directory_not_found|找不到目錄
 zh_TW|missing_command|找不到必要命令
 zh_TW|backup_created|備份已建立
 zh_TW|restart_proxy|正在重新啟動 pveproxy...
+zh_TW|restart_proxy_wait|這可能需要長達一分鐘，在此期間無法存取 Web 介面。這是正常現象，請勿中斷腳本。
 zh_TW|config_applied|設定已成功套用。
 zh_TW|relogin_needed|開啟新的 shell 工作階段或重新啟動，讓 locale 在所有地方生效。
 zh_TW|backup_used|使用的備份
@@ -2474,6 +2503,12 @@ show_warning_and_confirm() {
     return 0
 }
 
+restart_pveproxy() {
+    say_info "$(tr_msg restart_proxy)"
+    printf "  %b%s%b\n" "${PMX_GREY}" "$(tr_msg restart_proxy_wait)" "${RESET}"
+    systemctl restart pveproxy.service
+}
+
 latest_backup_dir() {
     find /root -maxdepth 1 -type d -name 'pve-default-language-*' | sort | tail -n1
 }
@@ -2545,8 +2580,7 @@ restore_from_manifest() {
         fi
     done < "$dir/MANIFEST.txt"
 
-    say_info "$(tr_msg restart_proxy)"
-    systemctl restart pveproxy.service
+    restart_pveproxy
 
     if command -v timedatectl >/dev/null 2>&1 && [[ -f "$TIMEZONE_FILE" ]]; then
         timedatectl set-timezone "$(cat "$TIMEZONE_FILE")" >/dev/null 2>&1 || true
@@ -2837,8 +2871,7 @@ choose_and_apply() {
         say_warn "$(tr_msg label_pve_ui_language): $(tr_msg web_language_unsupported)"
     fi
 
-    say_info "$(tr_msg restart_proxy)"
-    systemctl restart pveproxy.service
+    restart_pveproxy
 
     echo
     say_ok "$(tr_msg config_applied)"

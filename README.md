@@ -77,6 +77,8 @@ Removes the **"No valid subscription"** popup from the Proxmox VE web interface:
 
 > ℹ️ Proxmox VE stays free software either way, but a subscription funds its development and gives access to the enterprise repository.
 
+> ⏳ The final `pveproxy` restart can take up to a minute, and the web interface stays unreachable meanwhile. See [About the pveproxy restart](#-about-the-pveproxy-restart).
+
 #### Version compatibility
 
 Checked against the official Proxmox VE sources: the patch applies from **proxmox-widget-toolkit 4.0.9 to 5.2.8**, which covers Proxmox VE **8.0 through 9.2**.
@@ -189,6 +191,12 @@ When relevant, scripts in this repository should:
 * create backups before changes
 * fail safely if expected patterns are not found
 * avoid destructive behavior by default
+
+### ⏳ About the pveproxy restart
+
+Every script that changes the web interface restarts `pveproxy` at the end. That restart can take up to a minute: on start Proxmox refreshes the cluster certificates (`pvecm updatecerts`), and on a first run it may also refresh the appliance template list.
+
+The web interface stays unreachable during that time, and the script looks frozen while it waits. This is expected. Let it finish rather than interrupting it, and reload the page with **Ctrl+Shift+R** once it is done.
 
 ---
 
