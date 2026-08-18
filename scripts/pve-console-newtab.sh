@@ -100,12 +100,6 @@ tr_msg() {
         fr:status_title) echo "État du patch" ;;
         en:status_title) echo "Patch status" ;;
 
-        fr:overall_patched) echo "PATCHED" ;;
-        en:overall_patched) echo "PATCHED" ;;
-
-        fr:overall_partial) echo "STOCK_OR_PARTIAL" ;;
-        en:overall_partial) echo "STOCK_OR_PARTIAL" ;;
-
         fr:available_backups) echo "Backups disponibles" ;;
         en:available_backups) echo "Available backups" ;;
 
@@ -115,8 +109,32 @@ tr_msg() {
         fr:bye) echo "À bientôt." ;;
         en:bye) echo "Bye." ;;
 
-        fr:already_patched) echo "Le patch semble déjà présent. Aucune modification appliquée." ;;
-        en:already_patched) echo "The patch already appears to be present. No changes applied." ;;
+        fr:already_patched) echo "Le patch est déjà présent sur les deux fichiers. Aucune modification appliquée." ;;
+        en:already_patched) echo "The patch is already present in both files. No changes applied." ;;
+
+        fr:patch_incompatible) echo "Les blocs de code attendus n'ont pas été trouvés. Cette version de Proxmox VE n'est pas prise en charge par ce patch." ;;
+        en:patch_incompatible) echo "The expected code blocks were not found. This Proxmox VE version is not supported by this patch." ;;
+
+        fr:no_file_modified) echo "Aucun fichier n'a été modifié." ;;
+        en:no_file_modified) echo "No file has been modified." ;;
+
+        fr:patch_failed) echo "Le patch a échoué." ;;
+        en:patch_failed) echo "The patch failed." ;;
+
+        fr:detected_version) echo "Version détectée" ;;
+        en:detected_version) echo "Detected version" ;;
+
+        fr:version_mismatch_title) echo "VERSIONS DIFFÉRENTES" ;;
+        en:version_mismatch_title) echo "VERSION MISMATCH" ;;
+
+        fr:version_mismatch_body) echo "Ce backup a été pris sur une autre version de Proxmox VE. Restaurer ces fichiers sur la version actuelle peut casser l'interface web." ;;
+        en:version_mismatch_body) echo "This backup was taken on a different Proxmox VE version. Restoring these files on the current version may break the web interface." ;;
+
+        fr:version_in_backup) echo "Dans le backup" ;;
+        en:version_in_backup) echo "In the backup" ;;
+
+        fr:version_installed) echo "Installé" ;;
+        en:version_installed) echo "Installed" ;;
 
         fr:missing_python) echo "python3 est requis." ;;
         en:missing_python) echo "python3 is required." ;;
@@ -152,7 +170,7 @@ tr_msg() {
 APP_NAME="$(tr_msg banner_subtitle)"
 
 # ------------------------------------------------------------
-# Colors (Proxmox-inspired) — same visual engine as
+# Colors (Proxmox-inspired), same visual engine as
 # lxc-wireguard-server-install.sh, orange as the accent color.
 # ------------------------------------------------------------
 
@@ -255,7 +273,7 @@ show_banner() {
 
 pause() {
     echo
-    read -r -p "$(tr_msg press_enter)" _
+    read -r -p "$(tr_msg press_enter)" _ || true
 }
 
 require_root() {
@@ -272,16 +290,20 @@ require_files() {
     command -v sha256sum >/dev/null 2>&1 || { say_err "$(tr_msg missing_sha256sum)"; exit 1; }
 }
 
+confirm_yes() {
+    echo
+    printf "%b?%b %b%s%b : " "${PMX_AMBER}" "${RESET}" "${BOLD}" "$(tr_msg type_yes)" "${RESET}"
+    read -r answer
+    [[ "$answer" == "yes" ]]
+}
+
 show_warning_and_confirm() {
     panel "$PMX_AMBER" "$(tr_msg warning_title)" \
         "$(tr_msg warning_body_1)" \
         "$(tr_msg warning_body_2)" \
         "$(tr_msg warning_body_3)"
 
-    echo
-    printf "%b?%b %b%s%b : " "${PMX_AMBER}" "${RESET}" "${BOLD}" "$(tr_msg type_yes)" "${RESET}"
-    read -r answer
-    if [[ "$answer" != "yes" ]]; then
+    if ! confirm_yes; then
         say_info "$(tr_msg cancelled)"
         return 1
     fi
@@ -318,65 +340,30 @@ create_backup() {
     echo "$dir"
 }
 
-show_status() {
-    panel "$PMX_ORANGE" "$(tr_msg status_title)"
-    echo
-    PM_FILE="$PM_FILE" PX_FILE="$PX_FILE" python3 <<'PY'
-from pathlib import Path
-import os
-
-pm = Path(os.environ["PM_FILE"]).read_text(encoding="utf-8")
-px = Path(os.environ["PX_FILE"]).read_text(encoding="utf-8")
-
-checks = {
-    "pm_openDefault_opts": "openDefaultConsoleWindow: function (consoles, consoleType, vmid, nodename, vmname, cmd, opts)",
-    "pm_openConsole_opts": "openConsoleWindow: function (viewer, consoleType, vmid, nodename, vmname, cmd, opts)",
-    "pm_openVNC_opts": "openVNCViewer: function (vmtype, vmid, nodename, vmname, cmd, opts)",
-    "pm_newtab_method_default": "openDefaultConsoleNewTab: function ()",
-    "pm_newtab_method_menu": "openConsoleNewTab: function (types)",
-    "pm_novnc_menu_middleclick": "view.openConsoleNewTab(item.type);",
-    "pm_xterm_menu_middleclick": "itemId: 'xtermjs'",
-    "pm_spice_menu": "itemId: 'spicemenu'",
-    "pm_spice_middleclick": "view.openConsole(item.type);",
-    "px_xterm_opts": "openXtermJsViewer: function (vmtype, vmid, nodename, vmname, cmd, opts)",
+pkg_version_from_backup() {
+    local dir="$1" pkg="$2"
+    [[ -f "$dir/INFO.txt" ]] || return 0
+    sed -n "s/^${pkg}: \([^ ]*\).*/\1/p" "$dir/INFO.txt" | head -n1 || true
 }
 
-for key, needle in checks.items():
-    haystack = px if key.startswith("px_") else pm
-    print(f" - {key}: {'OK' if needle in haystack else 'MISSING'}")
-
-patched = (
-    checks["pm_openDefault_opts"] in pm and
-    checks["pm_openConsole_opts"] in pm and
-    checks["pm_openVNC_opts"] in pm and
-    checks["pm_newtab_method_default"] in pm and
-    checks["pm_newtab_method_menu"] in pm and
-    checks["pm_novnc_menu_middleclick"] in pm and
-    checks["pm_xterm_menu_middleclick"] in pm and
-    checks["pm_spice_menu"] in pm and
-    checks["pm_spice_middleclick"] in pm and
-    checks["px_xterm_opts"] in px and
-    "opts && opts.newTab" in pm and
-    "opts && opts.newTab" in px
-)
-
-print()
-print(f"overall: {'PATCHED' if patched else 'STOCK_OR_PARTIAL'}")
-PY
+installed_pkg_version() {
+    local pkg="$1"
+    pveversion -v 2>/dev/null | sed -n "s/^${pkg}: \([^ ]*\).*/\1/p" | head -n1 || true
 }
 
-apply_patch() {
-    local backup_dir
-
-    show_warning_and_confirm || return 0
-
-    backup_dir="$(create_backup)"
-    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
-
-    PM_FILE="$PM_FILE" PX_FILE="$PX_FILE" python3 <<'PY'
+# Single patch engine shared by the status view, the pre-flight check and the
+# patch itself. Modes: status (report only), check (dry run), apply (write).
+# Each file is inspected and patched on its own, so a Proxmox update that only
+# refreshes one of the two packages can still be re-patched.
+# Exit codes: 0 work to do or done, 10 nothing to do, 1 unsupported layout.
+run_patch_tool() {
+    local mode="$1"
+    PM_FILE="$PM_FILE" PX_FILE="$PX_FILE" PATCH_MODE="$mode" python3 <<'PY'
 from pathlib import Path
 import os
 import sys
+
+MODE = os.environ["PATCH_MODE"]
 
 pm_path = Path(os.environ["PM_FILE"])
 px_path = Path(os.environ["PX_FILE"])
@@ -384,37 +371,59 @@ px_path = Path(os.environ["PX_FILE"])
 pm = pm_path.read_text(encoding="utf-8")
 px = px_path.read_text(encoding="utf-8")
 
-def already_patched(pm_text, px_text):
-    return (
-        "openDefaultConsoleWindow: function (consoles, consoleType, vmid, nodename, vmname, cmd, opts)" in pm_text and
-        "openConsoleWindow: function (viewer, consoleType, vmid, nodename, vmname, cmd, opts)" in pm_text and
-        "openVNCViewer: function (vmtype, vmid, nodename, vmname, cmd, opts)" in pm_text and
-        "openDefaultConsoleNewTab: function ()" in pm_text and
-        "openConsoleNewTab: function (types)" in pm_text and
-        "view.openConsoleNewTab(item.type);" in pm_text and
-        "itemId: 'spicemenu'" in pm_text and
-        "openXtermJsViewer: function (vmtype, vmid, nodename, vmname, cmd, opts)" in px_text and
-        "opts && opts.newTab" in pm_text and
-        "opts && opts.newTab" in px_text
-    )
+NEWTAB_OPT = "opts && opts.newTab"
+PM_SIG_DEFAULT = "openDefaultConsoleWindow: function (consoles, consoleType, vmid, nodename, vmname, cmd, opts)"
+PM_SIG_CONSOLE = "openConsoleWindow: function (viewer, consoleType, vmid, nodename, vmname, cmd, opts)"
+PM_SIG_VNC = "openVNCViewer: function (vmtype, vmid, nodename, vmname, cmd, opts)"
+PX_SIG_XTERM = "openXtermJsViewer: function (vmtype, vmid, nodename, vmname, cmd, opts)"
 
-if already_patched(pm, px):
-    print("[INFO] already_patched")
+
+def pm_markers(text):
+    return [
+        ("PVE.Utils.openDefaultConsoleWindow(opts)", PM_SIG_DEFAULT in text),
+        ("PVE.Utils.openConsoleWindow(opts)", PM_SIG_CONSOLE in text),
+        ("PVE.Utils.openVNCViewer(opts)", PM_SIG_VNC in text),
+        ("ConsoleButton middle click", "openDefaultConsoleNewTab: function ()" in text),
+        ("ConsoleButton menu new tab", "openConsoleNewTab: function (types)" in text),
+        ("noVNC and xterm.js middle click", text.count("view.openConsoleNewTab(item.type);") == 2),
+        ("SPICE middle click", "view.openConsole(item.type);" in text),
+        ("new tab option", NEWTAB_OPT in text),
+    ]
+
+
+def px_markers(text):
+    return [
+        ("Proxmox.Utils.openXtermJsViewer(opts)", PX_SIG_XTERM in text),
+        ("new tab option", NEWTAB_OPT in text),
+    ]
+
+
+def is_patched(markers):
+    return all(ok for _, ok in markers)
+
+
+if MODE == "status":
+    for path, markers in ((pm_path, pm_markers(pm)), (px_path, px_markers(px))):
+        print(f" {path.name}: {'PATCHED' if is_patched(markers) else 'STOCK_OR_PARTIAL'}")
+        for label, ok in markers:
+            print(f"   - {label}: {'OK' if ok else 'MISSING'}")
+        print()
     sys.exit(0)
 
-def replace_once(text, old, new, label):
+
+def replace_once(text, old, new, label, filename):
     if old not in text:
-        raise SystemExit(f"[ERROR] Block not found for: {label}")
+        raise SystemExit(f"[ERROR] {filename}: code block not found for {label}")
     return text.replace(old, new, 1)
 
 def replace_object_by_anchor(text, anchor, replacement):
     idx = text.find(anchor)
     if idx == -1:
-        raise SystemExit(f"[ERROR] Anchor not found: {anchor}")
+        raise SystemExit(f"[ERROR] {pm_path.name}: anchor not found: {anchor}")
 
     start = text.rfind("        {", 0, idx)
     if start == -1:
-        raise SystemExit(f"[ERROR] Could not locate object start for anchor: {anchor}")
+        raise SystemExit(f"[ERROR] {pm_path.name}: object start not found for anchor: {anchor}")
 
     i = start
     depth = 0
@@ -444,7 +453,7 @@ def replace_object_by_anchor(text, anchor, replacement):
                     return text[:start] + replacement + text[end:]
         i += 1
 
-    raise SystemExit(f"[ERROR] Could not locate object end for anchor: {anchor}")
+    raise SystemExit(f"[ERROR] {pm_path.name}: object end not found for anchor: {anchor}")
 
 def replace_consolebutton_methods(text):
     class_anchor = "Ext.define('PVE.button.ConsoleButton', {"
@@ -453,15 +462,15 @@ def replace_consolebutton_methods(text):
 
     class_pos = text.find(class_anchor)
     if class_pos == -1:
-        raise SystemExit("[ERROR] ConsoleButton class not found")
+        raise SystemExit(f"[ERROR] {pm_path.name}: ConsoleButton class not found")
 
     start = text.find(start_anchor, class_pos)
     if start == -1:
-        raise SystemExit("[ERROR] ConsoleButton handler block not found")
+        raise SystemExit(f"[ERROR] {pm_path.name}: ConsoleButton handler block not found")
 
     end = text.find(end_anchor, start)
     if end == -1:
-        raise SystemExit("[ERROR] ConsoleButton menu block not found")
+        raise SystemExit(f"[ERROR] {pm_path.name}: ConsoleButton menu block not found")
 
     replacement = """    handler: function () {
         // main, general, handler
@@ -541,8 +550,9 @@ def replace_consolebutton_methods(text):
 """
     return text[:start] + replacement + text[end:]
 
-pm = replace_once(
-    pm,
+def patch_pm(text):
+    text = replace_once(
+        text,
 """        openDefaultConsoleWindow: function (consoles, consoleType, vmid, nodename, vmname, cmd) {
             var dv = PVE.Utils.defaultViewer(consoles, consoleType);
             PVE.Utils.openConsoleWindow(dv, consoleType, vmid, nodename, vmname, cmd);
@@ -553,11 +563,12 @@ pm = replace_once(
             PVE.Utils.openConsoleWindow(dv, consoleType, vmid, nodename, vmname, cmd, opts);
         },
 """,
-    "openDefaultConsoleWindow",
-)
+        "openDefaultConsoleWindow",
+        pm_path.name,
+    )
 
-pm = replace_once(
-    pm,
+    text = replace_once(
+        text,
 """        openConsoleWindow: function (viewer, consoleType, vmid, nodename, vmname, cmd) {
             if (vmid === undefined && (consoleType === 'kvm' || consoleType === 'lxc')) {
                 throw 'missing vmid';
@@ -626,11 +637,12 @@ pm = replace_once(
             }
         },
 """,
-    "openConsoleWindow",
-)
+        "openConsoleWindow",
+        pm_path.name,
+    )
 
-pm = replace_once(
-    pm,
+    text = replace_once(
+        text,
 """        openVNCViewer: function (vmtype, vmid, nodename, vmname, cmd) {
             let scaling = 'off';
             if (Proxmox.Utils.toolkit !== 'touch') {
@@ -678,15 +690,16 @@ pm = replace_once(
             }
         },
 """,
-    "openVNCViewer",
-)
+        "openVNCViewer",
+        pm_path.name,
+    )
 
-pm = replace_consolebutton_methods(pm)
+    text = replace_consolebutton_methods(text)
 
-pm = replace_object_by_anchor(
-    pm,
-    "iconCls: 'pve-itype-icon-novnc'",
-    """        {
+    text = replace_object_by_anchor(
+        text,
+        "iconCls: 'pve-itype-icon-novnc'",
+        """        {
             xtype: 'menuitem',
             text: 'noVNC',
             iconCls: 'pve-itype-icon-novnc',
@@ -722,12 +735,12 @@ pm = replace_object_by_anchor(
                 },
             },
         },""",
-)
+    )
 
-pm = replace_object_by_anchor(
-    pm,
-    "itemId: 'xtermjs'",
-    """        {
+    text = replace_object_by_anchor(
+        text,
+        "itemId: 'xtermjs'",
+        """        {
             text: 'xterm.js',
             itemId: 'xtermjs',
             iconCls: 'pve-itype-icon-xtermjs',
@@ -763,12 +776,12 @@ pm = replace_object_by_anchor(
                 },
             },
         },""",
-)
+    )
 
-pm = replace_object_by_anchor(
-    pm,
-    "itemId: 'spicemenu'",
-    """        {
+    text = replace_object_by_anchor(
+        text,
+        "itemId: 'spicemenu'",
+        """        {
             xtype: 'menuitem',
             itemId: 'spicemenu',
             text: 'SPICE',
@@ -805,10 +818,14 @@ pm = replace_object_by_anchor(
                 },
             },
         },""",
-)
+    )
 
-px = replace_once(
-    px,
+    return text
+
+
+def patch_px(text):
+    return replace_once(
+        text,
 """        openXtermJsViewer: function (vmtype, vmid, nodename, vmname, cmd) {
             let url = Ext.Object.toQueryString({
                 console: vmtype, // kvm, lxc, upgrade or shell
@@ -852,13 +869,70 @@ px = replace_once(
             }
         },
 """,
-    "openXtermJsViewer",
-)
+        "openXtermJsViewer",
+        px_path.name,
+    )
 
-pm_path.write_text(pm, encoding="utf-8")
-px_path.write_text(px, encoding="utf-8")
-print("[OK] patch_applied")
+
+pm_done = is_patched(pm_markers(pm))
+px_done = is_patched(px_markers(px))
+
+if pm_done and px_done:
+    sys.exit(10)
+
+if not pm_done:
+    pm = patch_pm(pm)
+if not px_done:
+    px = patch_px(px)
+
+if MODE == "apply":
+    for path, text, done in ((pm_path, pm, pm_done), (px_path, px, px_done)):
+        if not done:
+            path.write_text(text, encoding="utf-8")
+            print(f"[OK] patched: {path}")
 PY
+}
+
+show_status() {
+    local pm_version px_version
+    pm_version="$(installed_pkg_version pve-manager)"
+    px_version="$(installed_pkg_version proxmox-widget-toolkit)"
+
+    panel "$PMX_ORANGE" "$(tr_msg status_title)" \
+        "$(tr_msg detected_version): pve-manager ${BOLD}${pm_version:-?}${RESET} · proxmox-widget-toolkit ${BOLD}${px_version:-?}${RESET}"
+    echo
+    run_patch_tool status
+}
+
+apply_patch() {
+    local backup_dir rc=0
+
+    run_patch_tool check || rc=$?
+
+    if [[ "$rc" -eq 10 ]]; then
+        say_ok "$(tr_msg already_patched)"
+        return 0
+    fi
+
+    if [[ "$rc" -ne 0 ]]; then
+        say_err "$(tr_msg patch_incompatible)"
+        say_info "$(tr_msg no_file_modified)"
+        return 1
+    fi
+
+    show_warning_and_confirm || return 0
+
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
+
+    rc=0
+    run_patch_tool apply || rc=$?
+
+    if [[ "$rc" -ne 0 ]]; then
+        say_err "$(tr_msg patch_failed)"
+        say_info "$(tr_msg no_file_modified)"
+        return 1
+    fi
 
     say_info "$(tr_msg restart_proxy)"
     systemctl restart pveproxy
@@ -868,11 +942,39 @@ PY
     say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
 }
 
+confirm_backup_versions() {
+    local dir="$1"
+    local pkg backup_version installed_version
+    local mismatch=()
+
+    for pkg in pve-manager proxmox-widget-toolkit; do
+        backup_version="$(pkg_version_from_backup "$dir" "$pkg")"
+        installed_version="$(installed_pkg_version "$pkg")"
+        [[ -n "$backup_version" && -n "$installed_version" ]] || continue
+        [[ "$backup_version" != "$installed_version" ]] || continue
+        mismatch+=("${pkg} · $(tr_msg version_in_backup) ${BOLD}${backup_version}${RESET} · $(tr_msg version_installed) ${BOLD}${installed_version}${RESET}")
+    done
+
+    [[ "${#mismatch[@]}" -gt 0 ]] || return 0
+
+    panel "$PMX_AMBER" "$(tr_msg version_mismatch_title)" \
+        "$(tr_msg version_mismatch_body)" \
+        "${mismatch[@]}"
+
+    if ! confirm_yes; then
+        say_info "$(tr_msg restore_cancelled)"
+        return 1
+    fi
+    return 0
+}
+
 restore_specific() {
     local dir="$1"
     [[ -d "$dir" ]] || { say_err "$(tr_msg file_not_found): $dir"; return 1; }
     [[ -f "$dir/$(basename "$PM_FILE")" ]] || { say_err "$(tr_msg file_not_found): $dir/$(basename "$PM_FILE")"; return 1; }
     [[ -f "$dir/$(basename "$PX_FILE")" ]] || { say_err "$(tr_msg file_not_found): $dir/$(basename "$PX_FILE")"; return 1; }
+
+    confirm_backup_versions "$dir" || return 0
 
     cp -av "$dir/$(basename "$PM_FILE")" "$PM_FILE"
     cp -av "$dir/$(basename "$PX_FILE")" "$PX_FILE"
@@ -943,6 +1045,12 @@ show_backups() {
     pause
 }
 
+# Menu entries report their own errors on screen; a failed action must bring
+# the user back to the menu instead of ending the session through set -e.
+menu_action() {
+    "$@" || true
+}
+
 main_menu() {
     while true; do
         show_banner
@@ -959,22 +1067,22 @@ main_menu() {
 
         case "$choice" in
             1)
-                apply_patch
+                menu_action apply_patch
                 pause
                 ;;
             2)
-                restore_latest
+                menu_action restore_latest
                 pause
                 ;;
             3)
-                interactive_restore_menu
+                menu_action interactive_restore_menu
                 ;;
             4)
-                show_status
+                menu_action show_status
                 pause
                 ;;
             5)
-                show_backups
+                menu_action show_backups
                 ;;
             6)
                 say_info "$(tr_msg bye)"

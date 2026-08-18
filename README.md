@@ -38,6 +38,10 @@ Adds a more convenient browser workflow for the Proxmox VE web interface:
 * ♻️ built-in **restore** options
 * 📋 interactive menu
 
+> ✅ Verified against the Proxmox VE sources from **pve-manager 9.2.0 to 9.2.11** and **proxmox-widget-toolkit 5.2.0 to 5.2.8**.
+> Each of the two patched files is checked and patched on its own, so a Proxmox update that refreshes only one of them can simply be re-patched.
+> If a future Proxmox release changes the console code, the script stops with a clear message and leaves both files untouched.
+
 #### Run it directly
 
 ```bash
