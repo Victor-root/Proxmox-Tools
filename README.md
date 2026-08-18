@@ -62,6 +62,35 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 
 ---
 
+### 🔕 Remove the subscription notice
+
+**Script:** `pve-remove-subscription-notice.sh`
+
+Removes the **"No valid subscription"** popup from the Proxmox VE web interface:
+
+* 🔕 no more popup at every login
+* 🧩 the buttons that depend on that check keep working (package versions, system report, APT refresh, add repository)
+* 🔁 optional **automatic re-apply** after a package update, through an APT hook
+* 💾 automatic **backup** before patching
+* ♻️ built-in **restore** options
+* 📋 interactive menu
+
+> ℹ️ Proxmox VE stays free software either way, but a subscription funds its development and gives access to the enterprise repository.
+
+#### Version compatibility
+
+Checked against the official Proxmox VE sources: the patch applies from **proxmox-widget-toolkit 4.0.9 to 5.2.8**, which covers Proxmox VE **8.0 through 9.2**.
+
+The widely shared one-liner for this comments out the popup itself, which also silently kills every button that waits for it. This script instead lets the requested action run straight away, so nothing else changes. On an unsupported release it stops with a clear message, creates no backup and leaves the file untouched.
+
+#### Run it directly
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-remove-subscription-notice.sh)
+```
+
+---
+
 ### 🌍 Proxmox VE default language manager
 
 **Script:** `pve-default-language-i18n`
