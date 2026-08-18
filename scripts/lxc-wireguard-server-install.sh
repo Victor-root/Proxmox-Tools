@@ -65,11 +65,12 @@ term_width() {
 }
 
 hr() {
-  local cols
+  local cols line
   cols="$(term_width)"
-  printf "%b" "${RED_DARK}"
-  printf "%*s\n" "$cols" "" | tr ' ' '─'
-  printf "%b" "${RESET}"
+  # Bash substitution instead of tr: tr works on bytes and would turn a
+  # multi byte box character into garbage.
+  printf -v line "%*s" "$cols" ""
+  printf "%b%s%b\n" "${RED_DARK}" "${line// /─}" "${RESET}"
 }
 
 success() { printf "%b✓%b %b\n" "${GREEN}" "${RESET}" "$*"; }
