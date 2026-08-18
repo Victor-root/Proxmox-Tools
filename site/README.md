@@ -6,12 +6,19 @@ No build step, no dependency: three files and one data file.
 ```text
 site/
 ├── index.html        page shell, rarely changes
-├── data.js           the scripts, THIS is what you edit
+├── data.js           the scripts AND every interface string, THIS is what you edit
 ├── README.md         this file
 └── assets/
-    ├── styles.css    look and feel
-    └── app.js        builds the cards from data.js
+    ├── styles.css    look and feel, light and dark themes
+    └── app.js        builds the cards, handles language and theme
 ```
+
+Every text is bilingual, written as `{ en: '…', fr: '…' }`. A missing French
+string falls back to the English one, so nothing breaks while you translate.
+Interface strings live in the `UI` block at the bottom of `data.js`.
+
+Language follows the browser on the first visit, theme follows the system.
+Both have a switch in the header and the choice is remembered afterwards.
 
 ## Add a script
 

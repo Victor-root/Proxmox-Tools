@@ -3,36 +3,89 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Proxmox-Tools — shell scripts for Proxmox VE</title>
-<meta name="description" content="A small collection of open shell scripts for Proxmox VE. Copy one line, run it, read the source on GitHub first.">
-<meta name="color-scheme" content="dark">
+<title>Proxmox-Tools</title>
+<meta name="description" content="Open shell scripts for Proxmox VE. Copy one line, run it, read the source on GitHub first.">
+<meta name="color-scheme" content="dark light">
 
 <meta property="og:title" content="Proxmox-Tools">
 <meta property="og:description" content="Open shell scripts for Proxmox VE. One line to run, source readable on GitHub.">
 <meta property="og:type" content="website">
 
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23e57000'/><text y='72' x='50' font-size='60' text-anchor='middle' fill='%23111'>&gt;_</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23e57000'/><g fill='%23140d06'><rect x='14' y='16' width='36' height='9' rx='2.5'/><rect x='14' y='28' width='36' height='9' rx='2.5'/><rect x='14' y='40' width='22' height='9' rx='2.5'/></g></svg>">
+
+<!-- Applied before first paint so the page never flashes the wrong theme. -->
+<script>
+(function () {
+    var saved = null;
+    try { saved = localStorage.getItem('pmt-theme'); } catch (e) {}
+    var mode = saved || 'system';
+    var dark = mode === 'dark' || (mode === 'system' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    document.documentElement.dataset.themeMode = mode;
+})();
+</script>
+
 <link rel="stylesheet" href="assets/styles.css">
 </head>
 <body>
 
-<a class="skip" href="#scripts">Skip to the scripts</a>
+<a class="skip" href="#scripts" data-i18n="navScripts">Skip to the scripts</a>
 
 <header class="topbar">
   <div class="wrap topbar-inner">
-    <a class="brand" href="#top">
-      <span class="brand-mark" aria-hidden="true">&gt;_</span>
+
+    <a class="brand" href="#top" aria-label="Proxmox-Tools">
+      <svg class="brand-logo" viewBox="0 0 64 64" role="img" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff9a2e"/>
+            <stop offset="1" stop-color="#c25e00"/>
+          </linearGradient>
+        </defs>
+        <rect width="64" height="64" rx="15" fill="url(#lg)"/>
+        <g fill="#160e06">
+          <rect x="14" y="16" width="36" height="9" rx="2.5"/>
+          <rect x="14" y="28" width="36" height="9" rx="2.5"/>
+          <rect x="14" y="40" width="22" height="9" rx="2.5"/>
+        </g>
+        <circle cx="44" cy="44.5" r="4" fill="#160e06"/>
+      </svg>
       <span class="brand-name">Proxmox<span class="brand-accent">-Tools</span></span>
     </a>
-    <nav class="topnav">
-      <a href="#scripts">Scripts</a>
-      <a href="#news">What's new</a>
-      <a href="#trust">Is it safe</a>
-      <a class="ghlink" id="nav-repo" href="#" rel="noopener">
-        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-        <span>GitHub</span>
-      </a>
+
+    <nav class="topnav" aria-label="Main">
+      <a href="#scripts" data-i18n="navScripts">Scripts</a>
+      <a href="#news" data-i18n="navNews">What's new</a>
+      <a href="#trust" data-i18n="navTrust">Is it safe</a>
     </nav>
+
+    <div class="controls">
+
+      <div class="seg" role="group" id="lang-seg">
+        <span class="seg-label" data-i18n="langLabel">Language</span>
+        <button type="button" data-lang="en" title="English">EN</button>
+        <button type="button" data-lang="fr" title="Français">FR</button>
+      </div>
+
+      <div class="seg" role="group" id="theme-seg">
+        <span class="seg-label" data-i18n="themeLabel">Theme</span>
+        <button type="button" data-theme-mode="system" data-i18n-title="themeSystem" title="System">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v11H3z"/><path d="M9 20h6M12 16v4"/></svg>
+        </button>
+        <button type="button" data-theme-mode="light" data-i18n-title="themeLight" title="Light">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M19.1 4.9l-1.9 1.9M6.8 17.2l-1.9 1.9"/></svg>
+        </button>
+        <button type="button" data-theme-mode="dark" data-i18n-title="themeDark" title="Dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13.5A8.2 8.2 0 0 1 10.5 4a8.2 8.2 0 1 0 9.5 9.5z"/></svg>
+        </button>
+      </div>
+
+      <a class="ghlink" id="nav-repo" href="#" rel="noopener" aria-label="GitHub">
+        <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      </a>
+
+    </div>
   </div>
 </header>
 
@@ -40,21 +93,19 @@
 
   <section class="hero">
     <div class="wrap hero-inner">
-      <p class="eyebrow"><span class="dot"></span> Open source shell scripts</p>
-      <h1>Small tools that make <br><span class="grad">Proxmox VE</span> less annoying.</h1>
-      <p class="lede">
-        Every tool is a single shell script. Copy one line, paste it in your Proxmox shell, follow the menu.
-        Nothing is hidden: the source lives on GitHub and that is exactly what your server downloads.
-      </p>
+      <p class="eyebrow"><span class="dot"></span> <span data-i18n="heroEyebrow">Open source shell scripts</span></p>
+      <h1><span data-i18n="heroTitle1">Small tools that make</span> <br><span class="grad">Proxmox VE</span> <span data-i18n="heroTitle2">less annoying.</span></h1>
+      <p class="lede" data-i18n="heroLede"></p>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="#scripts">Browse the scripts</a>
-        <a class="btn btn-ghost" id="hero-repo" href="#" rel="noopener">Read the source</a>
+        <a class="btn btn-primary" href="#scripts" data-i18n="heroBtnScripts">Browse the scripts</a>
+        <a class="btn btn-ghost" id="hero-repo" href="#" rel="noopener" data-i18n="heroBtnSource">Read the source</a>
       </div>
       <ul class="hero-facts">
-        <li><strong id="fact-count">0</strong><span>scripts</span></li>
-        <li><strong>0</strong><span>dependencies</span></li>
-        <li><strong>AGPL</strong><span>friendly, no fork of Proxmox</span></li>
+        <li><strong id="fact-count">0</strong><span data-i18n="factScripts">scripts</span></li>
+        <li><strong>0</strong><span data-i18n="factDeps">dependencies</span></li>
+        <li><strong>AGPL</strong><span data-i18n="factLicense">no fork of Proxmox</span></li>
       </ul>
+      <p class="hero-by"><span data-i18n="footerBy">Built by</span> <a id="hero-author" href="#" rel="noopener">Victor-root</a></p>
     </div>
     <div class="hero-glow" aria-hidden="true"></div>
   </section>
@@ -62,16 +113,16 @@
   <section class="strip" id="trust">
     <div class="wrap strip-inner">
       <div class="strip-card">
-        <h3><span class="ico" aria-hidden="true">◎</span> You read it before you run it</h3>
-        <p>Each card links to the exact file on GitHub. Same file, same branch, same content your server fetches.</p>
+        <h3><span class="ico" aria-hidden="true">◎</span> <span data-i18n="trust1Title"></span></h3>
+        <p data-i18n="trust1Body"></p>
       </div>
       <div class="strip-card">
-        <h3><span class="ico" aria-hidden="true">⤿</span> It runs from GitHub, not from here</h3>
-        <p>This site only shows you the command. The download always comes from <code>raw.githubusercontent.com</code>.</p>
+        <h3><span class="ico" aria-hidden="true">⤿</span> <span data-i18n="trust2Title"></span></h3>
+        <p data-i18n="trust2Body"></p>
       </div>
       <div class="strip-card">
-        <h3><span class="ico" aria-hidden="true">⟲</span> Nothing is one-way</h3>
-        <p>Scripts that change a Proxmox file take a backup first and restore it from their own menu.</p>
+        <h3><span class="ico" aria-hidden="true">⟲</span> <span data-i18n="trust3Title"></span></h3>
+        <p data-i18n="trust3Body"></p>
       </div>
     </div>
   </section>
@@ -79,8 +130,8 @@
   <section class="section" id="scripts">
     <div class="wrap">
       <header class="section-head">
-        <h2>The scripts</h2>
-        <p>Pick one, copy the line, paste it as root. Every script opens a menu, nothing runs behind your back.</p>
+        <h2 data-i18n="scriptsTitle">The scripts</h2>
+        <p data-i18n="scriptsLede"></p>
       </header>
       <div class="cards" id="cards"></div>
     </div>
@@ -89,8 +140,8 @@
   <section class="section section-alt" id="news">
     <div class="wrap">
       <header class="section-head">
-        <h2>What's new</h2>
-        <p>Latest change on each script. The full history is in the commits.</p>
+        <h2 data-i18n="newsTitle">What's new</h2>
+        <p data-i18n="newsLede"></p>
       </header>
       <ul class="news" id="news-list"></ul>
     </div>
@@ -99,30 +150,15 @@
   <section class="section" id="howto">
     <div class="wrap">
       <header class="section-head">
-        <h2>How to run one</h2>
-        <p>Three steps, no installer, nothing left behind on your system.</p>
+        <h2 data-i18n="howtoTitle">How to run one</h2>
+        <p data-i18n="howtoLede"></p>
       </header>
       <ol class="steps">
-        <li>
-          <span class="step-n">1</span>
-          <h3>Open a root shell</h3>
-          <p>From the Proxmox web interface, <em>Shell</em> on your node. Or an SSH session as root. Keep it open while the script runs.</p>
-        </li>
-        <li>
-          <span class="step-n">2</span>
-          <h3>Paste the line</h3>
-          <p>Use the copy button on the card. The line downloads the script from GitHub and runs it, it installs nothing.</p>
-        </li>
-        <li>
-          <span class="step-n">3</span>
-          <h3>Follow the menu</h3>
-          <p>Scripts that modify Proxmox ask for a confirmation and take a backup first. The same menu restores it.</p>
-        </li>
+        <li><span class="step-n">1</span><h3 data-i18n="step1Title"></h3><p data-i18n="step1Body"></p></li>
+        <li><span class="step-n">2</span><h3 data-i18n="step2Title"></h3><p data-i18n="step2Body"></p></li>
+        <li><span class="step-n">3</span><h3 data-i18n="step3Title"></h3><p data-i18n="step3Body"></p></li>
       </ol>
-      <p class="howto-note">
-        Scripts that restart <code>pveproxy</code> can take up to a minute to finish: Proxmox refreshes its cluster
-        certificates on start. The web interface is unreachable meanwhile, it is expected.
-      </p>
+      <p class="howto-note" data-i18n="howtoNote"></p>
     </div>
   </section>
 
@@ -130,15 +166,18 @@
 
 <footer class="footer">
   <div class="wrap footer-inner">
-    <div>
+    <div class="footer-main">
       <p class="footer-brand">Proxmox<span class="brand-accent">-Tools</span></p>
-      <p class="footer-note">Community scripts, not affiliated with Proxmox Server Solutions GmbH.</p>
+      <p class="footer-by"><span data-i18n="footerBy">Built by</span> <a id="foot-author" href="#" rel="noopener">Victor-root</a></p>
     </div>
     <nav class="footer-links">
-      <a id="foot-repo" href="#" rel="noopener">Repository</a>
-      <a id="foot-issues" href="#" rel="noopener">Report a problem</a>
-      <a href="https://www.proxmox.com/" rel="noopener">Proxmox VE</a>
+      <a id="foot-repo" href="#" rel="noopener" data-i18n="footerRepo">Repository</a>
+      <a id="foot-issues" href="#" rel="noopener" data-i18n="footerIssues">Report a problem</a>
+      <a href="https://www.proxmox.com/" rel="noopener" data-i18n="footerProxmox">Proxmox VE</a>
     </nav>
+  </div>
+  <div class="wrap">
+    <p class="disclaimer" data-i18n="footerDisclaimer"></p>
   </div>
 </footer>
 

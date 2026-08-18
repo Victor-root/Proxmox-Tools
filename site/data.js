@@ -1,6 +1,9 @@
 /* ============================================================================
  * THE ONLY FILE YOU NEED TO EDIT TO ADD OR CHANGE A SCRIPT.
  *
+ * Every text is bilingual: { en: 'English', fr: 'Français' }.
+ * If a translation is missing the English one is used.
+ *
  * To add a script:
  *   1. push the script into scripts/ on the main branch
  *   2. copy one block of SCRIPTS below, paste it, change the values
@@ -10,42 +13,67 @@
  *   id        anchor used in the URL, lowercase, no spaces
  *   file      exact file name inside scripts/, the run command is built from it
  *   name      short title shown on the card
- *   tagline   one line, what it does, shown under the title
+ *   tagline   one line, what it does
  *   runsOn    where the user must run it
- *   compat    supported versions, shown as a small badge
- *   updated   free text, shown in the "What's new" list, keep it short
- *   points    3 to 5 short bullets, no long sentences
+ *   compat    supported versions, small badge, same text in both languages
+ *   updated   what changed, one short line, shown in "What's new"
+ *   points    3 to 5 short bullets
+ *   note      optional warning, shown in a quieter box
  *   terminal  what the fake terminal shows, see below
  *
  * terminal.banner   "proxmox" or "wireguard", the ASCII logo to draw
  * terminal.theme    "orange" (Proxmox scripts) or "red" (WireGuard script)
- * terminal.subtitle line printed under the logo
+ * terminal.subtitle line printed under the logo, as printed by the script
  * terminal.panel    optional box: { title, lines: [] }
  * terminal.menu     the menu entries, in order
  * terminal.prompt   the question printed at the bottom
+ *
+ * The terminal shows the script exactly as it runs, so its text is NOT
+ * translated: the Proxmox scripts print English, the WireGuard one French.
  * ==========================================================================*/
 
 const SITE = {
     repo: 'Victor-root/Proxmox-Tools',
     branch: 'main',
     scriptsDir: 'scripts',
+    author: 'Victor-root',
 };
 
 const SCRIPTS = [
     {
         id: 'console-newtab',
         file: 'pve-console-newtab.sh',
-        name: 'Console in a new tab',
-        tagline: 'Middle click a console button, it opens in a browser tab instead of a popup window.',
-        runsOn: 'Proxmox VE host, as root',
-        compat: 'PVE 8.4.2 to 9.2',
-        updated: 'Each patched file is now checked on its own, so a partial Proxmox update can simply be re-patched.',
-        points: [
-            'Middle click on Console, noVNC or xterm.js opens a real browser tab',
-            'Middle click on SPICE behaves like a normal click, no useless empty tab',
-            'Automatic backup before patching, restore from the menu',
-            'Stops and touches nothing if your Proxmox version is not supported',
-        ],
+        name: {
+            en: 'Console in a new tab',
+            fr: 'Console dans un nouvel onglet',
+        },
+        tagline: {
+            en: 'Middle click a console button, it opens in a browser tab instead of a popup window.',
+            fr: 'Clic molette sur un bouton console : il s’ouvre dans un onglet du navigateur au lieu d’une fenêtre popup.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 8.4.2 → 9.2',
+        updated: {
+            en: 'Each patched file is now checked on its own, so a partial Proxmox update can simply be re-patched.',
+            fr: 'Chaque fichier patché est vérifié séparément : après une mise à jour partielle de Proxmox, il suffit de relancer le patch.',
+        },
+        points: {
+            en: [
+                'Middle click on Console, noVNC or xterm.js opens a real browser tab',
+                'Middle click on SPICE behaves like a normal click, no useless empty tab',
+                'Automatic backup before patching, restore from the menu',
+                'Stops and touches nothing if your Proxmox version is not supported',
+            ],
+            fr: [
+                'Clic molette sur Console, noVNC ou xterm.js ouvre un vrai onglet',
+                'Clic molette sur SPICE se comporte comme un clic normal, sans onglet vide inutile',
+                'Backup automatique avant le patch, restauration depuis le menu',
+                'S’arrête sans rien toucher si votre version de Proxmox n’est pas prise en charge',
+            ],
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
@@ -68,18 +96,41 @@ const SCRIPTS = [
     {
         id: 'subscription-notice',
         file: 'pve-remove-subscription-notice.sh',
-        name: 'Remove the subscription notice',
-        tagline: 'Drops the "No valid subscription" popup, without breaking the buttons behind it.',
-        runsOn: 'Proxmox VE host, as root',
-        compat: 'PVE 8.0 to 9.2',
-        updated: 'New script. Optional APT hook re-applies the patch after a package update.',
-        points: [
-            'No more popup at every login',
-            'Package versions, system report, APT refresh and add repository keep working',
-            'Optional automatic re-apply after a package update',
-            'Automatic backup before patching, restore from the menu',
-        ],
-        note: 'Proxmox VE stays free software either way. A subscription funds its development and unlocks the enterprise repository.',
+        name: {
+            en: 'Remove the subscription notice',
+            fr: 'Supprimer le popup d’abonnement',
+        },
+        tagline: {
+            en: 'Drops the "No valid subscription" popup, without breaking the buttons behind it.',
+            fr: 'Enlève le popup « No valid subscription » sans casser les boutons qui en dépendent.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 8.0 → 9.2',
+        updated: {
+            en: 'New script. Optional APT hook re-applies the patch after a package update.',
+            fr: 'Nouveau script. Un hook APT optionnel réapplique le patch après une mise à jour.',
+        },
+        points: {
+            en: [
+                'No more popup at every login',
+                'Package versions, system report, APT refresh and add repository keep working',
+                'Optional automatic re-apply after a package update',
+                'Automatic backup before patching, restore from the menu',
+            ],
+            fr: [
+                'Plus de popup à chaque connexion',
+                'Versions des paquets, rapport système, actualisation APT et ajout de dépôt continuent de fonctionner',
+                'Réapplication automatique optionnelle après une mise à jour',
+                'Backup automatique avant le patch, restauration depuis le menu',
+            ],
+        },
+        note: {
+            en: 'Proxmox VE stays free software either way. A subscription funds its development and unlocks the enterprise repository.',
+            fr: 'Proxmox VE reste un logiciel libre dans tous les cas. Un abonnement finance son développement et donne accès au dépôt entreprise.',
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
@@ -108,17 +159,37 @@ const SCRIPTS = [
     {
         id: 'default-language',
         file: 'pve-default-language-i18n',
-        name: 'Default language manager',
-        tagline: 'Sets the language of the shell and of the Proxmox web interface, in one place.',
-        runsOn: 'Proxmox VE host, as root',
-        compat: 'PVE 8.x and 9.x',
-        updated: 'Croatian, Georgian and Ukrainian added. 29 languages available.',
-        points: [
-            'Sets the system locale and the web interface language together',
-            '29 languages, the script interface speaks them too',
-            'Optional timezone and NTP setup',
-            'Warns instead of writing a language Proxmox would silently drop',
-        ],
+        name: {
+            en: 'Default language manager',
+            fr: 'Gestionnaire de langue par défaut',
+        },
+        tagline: {
+            en: 'Sets the language of the shell and of the Proxmox web interface, in one place.',
+            fr: 'Règle la langue du shell et celle de l’interface web Proxmox, au même endroit.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 8.x / 9.x',
+        updated: {
+            en: 'Croatian, Georgian and Ukrainian added. 29 languages available.',
+            fr: 'Ajout du croate, du géorgien et de l’ukrainien. 29 langues disponibles.',
+        },
+        points: {
+            en: [
+                'Sets the system locale and the web interface language together',
+                '29 languages, the script interface speaks them too',
+                'Optional timezone and NTP setup',
+                'Warns instead of writing a language Proxmox would silently drop',
+            ],
+            fr: [
+                'Règle la locale système et la langue de l’interface web ensemble',
+                '29 langues, l’interface du script les parle aussi',
+                'Configuration optionnelle du fuseau horaire et du NTP',
+                'Prévient au lieu d’écrire une langue que Proxmox ignorerait',
+            ],
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
@@ -146,18 +217,41 @@ const SCRIPTS = [
     {
         id: 'wireguard',
         file: 'lxc-wireguard-server-install.sh',
-        name: 'WireGuard VPN server',
-        tagline: 'Installs and manages a WireGuard server inside an LXC, clients and QR codes included.',
-        runsOn: 'Inside a Debian or Ubuntu LXC, as root',
+        name: {
+            en: 'WireGuard VPN server',
+            fr: 'Serveur VPN WireGuard',
+        },
+        tagline: {
+            en: 'Installs and manages a WireGuard server inside an LXC, clients and QR codes included.',
+            fr: 'Installe et gère un serveur WireGuard dans un LXC, clients et QR codes compris.',
+        },
+        runsOn: {
+            en: 'Inside a Debian or Ubuntu LXC, as root',
+            fr: 'Dans un LXC Debian ou Ubuntu, en root',
+        },
         compat: 'Debian / Ubuntu LXC',
-        updated: 'Client list now follows the order of wg0.conf, and the config is remembered after the first run.',
-        points: [
-            'Guided install with three clear network modes',
-            'Add, list, show and revoke clients, QR code included',
-            'Diagnostic that checks the service, the port, routing and the firewall',
-            'Built-in backup and restore, and a clean uninstall',
-        ],
-        note: 'Run it inside the container, not on the Proxmox host. On an unprivileged LXC the script tells you the exact pct commands to run first.',
+        updated: {
+            en: 'Client list now follows the order of wg0.conf, and the config is remembered after the first run.',
+            fr: 'La liste des clients suit l’ordre du wg0.conf, et la configuration est mémorisée après le premier lancement.',
+        },
+        points: {
+            en: [
+                'Guided install with three clear network modes',
+                'Add, list, show and revoke clients, QR code included',
+                'Diagnostic that checks the service, the port, routing and the firewall',
+                'Built-in backup and restore, and a clean uninstall',
+            ],
+            fr: [
+                'Installation guidée avec trois modes réseau clairs',
+                'Ajouter, lister, afficher et révoquer des clients, QR code compris',
+                'Diagnostic qui vérifie le service, le port, le routage et le pare-feu',
+                'Sauvegarde et restauration intégrées, et désinstallation propre',
+            ],
+        },
+        note: {
+            en: 'Run it inside the container, not on the Proxmox host. On an unprivileged LXC the script tells you the exact pct commands to run first.',
+            fr: 'À lancer dans le conteneur, pas sur l’hôte Proxmox. Sur un LXC non privilégié, le script vous donne les commandes pct exactes à passer avant.',
+        },
         terminal: {
             banner: 'wireguard',
             theme: 'red',
@@ -206,4 +300,100 @@ const BANNERS = {
         '╚███╔███╔╝██║██║  ██║███████╗╚██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝',
         ' ╚══╝╚══╝ ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝',
     ],
+};
+
+/* Interface strings. Same rule: { en, fr }. */
+const UI = {
+    navScripts: { en: 'Scripts', fr: 'Les scripts' },
+    navNews: { en: "What's new", fr: 'Nouveautés' },
+    navTrust: { en: 'Is it safe', fr: 'Est-ce sûr' },
+
+    langLabel: { en: 'Language', fr: 'Langue' },
+    themeLabel: { en: 'Theme', fr: 'Thème' },
+    themeSystem: { en: 'System', fr: 'Système' },
+    themeLight: { en: 'Light', fr: 'Clair' },
+    themeDark: { en: 'Dark', fr: 'Sombre' },
+
+    heroEyebrow: { en: 'Open source shell scripts', fr: 'Scripts shell open source' },
+    heroTitle1: { en: 'Small tools that make', fr: 'Des petits outils qui rendent' },
+    heroTitle2: { en: 'less annoying.', fr: 'moins pénible.' },
+    heroLede: {
+        en: 'Every tool is a single shell script. Copy one line, paste it in your Proxmox shell, follow the menu. Nothing is hidden: the source lives on GitHub and that is exactly what your server downloads.',
+        fr: 'Chaque outil est un simple script shell. Copiez une ligne, collez-la dans le shell de Proxmox, suivez le menu. Rien n’est caché : le code est sur GitHub, et c’est exactement ce que votre serveur télécharge.',
+    },
+    heroBtnScripts: { en: 'Browse the scripts', fr: 'Voir les scripts' },
+    heroBtnSource: { en: 'Read the source', fr: 'Lire le code' },
+    factScripts: { en: 'scripts', fr: 'scripts' },
+    factDeps: { en: 'dependencies', fr: 'dépendances' },
+    factLicense: { en: 'no fork of Proxmox', fr: 'aucun fork de Proxmox' },
+
+    trust1Title: { en: 'You read it before you run it', fr: 'Vous le lisez avant de le lancer' },
+    trust1Body: {
+        en: 'Each card links to the exact file on GitHub. Same file, same branch, same content your server fetches.',
+        fr: 'Chaque carte renvoie au fichier exact sur GitHub. Même fichier, même branche, même contenu que celui téléchargé par votre serveur.',
+    },
+    trust2Title: { en: 'It runs from GitHub, not from here', fr: 'Ça tourne depuis GitHub, pas depuis ici' },
+    trust2Body: {
+        en: 'This site only shows you the command. The download always comes from raw.githubusercontent.com.',
+        fr: 'Ce site ne fait qu’afficher la commande. Le téléchargement vient toujours de raw.githubusercontent.com.',
+    },
+    trust3Title: { en: 'Nothing is one-way', fr: 'Rien n’est sans retour' },
+    trust3Body: {
+        en: 'Scripts that change a Proxmox file take a backup first and restore it from their own menu.',
+        fr: 'Les scripts qui modifient un fichier Proxmox font un backup avant, et le restaurent depuis leur propre menu.',
+    },
+
+    scriptsTitle: { en: 'The scripts', fr: 'Les scripts' },
+    scriptsLede: {
+        en: 'Pick one, copy the line, paste it as root. Every script opens a menu, nothing runs behind your back.',
+        fr: 'Choisissez-en un, copiez la ligne, collez-la en root. Chaque script ouvre un menu, rien ne s’exécute dans votre dos.',
+    },
+    cardRunOn: { en: 'Run it on', fr: 'À lancer' },
+    cardCopyLabel: { en: 'Copy this line into your shell', fr: 'Copiez cette ligne dans votre shell' },
+    cardCopy: { en: 'Copy', fr: 'Copier' },
+    cardCopied: { en: 'Copied', fr: 'Copié' },
+    cardSource: { en: 'Read the source on GitHub', fr: 'Lire le code sur GitHub' },
+    cardHistory: { en: 'History', fr: 'Historique' },
+    copyOk: { en: 'Command copied, paste it as root', fr: 'Commande copiée, collez-la en root' },
+    copyFail: { en: 'Copy failed, select the line by hand', fr: 'Copie impossible, sélectionnez la ligne à la main' },
+
+    newsTitle: { en: "What's new", fr: 'Nouveautés' },
+    newsLede: {
+        en: 'Latest change on each script. The full history is in the commits.',
+        fr: 'Dernier changement de chaque script. L’historique complet est dans les commits.',
+    },
+
+    howtoTitle: { en: 'How to run one', fr: 'Comment en lancer un' },
+    howtoLede: {
+        en: 'Three steps, no installer, nothing left behind on your system.',
+        fr: 'Trois étapes, aucun installeur, rien qui traîne sur votre système.',
+    },
+    step1Title: { en: 'Open a root shell', fr: 'Ouvrez un shell root' },
+    step1Body: {
+        en: 'From the Proxmox web interface, Shell on your node. Or an SSH session as root. Keep it open while the script runs.',
+        fr: 'Depuis l’interface web Proxmox, Shell sur votre nœud. Ou une session SSH en root. Gardez-la ouverte pendant l’exécution.',
+    },
+    step2Title: { en: 'Paste the line', fr: 'Collez la ligne' },
+    step2Body: {
+        en: 'Use the copy button on the card. The line downloads the script from GitHub and runs it, it installs nothing.',
+        fr: 'Utilisez le bouton Copier de la carte. La ligne télécharge le script depuis GitHub et l’exécute, elle n’installe rien.',
+    },
+    step3Title: { en: 'Follow the menu', fr: 'Suivez le menu' },
+    step3Body: {
+        en: 'Scripts that modify Proxmox ask for a confirmation and take a backup first. The same menu restores it.',
+        fr: 'Les scripts qui modifient Proxmox demandent confirmation et font un backup avant. Le même menu le restaure.',
+    },
+    howtoNote: {
+        en: 'Scripts that restart pveproxy can take up to a minute to finish: Proxmox refreshes its cluster certificates on start. The web interface is unreachable meanwhile, it is expected.',
+        fr: 'Les scripts qui redémarrent pveproxy peuvent mettre jusqu’à une minute : Proxmox régénère ses certificats de cluster au démarrage. L’interface web est injoignable pendant ce temps, c’est normal.',
+    },
+
+    footerBy: { en: 'Built by', fr: 'Réalisé par' },
+    footerDisclaimer: {
+        en: 'Community project, not affiliated with, endorsed by or sponsored by Proxmox Server Solutions GmbH. Proxmox and the Proxmox logo are trademarks of Proxmox Server Solutions GmbH. These scripts are provided as is, without warranty: read them before running them.',
+        fr: 'Projet communautaire, sans aucun lien avec Proxmox Server Solutions GmbH, ni approuvé ni sponsorisé par eux. Proxmox et le logo Proxmox sont des marques de Proxmox Server Solutions GmbH. Ces scripts sont fournis tels quels, sans garantie : lisez-les avant de les lancer.',
+    },
+    footerRepo: { en: 'Repository', fr: 'Dépôt' },
+    footerIssues: { en: 'Report a problem', fr: 'Signaler un problème' },
+    footerProxmox: { en: 'Proxmox VE', fr: 'Proxmox VE' },
 };
