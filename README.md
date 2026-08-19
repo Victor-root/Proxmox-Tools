@@ -142,6 +142,7 @@ Installs and manages a native **WireGuard VPN server** inside a Debian/Ubuntu **
 * 🧱 automatic **nftables** rules and IPv4 forwarding for LAN / full-tunnel modes
 * 🔧 per-client tunables: AllowedIPs, DNS, PersistentKeepalive, **MTU** (default 1420)
 * 🧠 remembers your settings (endpoint, port, network) after the first run
+* 🌍 interface in **English or French**, following the system locale, English by default
 * 💾 built-in **backup / restore** of the whole configuration
 * 🧹 clean **uninstall**
 * 📋 interactive menu
