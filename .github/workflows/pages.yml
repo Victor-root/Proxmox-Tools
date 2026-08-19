@@ -1,7 +1,7 @@
 name: Deploy site to GitHub Pages
 
 # Publishes the static site in site/ to GitHub Pages.
-# One-time setup: repository Settings > Pages > Source: GitHub Actions.
+# Nothing to set up by hand: the Configure step turns Pages on itself.
 
 on:
   push:
@@ -29,10 +29,13 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # enable Pages on the repository if it is not enabled yet
+          enablement: true
 
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
