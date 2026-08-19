@@ -12,6 +12,9 @@
     const LANGS = ['en', 'fr'];
     const THEMES = ['system', 'light', 'dark'];
 
+    /* where a script runs, from the target field of data.js */
+    const TARGET_ICON = { pve: 'server', lxc: 'box' };
+
     let lang = 'en';
 
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
@@ -112,8 +115,26 @@
 
     /* ---------- fake terminal ---------- */
 
-    function terminal(script) {
-        const t = script.terminal;
+    /* KDE Breeze frame: title on the left, chevron buttons on the right. */
+    function termFrame(host, body, cls) {
+        return [
+            '<div class="term' + (cls ? ' ' + cls : '') + '">',
+            '  <div class="term-bar">',
+            '    <span class="term-name">' + esc(host) + ': ~</span>',
+            '    <span class="term-btns" aria-hidden="true">',
+            '      <span class="term-btn min">' + icon('chevron-down') + '</span>',
+            '      <span class="term-btn max">' + icon('chevron-up') + '</span>',
+            '      <span class="term-btn close">' + icon('x') + '</span>',
+            '    </span>',
+            '  </div>',
+            '  <div class="term-body">' + body + '</div>',
+            '</div>',
+        ].join('\n');
+    }
+
+    /* The screen a script draws: logo, subtitle, optional box, menu, prompt.
+       withPanel is false for the hero, which stays compact. */
+    function termScreen(t, withPanel) {
         const red = t.theme === 'red' ? ' red' : '';
         const logo = BANNERS[t.banner] || [];
         const width = Math.max(...logo.map((l) => l.length), t.subtitle.length + 20);
@@ -124,7 +145,7 @@
         out.push('  <span class="t-sub' + red + '">' + esc(t.subtitle) + '</span> <span class="t-by">· by ' + esc(SITE.author) + '</span>');
         out.push('<span class="t-rule' + red + '">' + '─'.repeat(width) + '</span>');
 
-        if (t.panel) {
+        if (withPanel && t.panel) {
             out.push('');
             out.push('<span class="t-box' + red + '">┌</span> <span class="t-box' + red + '">' + esc(t.panel.title) + '</span>');
             t.panel.lines.forEach((line) => {
@@ -143,15 +164,20 @@
         return '<pre>' + out.join('\n') + '</pre>';
     }
 
-    /* Window buttons: chevron down, chevron up, cross, on the right */
-    function windowButtons() {
-        return [
-            '<span class="term-btns" aria-hidden="true">',
-            '  <span class="term-btn min">' + icon('chevron-down') + '</span>',
-            '  <span class="term-btn max">' + icon('chevron-up') + '</span>',
-            '  <span class="term-btn close">' + icon('x') + '</span>',
-            '</span>',
-        ].join('\n');
+    /* Hero: the first script of data.js, shown from the pasted line onwards. */
+    function renderHero() {
+        const script = SCRIPTS[0];
+        const slot = document.getElementById('hero-demo');
+        if (!script || !slot) return;
+
+        const t = script.terminal;
+        const typed = [
+            '<pre class="t-run"><span class="t-user">' + esc(t.host) + ':~#</span> ',
+            '<span class="c-cmd">bash</span> &lt;(<span class="c-cmd">curl</span> -fsSL ',
+            '<span class="c-url">' + esc(RAW_BASE + script.file) + '</span>)</pre>',
+        ].join('');
+
+        slot.innerHTML = termFrame(t.host, typed + termScreen(t, false), 'term-hero');
     }
 
     /* ---------- cards ---------- */
@@ -164,7 +190,6 @@
         const note = script.note
             ? '<p class="card-note">' + icon('info') + '<span>' + esc(tr(script.note)) + '</span></p>'
             : '';
-        const host = script.terminal.banner === 'wireguard' ? 'root@lxc-wireguard: ~' : 'root@pve01: ~';
 
         return [
             '<article class="card" id="' + esc(script.id) + '">',
@@ -175,7 +200,7 @@
             '        <span class="badge">' + esc(tr(script.compat)) + '</span>',
             '      </div>',
             '      <p class="card-tagline">' + esc(tr(script.tagline)) + '</p>',
-            '      <span class="runs-on">' + icon('server') + '<b>' + esc(tr(UI.cardRunOn)) + '</b> ' + esc(tr(script.runsOn)) + '</span>',
+            '      <span class="runs-on">' + icon(TARGET_ICON[script.target] || 'server') + '<b>' + esc(tr(UI.cardRunOn)) + '</b> ' + esc(tr(script.runsOn)) + '</span>',
             '      <ul class="points">' + points + '</ul>',
             note,
             '      <div class="run">',
@@ -183,8 +208,7 @@
             '        <div class="run-box">',
             '          <div class="run-cmd"><code><span class="c-cmd">bash</span> &lt;(<span class="c-cmd">curl</span> -fsSL <span class="c-url">' + esc(RAW_BASE + script.file) + '</span>)</code></div>',
             '          <button class="copy" type="button" data-cmd="' + esc(cmd) + '" title="' + esc(tr(UI.cardCopy)) + '" aria-label="' + esc(tr(UI.cardCopy)) + '">',
-            '            <svg class="ico-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5.5 15H5a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 5 3.5h8.5A1.5 1.5 0 0 1 15 5v.5"/></svg>',
-            '            <svg class="ico-done" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5 10-10"/></svg>',
+            '            ' + icon('copy', 'ico-copy') + icon('check', 'ico-done'),
             '          </button>',
             '        </div>',
             '      </div>',
@@ -193,13 +217,7 @@
             '      </div>',
             '    </div>',
             '    <div class="term-side">',
-            '      <div class="term">',
-            '        <div class="term-bar">',
-            '          <span class="term-name">' + host + '</span>',
-            windowButtons(),
-            '        </div>',
-            '        <div class="term-body">' + terminal(script) + '</div>',
-            '      </div>',
+            termFrame(script.terminal.host, termScreen(script.terminal, true)),
             '    </div>',
             '  </div>',
             '</article>',
@@ -211,19 +229,22 @@
         wireCopyButtons();
     }
 
+    /* Each card is one link: clicking anywhere on it scrolls to the script. */
     function renderNews() {
         document.getElementById('news-list').innerHTML = SCRIPTS
             .filter((s) => s.updated)
             .map((s) => [
-                '<article class="news-card">',
+                '<a class="news-card" href="#' + esc(s.id) + '">',
                 '  <div class="news-top">',
                 '    <span class="news-icon">' + icon(s.icon || 'code') + '</span>',
                 '    <span class="news-name">' + esc(tr(s.name)) + '</span>',
-                '    <span class="news-badge">' + icon('sparkles') + esc(tr(UI.newsBadge)) + '</span>',
                 '  </div>',
                 '  <p class="news-body">' + esc(tr(s.updated)) + '</p>',
-                '  <a class="news-link" href="#' + esc(s.id) + '">' + esc(tr(UI.newsLink)) + icon('arrow-right') + '</a>',
-                '</article>',
+                '  <div class="news-foot">',
+                '    <span class="news-badge">' + icon('bolt') + esc(tr(UI.newsBadge)) + '</span>',
+                '    <span class="news-go" aria-hidden="true">' + icon('arrow-right') + '</span>',
+                '  </div>',
+                '</a>',
             ].join('\n'))
             .join('\n');
     }
@@ -275,6 +296,7 @@
 
     function build() {
         document.getElementById('fact-count').textContent = SCRIPTS.length;
+        renderHero();
 
         [['nav-repo', REPO_URL],
          ['hero-repo', REPO_URL + '/tree/' + SITE.branch + '/' + SITE.scriptsDir],

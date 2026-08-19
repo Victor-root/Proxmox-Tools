@@ -11,8 +11,9 @@
  *
  * Fields of a script block
  *   id        anchor used in the URL, lowercase, no spaces
- *   icon       Tabler icon key, see ICONS in index.html (browser, bell-off, …)
+ *   icon      Tabler icon key, see the sprite in index.html (browser, bell-off, …)
  *   file      exact file name inside scripts/, the run command is built from it
+ *   target    "pve" (Proxmox host) or "lxc" (inside a container), picks the icon
  *   name      short title shown on the card
  *   tagline   one line, what it does
  *   runsOn    where the user must run it
@@ -24,6 +25,7 @@
  *
  * terminal.banner   "proxmox" or "wireguard", the ASCII logo to draw
  * terminal.theme    "orange" (Proxmox scripts) or "red" (WireGuard script)
+ * terminal.host     machine name in the window title and in the shell prompt
  * terminal.subtitle line printed under the logo, as printed by the script
  * terminal.panel    optional box: { title, lines: [] }
  * terminal.menu     the menu entries, in order
@@ -31,6 +33,7 @@
  *
  * The terminal shows the script exactly as it runs, so its text is NOT
  * translated: the Proxmox scripts print English, the WireGuard one French.
+ * The first script of the list is also the one shown in the hero terminal.
  * ==========================================================================*/
 
 const SITE = {
@@ -45,6 +48,7 @@ const SCRIPTS = [
         id: 'console-newtab',
         icon: 'browser',
         file: 'pve-console-newtab.sh',
+        target: 'pve',
         name: {
             en: 'Console in a new tab',
             fr: 'Console dans un nouvel onglet',
@@ -79,6 +83,7 @@ const SCRIPTS = [
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
+            host: 'root@pve01',
             subtitle: 'Console New Tab Patch Utility',
             panel: {
                 title: 'Interactive patch utility for the Proxmox VE web interface',
@@ -99,6 +104,7 @@ const SCRIPTS = [
         id: 'subscription-notice',
         icon: 'bell-off',
         file: 'pve-remove-subscription-notice.sh',
+        target: 'pve',
         name: {
             en: 'Remove the subscription notice',
             fr: 'Supprimer le popup d’abonnement',
@@ -137,6 +143,7 @@ const SCRIPTS = [
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
+            host: 'root@pve01',
             subtitle: 'Subscription Notice Remover',
             panel: {
                 title: 'Patch status',
@@ -163,6 +170,7 @@ const SCRIPTS = [
         id: 'default-language',
         icon: 'language',
         file: 'pve-default-language-i18n',
+        target: 'pve',
         name: {
             en: 'Default language manager',
             fr: 'Gestionnaire de langue par défaut',
@@ -197,6 +205,7 @@ const SCRIPTS = [
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
+            host: 'root@pve01',
             subtitle: 'Default Language Utility',
             panel: {
                 title: 'Summary',
@@ -222,6 +231,7 @@ const SCRIPTS = [
         id: 'wireguard',
         icon: 'shield-lock',
         file: 'lxc-wireguard-server-install.sh',
+        target: 'lxc',
         name: {
             en: 'WireGuard VPN server',
             fr: 'Serveur VPN WireGuard',
@@ -260,6 +270,7 @@ const SCRIPTS = [
         terminal: {
             banner: 'wireguard',
             theme: 'red',
+            host: 'root@lxc-wireguard',
             subtitle: 'Installation, configuration et gestion du serveur WireGuard',
             panel: {
                 title: 'Les trois modes',
@@ -323,8 +334,8 @@ const UI = {
     heroTitle1: { en: 'Handy scripts for everyday', fr: 'Des scripts pratiques pour' },
     heroTitle2: { en: '', fr: 'au quotidien' },
     heroLede: {
-        en: 'Each tool is one shell script. Copy a line, paste it in your Proxmox shell, let the menu guide you. Nothing is hidden: the source sits on GitHub, and that is exactly what your server downloads.',
-        fr: 'Chaque outil tient dans un seul script shell. Copiez une ligne, collez-la dans le shell de Proxmox, laissez le menu vous guider. Rien n’est caché : le code est sur GitHub, et c’est exactement ce que votre serveur télécharge.',
+        en: 'Each tool is one shell script. Copy a line, paste it in the shell of your Proxmox host or of an LXC, let the menu guide you. Nothing is hidden: the source sits on GitHub, and that is exactly what your server downloads.',
+        fr: 'Chaque outil tient dans un seul script shell. Copiez une ligne, collez-la dans le shell de votre hôte Proxmox ou d’un LXC, laissez le menu vous guider. Rien n’est caché : le code est sur GitHub, et c’est exactement ce que votre serveur télécharge.',
     },
     heroBtnScripts: { en: 'Browse the scripts', fr: 'Voir les scripts' },
     heroBtnSource: { en: 'Read the source', fr: 'Lire le code' },
@@ -350,8 +361,8 @@ const UI = {
 
     scriptsTitle: { en: 'The scripts', fr: 'Les scripts' },
     scriptsLede: {
-        en: 'Pick one, copy its line, paste it as root. Each script opens a menu and waits for you: nothing runs on its own.',
-        fr: 'Choisissez-en un, copiez sa ligne, collez-la en root. Chaque script ouvre un menu et vous attend : rien ne s’exécute tout seul.',
+        en: 'Pick one, copy its line, paste it as root, on the Proxmox host or inside the LXC it targets. Each script opens a menu and waits for you: nothing runs on its own.',
+        fr: 'Choisissez-en un, copiez sa ligne, collez-la en root, sur l’hôte Proxmox ou dans le LXC concerné. Chaque script ouvre un menu et vous attend : rien ne s’exécute tout seul.',
     },
     cardRunOn: { en: 'Runs on', fr: 'S’exécute sur' },
     cardCopyLabel: { en: 'Copy this line into your shell', fr: 'Copiez cette ligne dans votre shell' },
@@ -367,7 +378,6 @@ const UI = {
         fr: 'La dernière amélioration de chaque script. Tout le reste vit dans l’historique des commits.',
     },
     newsBadge: { en: 'Latest', fr: 'Nouveau' },
-    newsLink: { en: 'See the script', fr: 'Voir le script' },
 
     howtoTitle: { en: 'Get started in three steps', fr: 'Démarrer en trois étapes' },
     howtoLede: {
@@ -376,8 +386,8 @@ const UI = {
     },
     step1Title: { en: 'Open a root shell', fr: 'Ouvrez un shell root' },
     step1Body: {
-        en: 'From the Proxmox web interface, Shell on your node. Or an SSH session as root. Keep it open while the script runs.',
-        fr: 'Depuis l’interface web Proxmox, Shell sur votre nœud. Ou une session SSH en root. Gardez-la ouverte pendant l’exécution.',
+        en: 'From the Proxmox web interface, Shell on your node, or Console on the LXC a script targets. An SSH session as root works too. Keep it open while the script runs.',
+        fr: 'Depuis l’interface web Proxmox, Shell sur votre nœud, ou Console sur le LXC visé par un script. Une session SSH en root marche aussi. Gardez-la ouverte pendant l’exécution.',
     },
     step2Title: { en: 'Paste the line', fr: 'Collez la ligne' },
     step2Body: {

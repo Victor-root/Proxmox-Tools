@@ -32,7 +32,9 @@ The run command, the "read the source" link and the history link are built from
 ```js
 {
     id: 'my-script',                       // anchor in the URL
+    icon: 'browser',                       // symbol name without the i- prefix
     file: 'pve-my-script.sh',              // exact name inside scripts/
+    target: 'pve',                         // 'pve' host, or 'lxc' container
     name: 'What it is',
     tagline: 'One line, what it does.',
     runsOn: 'Proxmox VE host, as root',
@@ -46,6 +48,7 @@ The run command, the "read the source" link and the history link are built from
     terminal: {
         banner: 'proxmox',                 // 'proxmox' or 'wireguard'
         theme: 'orange',                   // 'orange' or 'red'
+        host: 'root@pve01',                // window title and shell prompt
         subtitle: 'Line printed under the logo',
         panel: { title: 'Box title', lines: ['line one', 'line two'] },
         menu: ['First entry', 'Second entry', 'Quit'],
@@ -56,17 +59,26 @@ The run command, the "read the source" link and the history link are built from
 
 `panel` and `note` can be removed if the script has none.
 
+`target` only picks the icon shown next to "Runs on": a server for the Proxmox
+host, a container for a script that runs inside an LXC.
+
+The first script of the list is also the one drawn in the hero terminal, under
+the pasted command line. Move a block to the top to feature it there.
+
 ## Change a script that already exists
 
 Edit its block in `data.js`. Only `updated` needs care: it is what shows up in
-the "What's new" list, so keep it to one short sentence.
+"What's new", where each card is a link down to the script it talks about, so
+keep it to one short sentence.
 
 ## Icons
 
-Icons come from [Tabler Icons](https://tabler.io/icons) (MIT). They live in one
-sprite at the top of `index.html`. To use a new one, copy its paths from Tabler
-into a `<symbol viewBox="0 0 24 24" id="i-name">`, then reference it anywhere
-with `<svg class="ico"><use href="#i-name"/></svg>`.
+Icons come from [Tabler Icons](https://tabler.io/icons) (MIT), outline set. They
+live in one sprite at the top of `index.html`. To use a new one, copy the paths
+of the published SVG into a `<symbol viewBox="0 0 24 24" id="i-name">`, drop the
+invisible `stroke="none"` rectangle, then reference it anywhere with
+`<svg class="ico"><use href="#i-name"/></svg>`. Keeping the `viewBox` matters:
+without it the icon is drawn cropped.
 
 A script card and its news card use the `icon` field of its block in `data.js`,
 which is the symbol name without the `i-` prefix.
