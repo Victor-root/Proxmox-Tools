@@ -29,7 +29,10 @@ This repository is meant to grow over time with more Proxmox-oriented utilities.
 
 ## 🛠️ Available scripts
 
-### 🖱️ Open Proxmox consoles in new tabs
+Click a script to unfold what it does, what it supports and the line to run it.
+
+<details>
+<summary><b>🖱️ Open Proxmox consoles in new tabs</b></summary>
 
 **Script:** `pve-console-newtab.sh`
 
@@ -65,9 +68,10 @@ Each of the two patched files is also checked and patched on its own: a Proxmox 
 bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-console-newtab.sh)
 ```
 
----
+</details>
 
-### 🔕 Remove the subscription notice
+<details>
+<summary><b>🔕 Remove the subscription notice</b></summary>
 
 **Script:** `pve-remove-subscription-notice.sh`
 
@@ -96,9 +100,10 @@ The widely shared one-liner for this comments out the popup itself, which also s
 bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-remove-subscription-notice.sh)
 ```
 
----
+</details>
 
-### 🌍 Proxmox VE default language manager
+<details>
+<summary><b>🌍 Proxmox VE default language manager</b></summary>
 
 **Script:** `pve-default-language-i18n`
 
@@ -127,9 +132,10 @@ Proxmox VE only accepts a fixed list of languages for its web interface. For a l
 bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-default-language-i18n)
 ```
 
----
+</details>
 
-### 🔐 WireGuard VPN server installer & client manager (LXC)
+<details>
+<summary><b>🔐 WireGuard VPN server installer & client manager (LXC)</b></summary>
 
 **Script:** `lxc-wireguard-server-install.sh`
 
@@ -137,7 +143,7 @@ Installs and manages a native **WireGuard VPN server** inside a Debian/Ubuntu **
 
 * 🧭 guided install with **3 clear network modes**: private network, LAN access, full Internet tunnel
 * 👤 full client lifecycle: **add**, **list** (with live connection state), **show / re-scan** (config + QR code), **revoke**
-* 🩺 **diagnostic** that checks the service, UDP port, IPv4 routing, firewall rules and connected clients — in plain language
+* 🩺 **diagnostic** that checks the service, UDP port, IPv4 routing, firewall rules and connected clients, in plain language
 * 🌐 endpoint by **public IP or domain**, with a **CGNAT** warning and a check that the domain points to the server
 * 🧱 automatic **nftables** rules and IPv4 forwarding for LAN / full-tunnel modes
 * 🔧 per-client tunables: AllowedIPs, DNS, PersistentKeepalive, **MTU** (default 1420)
@@ -153,8 +159,9 @@ Installs and manages a native **WireGuard VPN server** inside a Debian/Ubuntu **
 bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/lxc-wireguard-server-install.sh)
 ```
 
-> ⚠️ Run it as **root inside the target LXC** (not on the Proxmox host). On an **unprivileged** container, WireGuard needs `/dev/net/tun` passed through — the script detects this and shows the exact `pct set` commands to run on the host if needed.
+> ⚠️ Run it as **root inside the target LXC** (not on the Proxmox host). On an **unprivileged** container, WireGuard needs `/dev/net/tun` passed through: the script detects this and shows the exact `pct set` commands to run on the host if needed.
 
+</details>
 ---
 
 ## 📂 Repository philosophy
