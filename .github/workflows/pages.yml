@@ -1,6 +1,6 @@
 name: Deploy site to GitHub Pages
 
-# Publishes the static site in site/ to GitHub Pages.
+# Publishes the static site in site/ to GitHub Pages, from the main branch.
 #
 # Nothing is published until Pages is turned on for the repository: until then
 # this workflow stops on "Get Pages site failed", on purpose. To go live, set
@@ -8,7 +8,7 @@ name: Deploy site to GitHub Pages
 
 on:
   push:
-    branches: [website]
+    branches: [main]
     paths:
       - 'site/**'
       - '.github/workflows/pages.yml'
