@@ -4,6 +4,11 @@
 >
 > Fast to run. Easy to reuse. Built for real-world homelab and admin workflows.
 
+### 🌐 [Browse the scripts on the website](https://victor-root.github.io/Proxmox-Tools/)
+
+Every script with what it does, what it writes on your machine, the line to run
+it and a preview of its menu. Same files as this repository, nothing else.
+
 ---
 
 ## ✨ What is this repository?

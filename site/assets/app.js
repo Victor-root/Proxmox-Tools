@@ -101,6 +101,7 @@
 
         renderCards();
         renderNews();
+        renderFaq();
     }
 
     function initLang() {
@@ -182,6 +183,32 @@
 
     /* ---------- cards ---------- */
 
+    /* Folded by default: the exact files the script writes, where the copy it
+       keeps goes, what it restarts. Open it before running as root. */
+    function touched(script) {
+        const t = script.touches;
+        if (!t) return '';
+
+        const files = t.files
+            .map((f) => '<li><code>' + esc(f.path) + '</code><span>' + esc(tr(f.role)) + '</span></li>')
+            .join('');
+        const meta = (name, label, value) =>
+            '<p class="touch-meta">' + icon(name) + '<b>' + esc(tr(label)) + '</b><code>' + esc(value) + '</code></p>';
+
+        return [
+            '<details class="touches">',
+            '  <summary>' + icon('list-details') + '<span>' + esc(tr(UI.touchesTitle)) + '</span>' + icon('chevron-down', 'touch-caret') + '</summary>',
+            '  <ul class="touch-list">' + files + '</ul>',
+            t.installs ? meta('package', UI.touchesInstalls, t.installs) : '',
+            meta('archive', UI.touchesBackup, t.backup),
+            meta('refresh', UI.touchesRestarts, t.restarts),
+            '</details>',
+        ].join('\n');
+    }
+
+    /* shareable address of one card, whatever the page is served from */
+    const pageLink = (id) => location.origin + location.pathname + '#' + id;
+
     function card(script) {
         const cmd = 'bash <(curl -fsSL ' + RAW_BASE + script.file + ')';
         const points = tr(script.points)
@@ -202,18 +229,20 @@
             '      <p class="card-tagline">' + esc(tr(script.tagline)) + '</p>',
             '      <span class="runs-on">' + icon(TARGET_ICON[script.target] || 'server') + '<b>' + esc(tr(UI.cardRunOn)) + '</b> ' + esc(tr(script.runsOn)) + '</span>',
             '      <ul class="points">' + points + '</ul>',
+            touched(script),
             note,
             '      <div class="run">',
             '        <span class="run-label">' + esc(tr(UI.cardCopyLabel)) + '</span>',
             '        <div class="run-box">',
             '          <div class="run-cmd"><code><span class="c-cmd">bash</span> &lt;(<span class="c-cmd">curl</span> -fsSL <span class="c-url">' + esc(RAW_BASE + script.file) + '</span>)</code></div>',
-            '          <button class="copy" type="button" data-cmd="' + esc(cmd) + '" title="' + esc(tr(UI.cardCopy)) + '" aria-label="' + esc(tr(UI.cardCopy)) + '">',
+            '          <button class="copy" type="button" data-copy="' + esc(cmd) + '" title="' + esc(tr(UI.cardCopy)) + '" aria-label="' + esc(tr(UI.cardCopy)) + '">',
             '            ' + icon('copy', 'ico-copy') + icon('check', 'ico-done'),
             '          </button>',
             '        </div>',
             '      </div>',
             '      <div class="card-links">',
             '        <a href="' + BLOB_BASE + encodeURIComponent(script.file) + '" rel="noopener">' + icon('external') + esc(tr(UI.cardSource)) + '</a>',
+            '        <button type="button" data-copy="' + esc(pageLink(script.id)) + '" data-toast="linkOk">' + icon('link') + esc(tr(UI.cardLink)) + '</button>',
             '      </div>',
             '    </div>',
             '    <div class="term-side">',
@@ -226,7 +255,18 @@
 
     function renderCards() {
         document.getElementById('cards').innerHTML = SCRIPTS.map(card).join('\n');
-        wireCopyButtons();
+        wireCopy();
+    }
+
+    function renderFaq() {
+        document.getElementById('faq-list').innerHTML = FAQ
+            .map((item) => [
+                '<article class="faq-item">',
+                '  <h3>' + icon('help') + '<span>' + esc(tr(item.q)) + '</span></h3>',
+                '  <p>' + esc(tr(item.a)) + '</p>',
+                '</article>',
+            ].join('\n'))
+            .join('\n');
     }
 
     /* Each card is one link: clicking anywhere on it scrolls to the script. */
@@ -280,13 +320,14 @@
         }
     }
 
-    function wireCopyButtons() {
-        document.querySelectorAll('.copy').forEach((btn) => {
+    /* anything carrying data-copy: the run command, the link to a card */
+    function wireCopy() {
+        document.querySelectorAll('[data-copy]').forEach((btn) => {
             btn.addEventListener('click', async () => {
-                const ok = await copy(btn.dataset.cmd);
+                const ok = await copy(btn.dataset.copy);
                 if (!ok) { toast(tr(UI.copyFail)); return; }
                 btn.classList.add('done');
-                toast(tr(UI.copyOk));
+                toast(tr(UI[btn.dataset.toast] || UI.copyOk));
                 setTimeout(() => btn.classList.remove('done'), 1800);
             });
         });

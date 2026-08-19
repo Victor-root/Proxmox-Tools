@@ -20,8 +20,14 @@
  *   compat    supported versions, small badge, same text in both languages
  *   updated   what changed, one short line, shown in "What's new"
  *   points    3 to 5 short bullets
+ *   touches   what the script writes on the machine, see below
  *   note      optional warning, shown in a quieter box
  *   terminal  what the fake terminal shows, see below
+ *
+ * touches.files    [{ path, role }], every file the script writes or creates
+ * touches.installs optional, the packages it adds
+ * touches.backup   where the copy it keeps before changing anything goes
+ * touches.restarts the services it restarts
  *
  * terminal.banner   "proxmox" or "wireguard", the ASCII logo to draw
  * terminal.theme    "orange" (Proxmox scripts) or "red" (WireGuard script)
@@ -79,6 +85,17 @@ const SCRIPTS = [
                 'Configuration optionnelle du fuseau horaire et du NTP',
                 'Prévient au lieu d’écrire une langue que Proxmox ignorerait',
             ],
+        },
+        touches: {
+            files: [
+                { path: '/etc/pve/datacenter.cfg', role: { en: 'web interface language', fr: 'langue de l’interface web' } },
+                { path: '/etc/default/locale', role: { en: 'system locale', fr: 'locale du système' } },
+                { path: '/etc/locale.gen', role: { en: 'locales to generate', fr: 'locales à générer' } },
+                { path: '/etc/profile.d/proxmox-tools-locale.sh', role: { en: 'created, applies the locale to each shell', fr: 'créé, applique la locale à chaque shell' } },
+                { path: '/etc/timezone', role: { en: 'only if you choose a timezone', fr: 'seulement si vous choisissez un fuseau horaire' } },
+            ],
+            backup: '/root/pve-default-language-<date>/',
+            restarts: 'pveproxy',
         },
         terminal: {
             banner: 'proxmox',
@@ -140,6 +157,14 @@ const SCRIPTS = [
                 'Réapplication automatique optionnelle après une mise à jour',
                 'Backup automatique avant le patch, restauration depuis le menu',
             ],
+        },
+        touches: {
+            files: [
+                { path: '/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js', role: { en: 'one line changed, the one that shows the popup', fr: 'une ligne modifiée, celle qui affiche le popup' } },
+                { path: '/etc/apt/apt.conf.d/99-pve-remove-subscription-notice', role: { en: 'created only if you turn on the automatic re-apply', fr: 'créé seulement si vous activez la réapplication automatique' } },
+            ],
+            backup: '/root/pve-subscription-notice-patch-<date>/',
+            restarts: 'pveproxy',
         },
         note: {
             en: 'Proxmox VE stays free software either way. A subscription funds its development and unlocks the enterprise repository.',
@@ -207,6 +232,14 @@ const SCRIPTS = [
                 'S’arrête sans rien toucher si votre version de Proxmox n’est pas prise en charge',
             ],
         },
+        touches: {
+            files: [
+                { path: '/usr/share/pve-manager/js/pvemanagerlib.js', role: { en: 'console buttons of the interface', fr: 'boutons console de l’interface' } },
+                { path: '/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js', role: { en: 'the function that opens the console window', fr: 'la fonction qui ouvre la fenêtre de console' } },
+            ],
+            backup: '/root/pve-console-newtab-patch-<date>/',
+            restarts: 'pveproxy',
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
@@ -263,6 +296,16 @@ const SCRIPTS = [
                 'Sauvegarde et restauration intégrées, et désinstallation propre',
             ],
         },
+        touches: {
+            files: [
+                { path: '/etc/wireguard/', role: { en: 'server config, keys and clients', fr: 'configuration du serveur, clés et clients' } },
+                { path: '/etc/systemd/system/wg-server-nft.service', role: { en: 'created, loads the firewall rules at boot', fr: 'créé, charge les règles de pare-feu au démarrage' } },
+                { path: '/etc/sysctl.d/99-wireguard-server.conf', role: { en: 'created, turns on IPv4 forwarding', fr: 'créé, active le routage IPv4' } },
+            ],
+            installs: 'wireguard-tools, nftables, qrencode, iproute2, iputils-ping, curl, ca-certificates',
+            backup: '/etc/wireguard/wg0.conf.bak.<date>',
+            restarts: 'wg-quick@wg0, wg-server-nft',
+        },
         note: {
             en: 'Run it inside the container, not on the Proxmox host. On an unprivileged LXC the script tells you the exact pct commands to run first.',
             fr: 'À lancer dans le conteneur, pas sur l’hôte Proxmox. Sur un LXC non privilégié, le script vous donne les commandes pct exactes à passer avant.',
@@ -318,11 +361,57 @@ const BANNERS = {
     ],
 };
 
+/* The questions people actually ask before running something as root.
+ * Keep the answers to two or three lines. */
+const FAQ = [
+    {
+        q: {
+            en: 'Does a Proxmox update undo the changes?',
+            fr: 'Une mise à jour de Proxmox annule-t-elle les changements ?',
+        },
+        a: {
+            en: 'For the two scripts that patch the web interface, yes: an update rewrites those files. Run the script again, or turn on the automatic re-apply of the subscription one. The language manager is not affected, it only writes configuration files.',
+            fr: 'Pour les deux scripts qui patchent l’interface web, oui : une mise à jour réécrit ces fichiers. Relancez le script, ou activez la réapplication automatique de celui du popup. Le gestionnaire de langue n’est pas concerné, il n’écrit que des fichiers de configuration.',
+        },
+    },
+    {
+        q: {
+            en: 'How do I undo it?',
+            fr: 'Comment revenir en arrière ?',
+        },
+        a: {
+            en: 'Every script keeps a copy before touching anything, and puts it back from its own menu, the restore entry. Nothing else to do. As a last resort, reinstalling the Proxmox package brings the original file back.',
+            fr: 'Chaque script garde une copie avant de toucher à quoi que ce soit, et la remet depuis son propre menu, l’entrée de restauration. Rien d’autre à faire. En dernier recours, réinstaller le paquet Proxmox remet le fichier d’origine.',
+        },
+    },
+    {
+        q: {
+            en: 'Does it get in the way of a Proxmox subscription?',
+            fr: 'Est-ce que ça gêne un abonnement Proxmox ?',
+        },
+        a: {
+            en: 'No. These scripts only change files on your own machine, nothing on the Proxmox side. Removing the notice does not unlock the enterprise repository either, that still needs a valid subscription.',
+            fr: 'Non. Ces scripts ne modifient que des fichiers sur votre machine, rien du côté de Proxmox. Enlever le popup ne donne pas non plus accès au dépôt entreprise, qui demande toujours un abonnement valide.',
+        },
+    },
+    {
+        q: {
+            en: 'And on a cluster?',
+            fr: 'Et sur un cluster ?',
+        },
+        a: {
+            en: 'The interface patches apply to the node you run them on, so run them on each node. The web interface language is different: it lives in /etc/pve, shared by the whole cluster, so one run is enough. The shell locale stays per node.',
+            fr: 'Les patchs d’interface s’appliquent au nœud sur lequel vous les lancez, donc à repasser sur chaque nœud. La langue de l’interface web, elle, vit dans /etc/pve, partagé par tout le cluster : un seul passage suffit. La locale du shell reste propre à chaque nœud.',
+        },
+    },
+];
+
 /* Interface strings. Same rule: { en, fr }. */
 const UI = {
     navNews: { en: "What's new", fr: 'Nouveautés' },
     navHowto: { en: 'Get started', fr: 'Démarrer' },
     navScripts: { en: 'Scripts', fr: 'Les scripts' },
+    navFaq: { en: 'Questions', fr: 'Questions' },
 
     langLabel: { en: 'Language', fr: 'Langue' },
     themeLabel: { en: 'Theme', fr: 'Thème' },
@@ -369,7 +458,13 @@ const UI = {
     cardCopy: { en: 'Copy the command', fr: 'Copier la commande' },
     cardCopied: { en: 'Copied', fr: 'Copié' },
     cardSource: { en: 'Read the source on GitHub', fr: 'Lire le code sur GitHub' },
+    cardLink: { en: 'Copy the link to this script', fr: 'Copier le lien vers ce script' },
+    touchesTitle: { en: 'What this script touches', fr: 'Ce que ce script touche' },
+    touchesInstalls: { en: 'Installs', fr: 'Installe' },
+    touchesBackup: { en: 'Copy kept in', fr: 'Copie gardée dans' },
+    touchesRestarts: { en: 'Restarts', fr: 'Redémarre' },
     copyOk: { en: 'Command copied, paste it as root', fr: 'Commande copiée, collez-la en root' },
+    linkOk: { en: 'Link to this script copied', fr: 'Lien vers ce script copié' },
     copyFail: { en: 'Copy failed, select the line by hand', fr: 'Copie impossible, sélectionnez la ligne à la main' },
 
     newsTitle: { en: "What's new", fr: 'Quoi de neuf' },
@@ -402,6 +497,12 @@ const UI = {
     howtoNote: {
         en: 'Scripts that restart pveproxy can take up to a minute: Proxmox refreshes its cluster certificates on start. The web interface is unreachable meanwhile, it is expected.',
         fr: 'Les scripts qui redémarrent pveproxy peuvent mettre jusqu’à une minute : Proxmox régénère ses certificats de cluster au démarrage. L’interface web est injoignable pendant ce temps, c’est normal.',
+    },
+
+    faqTitle: { en: 'Questions people ask', fr: 'Les questions qu’on se pose' },
+    faqLede: {
+        en: 'What comes up most often before running one of these on a live server.',
+        fr: 'Ce qui revient le plus souvent avant de lancer un de ces scripts sur un serveur en service.',
     },
 
     footerBy: { en: 'Built by', fr: 'Réalisé par' },

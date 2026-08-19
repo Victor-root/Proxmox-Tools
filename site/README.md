@@ -45,6 +45,14 @@ The run command, the "read the source" link and the history link are built from
         'No long sentences',
     ],
     note: 'Optional warning shown in a quieter box.',
+    touches: {                             // folded block, what it writes
+        files: [
+            { path: '/etc/some/file', role: 'what that file is' },
+        ],
+        installs: 'package-one, package-two',   // optional
+        backup: '/root/my-script-<date>/',
+        restarts: 'pveproxy',
+    },
     terminal: {
         banner: 'proxmox',                 // 'proxmox' or 'wireguard'
         theme: 'orange',                   // 'orange' or 'red'
@@ -57,7 +65,11 @@ The run command, the "read the source" link and the history link are built from
 },
 ```
 
-`panel` and `note` can be removed if the script has none.
+`panel`, `note` and `touches.installs` can be removed if the script has none.
+
+Fill `touches` from the script itself, never from memory: the paths at the top
+of the file, the backup directory it builds, the services it restarts. It is
+the block people read before running something as root, so it has to be exact.
 
 `target` only picks the icon shown next to "Runs on": a server for the Proxmox
 host, a container for a script that runs inside an LXC.
@@ -70,6 +82,12 @@ the pasted command line. Move a block to the top to feature it there.
 Edit its block in `data.js`. Only `updated` needs care: it is what shows up in
 "What's new", where each card is a link down to the script it talks about, so
 keep it to one short sentence.
+
+## Change the questions
+
+The "Questions people ask" section reads the `FAQ` list in `data.js`: one block
+per question, `q` and `a`, both bilingual. Add or remove blocks freely, the
+grid stays on two columns.
 
 ## Icons
 

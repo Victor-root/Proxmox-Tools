@@ -387,6 +387,41 @@ code {
 }
 .card-note .ico { width: 19px; height: 19px; color: var(--ansi-blue); margin-top: 1px; }
 
+/* folded by default: the exact paths the script writes, read before running */
+.touches {
+    background: var(--panel-2);
+    border: 1px solid var(--line-soft); border-radius: var(--radius-sm);
+}
+.touches summary {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; cursor: pointer; list-style: none;
+    font-size: 0.88rem; font-weight: 620; color: var(--fg-dim);
+    border-radius: var(--radius-sm);
+    transition: color .15s;
+}
+.touches summary::-webkit-details-marker { display: none; }
+.touches summary:hover { color: var(--fg); }
+.touches summary .ico { width: 18px; height: 18px; color: var(--orange); }
+.touch-caret { margin-left: auto; color: var(--fg-faint); transition: transform .2s; }
+.touches[open] .touch-caret { transform: rotate(180deg); }
+
+.touch-list { list-style: none; margin: 0; padding: 2px 14px 10px; display: flex; flex-direction: column; gap: 9px; }
+.touch-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 10px; font-size: 0.82rem; }
+.touch-list span { color: var(--fg-faint); }
+
+.touch-meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 5px 9px;
+    padding: 9px 14px; font-size: 0.8rem;
+    border-top: 1px solid var(--line-soft);
+}
+.touch-meta .ico { width: 16px; height: 16px; color: var(--fg-faint); }
+.touch-meta b { color: var(--fg-dim); font-weight: 620; }
+.touches code {
+    font-size: 0.76rem; color: var(--fg);
+    background: var(--code-bg); border-color: var(--line-soft);
+    word-break: break-all;
+}
+
 .run { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
 .run-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.09em; color: var(--fg-faint); font-weight: 650; }
 
@@ -425,13 +460,16 @@ code {
 .copy.done .ico-copy { display: none; }
 .copy.done .ico-done { display: block; }
 
-.card-links { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.87rem; }
-.card-links a {
+.card-links { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.87rem; }
+.card-links a, .card-links button {
     display: inline-flex; align-items: center; gap: 6px;
-    color: var(--fg-dim); text-decoration: none; border-bottom: 1px solid transparent;
+    color: var(--fg-dim); text-decoration: none;
+    border: 0; border-bottom: 1px solid transparent;
+    background: none; padding: 0; font: inherit; cursor: pointer;
     transition: color .15s, border-color .15s;
 }
-.card-links a:hover { color: var(--orange); border-color: var(--orange); }
+.card-links a:hover, .card-links button:hover { color: var(--orange); border-color: var(--orange); }
+.card-links button.done { color: var(--ansi-green); border-color: transparent; }
 .card-links .ico { width: 17px; height: 17px; }
 
 /* ---------- fake terminal, KDE Breeze style frame ---------- */
@@ -595,6 +633,19 @@ code {
     border-radius: var(--radius-sm); color: var(--fg-dim); font-size: 0.9rem;
 }
 .howto-note .ico { width: 20px; height: 20px; color: var(--ansi-amber); margin-top: 2px; }
+
+/* ---------- questions ---------- */
+
+/* two wide columns rather than three narrow ones: the answers are sentences */
+.faq { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 760px) { .faq { grid-template-columns: 1fr 1fr; } }
+.faq-item {
+    background: var(--panel); border: 1px solid var(--line-soft);
+    border-radius: var(--radius); padding: 22px;
+}
+.faq-item h3 { font-size: 1.02rem; display: flex; align-items: flex-start; gap: 11px; margin-bottom: 10px; }
+.faq-item h3 .ico { width: 20px; height: 20px; color: var(--orange); flex: none; margin-top: 1px; }
+.faq-item p { font-size: 0.92rem; color: var(--fg-dim); }
 
 /* ---------- footer ---------- */
 
