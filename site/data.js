@@ -411,7 +411,7 @@ const UI = {
     navNews: { en: "What's new", fr: 'Nouveautés' },
     navHowto: { en: 'Get started', fr: 'Démarrer' },
     navScripts: { en: 'Scripts', fr: 'Les scripts' },
-    navFaq: { en: 'Questions', fr: 'Questions' },
+    navFaq: 'FAQ',
 
     langLabel: { en: 'Language', fr: 'Langue' },
     themeLabel: { en: 'Theme', fr: 'Thème' },
@@ -499,7 +499,7 @@ const UI = {
         fr: 'Les scripts qui redémarrent pveproxy peuvent mettre jusqu’à une minute : Proxmox régénère ses certificats de cluster au démarrage. L’interface web est injoignable pendant ce temps, c’est normal.',
     },
 
-    faqTitle: { en: 'Questions people ask', fr: 'Les questions qu’on se pose' },
+    faqTitle: 'FAQ',
     faqLede: {
         en: 'What comes up most often before running one of these on a live server.',
         fr: 'Ce qui revient le plus souvent avant de lancer un de ces scripts sur un serveur en service.',
