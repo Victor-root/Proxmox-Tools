@@ -38,7 +38,8 @@
  * terminal.prompt   the question printed at the bottom
  *
  * The terminal shows the script exactly as it runs, so its text is NOT
- * translated: the Proxmox scripts print English, the WireGuard one French.
+ * translated: every script speaks the locale of the server, English by default,
+ * and that default is what the preview shows.
  * The first script of the list is also the one shown in the hero terminal.
  * ==========================================================================*/
 
@@ -314,28 +315,28 @@ const SCRIPTS = [
             banner: 'wireguard',
             theme: 'red',
             host: 'root@lxc-wireguard',
-            subtitle: 'Installation, configuration et gestion du serveur WireGuard',
+            subtitle: 'WireGuard server install, setup and management',
             panel: {
-                title: 'Les trois modes',
+                title: 'The three modes',
                 lines: [
-                    '1) Privé : seuls les appareils WireGuard communiquent entre eux.',
-                    '2) LAN : les clients peuvent accéder au réseau local derrière le serveur.',
-                    '3) Full tunnel : Internet des clients passe par le serveur.',
+                    '1) Private: only the WireGuard devices talk to each other.',
+                    '2) LAN: clients can reach the local network behind the server.',
+                    '3) Full tunnel: client Internet traffic goes through the server.',
                 ],
             },
             menu: [
-                'Installer ou reconfigurer le serveur WireGuard',
-                'Ajouter ou régénérer un client',
-                'Lister les clients et leur état',
-                'Afficher / re-scanner un client (config + QR)',
-                'Supprimer un client',
-                'Diagnostic (vérifier que tout marche)',
-                'Aide redirection de port',
-                'Sauvegarde / restauration de la configuration',
-                'Désinstaller le serveur WireGuard',
-                'Quitter',
+                'Install or reconfigure the WireGuard server',
+                'Add or regenerate a client',
+                'List the clients and their state',
+                'Show or re-scan a client (config + QR)',
+                'Delete a client',
+                'Diagnostic (check that everything works)',
+                'Port forwarding help',
+                'Backup and restore of the configuration',
+                'Uninstall the WireGuard server',
+                'Quit',
             ],
-            prompt: 'Votre choix [1]:',
+            prompt: 'Your choice [1]:',
         },
     },
 ];
