@@ -61,6 +61,16 @@ The run command, the "read the source" link and the history link are built from
 Edit its block in `data.js`. Only `updated` needs care: it is what shows up in
 the "What's new" list, so keep it to one short sentence.
 
+## Icons
+
+Icons come from [Tabler Icons](https://tabler.io/icons) (MIT). They live in one
+sprite at the top of `index.html`. To use a new one, copy its paths from Tabler
+into a `<symbol viewBox="0 0 24 24" id="i-name">`, then reference it anywhere
+with `<svg class="ico"><use href="#i-name"/></svg>`.
+
+A script card and its news card use the `icon` field of its block in `data.js`,
+which is the symbol name without the `i-` prefix.
+
 ## Add a new ASCII logo
 
 Only needed if a script ships a logo that is neither Proxmox nor WireGuard.

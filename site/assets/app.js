@@ -25,6 +25,9 @@
         return value[lang] !== undefined ? value[lang] : (value.en || '');
     };
 
+    const icon = (name, cls) =>
+        '<svg class="ico' + (cls ? ' ' + cls : '') + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
+
     const store = {
         get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
         set(key, value) { try { localStorage.setItem(key, value); } catch (e) {} },
@@ -144,9 +147,9 @@
     function windowButtons() {
         return [
             '<span class="term-btns" aria-hidden="true">',
-            '  <span class="term-btn min"><svg viewBox="0 0 16 16"><path d="M4 6.5l4 4 4-4"/></svg></span>',
-            '  <span class="term-btn max"><svg viewBox="0 0 16 16"><path d="M4 9.5l4-4 4 4"/></svg></span>',
-            '  <span class="term-btn close"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></span>',
+            '  <span class="term-btn min">' + icon('chevron-down') + '</span>',
+            '  <span class="term-btn max">' + icon('chevron-up') + '</span>',
+            '  <span class="term-btn close">' + icon('x') + '</span>',
             '</span>',
         ].join('\n');
     }
@@ -155,8 +158,12 @@
 
     function card(script) {
         const cmd = 'bash <(curl -fsSL ' + RAW_BASE + script.file + ')';
-        const points = tr(script.points).map((p) => '<li>' + esc(p) + '</li>').join('');
-        const note = script.note ? '<p class="card-note">' + esc(tr(script.note)) + '</p>' : '';
+        const points = tr(script.points)
+            .map((p) => '<li>' + icon('circle-check') + '<span>' + esc(p) + '</span></li>')
+            .join('');
+        const note = script.note
+            ? '<p class="card-note">' + icon('info') + '<span>' + esc(tr(script.note)) + '</span></p>'
+            : '';
         const host = script.terminal.banner === 'wireguard' ? 'root@lxc-wireguard: ~' : 'root@pve01: ~';
 
         return [
@@ -164,11 +171,11 @@
             '  <div class="card-grid">',
             '    <div class="card-info">',
             '      <div class="card-top">',
-            '        <h3 class="card-title">' + esc(tr(script.name)) + '</h3>',
+            '        <h3 class="card-title">' + icon(script.icon || 'code') + '<span>' + esc(tr(script.name)) + '</span></h3>',
             '        <span class="badge">' + esc(tr(script.compat)) + '</span>',
             '      </div>',
             '      <p class="card-tagline">' + esc(tr(script.tagline)) + '</p>',
-            '      <span class="runs-on"><b>' + esc(tr(UI.cardRunOn)) + '</b> ' + esc(tr(script.runsOn)) + '</span>',
+            '      <span class="runs-on">' + icon('server') + '<b>' + esc(tr(UI.cardRunOn)) + '</b> ' + esc(tr(script.runsOn)) + '</span>',
             '      <ul class="points">' + points + '</ul>',
             note,
             '      <div class="run">',
@@ -182,7 +189,7 @@
             '        </div>',
             '      </div>',
             '      <div class="card-links">',
-            '        <a href="' + BLOB_BASE + encodeURIComponent(script.file) + '" rel="noopener">' + esc(tr(UI.cardSource)) + '</a>',
+            '        <a href="' + BLOB_BASE + encodeURIComponent(script.file) + '" rel="noopener">' + icon('external') + esc(tr(UI.cardSource)) + '</a>',
             '      </div>',
             '    </div>',
             '    <div class="term-side">',
@@ -207,7 +214,17 @@
     function renderNews() {
         document.getElementById('news-list').innerHTML = SCRIPTS
             .filter((s) => s.updated)
-            .map((s) => '<li><a href="#' + esc(s.id) + '">' + esc(tr(s.name)) + '</a><p>' + esc(tr(s.updated)) + '</p></li>')
+            .map((s) => [
+                '<article class="news-card">',
+                '  <div class="news-top">',
+                '    <span class="news-icon">' + icon(s.icon || 'code') + '</span>',
+                '    <span class="news-name">' + esc(tr(s.name)) + '</span>',
+                '    <span class="news-badge">' + icon('sparkles') + esc(tr(UI.newsBadge)) + '</span>',
+                '  </div>',
+                '  <p class="news-body">' + esc(tr(s.updated)) + '</p>',
+                '  <a class="news-link" href="#' + esc(s.id) + '">' + esc(tr(UI.newsLink)) + icon('arrow-right') + '</a>',
+                '</article>',
+            ].join('\n'))
             .join('\n');
     }
 

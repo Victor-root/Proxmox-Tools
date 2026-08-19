@@ -11,6 +11,7 @@
  *
  * Fields of a script block
  *   id        anchor used in the URL, lowercase, no spaces
+ *   icon       Tabler icon key, see ICONS in index.html (browser, bell-off, …)
  *   file      exact file name inside scripts/, the run command is built from it
  *   name      short title shown on the card
  *   tagline   one line, what it does
@@ -42,6 +43,7 @@ const SITE = {
 const SCRIPTS = [
     {
         id: 'console-newtab',
+        icon: 'browser',
         file: 'pve-console-newtab.sh',
         name: {
             en: 'Console in a new tab',
@@ -95,6 +97,7 @@ const SCRIPTS = [
     },
     {
         id: 'subscription-notice',
+        icon: 'bell-off',
         file: 'pve-remove-subscription-notice.sh',
         name: {
             en: 'Remove the subscription notice',
@@ -158,6 +161,7 @@ const SCRIPTS = [
     },
     {
         id: 'default-language',
+        icon: 'language',
         file: 'pve-default-language-i18n',
         name: {
             en: 'Default language manager',
@@ -216,6 +220,7 @@ const SCRIPTS = [
     },
     {
         id: 'wireguard',
+        icon: 'shield-lock',
         file: 'lxc-wireguard-server-install.sh',
         name: {
             en: 'WireGuard VPN server',
@@ -304,10 +309,9 @@ const BANNERS = {
 
 /* Interface strings. Same rule: { en, fr }. */
 const UI = {
-    navScripts: { en: 'Scripts', fr: 'Les scripts' },
     navNews: { en: "What's new", fr: 'Nouveautés' },
-    navHowto: { en: 'How to run', fr: 'Comment lancer' },
-    navTrust: { en: 'Is it safe', fr: 'Est-ce sûr' },
+    navHowto: { en: 'Get started', fr: 'Démarrer' },
+    navScripts: { en: 'Scripts', fr: 'Les scripts' },
 
     langLabel: { en: 'Language', fr: 'Langue' },
     themeLabel: { en: 'Theme', fr: 'Thème' },
@@ -316,40 +320,40 @@ const UI = {
     themeDark: { en: 'Dark', fr: 'Sombre' },
 
     heroEyebrow: { en: 'Open source shell scripts', fr: 'Scripts shell open source' },
-    heroTitle1: { en: 'Small tools that make', fr: 'Des petits outils qui rendent' },
-    heroTitle2: { en: 'less annoying.', fr: 'moins pénible.' },
+    heroTitle1: { en: 'Handy scripts for everyday', fr: 'Des scripts pratiques pour' },
+    heroTitle2: { en: '', fr: 'au quotidien' },
     heroLede: {
-        en: 'Every tool is a single shell script. Copy one line, paste it in your Proxmox shell, follow the menu. Nothing is hidden: the source lives on GitHub and that is exactly what your server downloads.',
-        fr: 'Chaque outil est un simple script shell. Copiez une ligne, collez-la dans le shell de Proxmox, suivez le menu. Rien n’est caché : le code est sur GitHub, et c’est exactement ce que votre serveur télécharge.',
+        en: 'Each tool is one shell script. Copy a line, paste it in your Proxmox shell, let the menu guide you. Nothing is hidden: the source sits on GitHub, and that is exactly what your server downloads.',
+        fr: 'Chaque outil tient dans un seul script shell. Copiez une ligne, collez-la dans le shell de Proxmox, laissez le menu vous guider. Rien n’est caché : le code est sur GitHub, et c’est exactement ce que votre serveur télécharge.',
     },
     heroBtnScripts: { en: 'Browse the scripts', fr: 'Voir les scripts' },
     heroBtnSource: { en: 'Read the source', fr: 'Lire le code' },
-    factScripts: { en: 'scripts', fr: 'scripts' },
-    factDeps: { en: 'dependencies', fr: 'dépendances' },
-    factLicense: { en: 'no fork of Proxmox', fr: 'aucun fork de Proxmox' },
+    factScripts: { en: 'scripts ready to run', fr: 'scripts prêts à lancer' },
+    factDeps: { en: 'dependency to install', fr: 'dépendance à installer' },
+    factLicense: { en: 'open source, no fork of Proxmox', fr: 'open source, aucun fork de Proxmox' },
 
-    trust1Title: { en: 'You read it before you run it', fr: 'Vous le lisez avant de le lancer' },
+    trust1Title: { en: 'Read it before you run it', fr: 'Lisez-le avant de le lancer' },
     trust1Body: {
         en: 'Each card links to the exact file on GitHub. Same file, same branch, same content your server fetches.',
         fr: 'Chaque carte renvoie au fichier exact sur GitHub. Même fichier, même branche, même contenu que celui téléchargé par votre serveur.',
     },
-    trust2Title: { en: 'It runs from GitHub, not from here', fr: 'Ça tourne depuis GitHub, pas depuis ici' },
+    trust2Title: { en: 'Served by GitHub, not by this site', fr: 'Servi par GitHub, pas par ce site' },
     trust2Body: {
-        en: 'This site only shows you the command. The download always comes from raw.githubusercontent.com.',
-        fr: 'Ce site ne fait qu’afficher la commande. Le téléchargement vient toujours de raw.githubusercontent.com.',
+        en: 'This page only shows you the command. The download always comes from raw.githubusercontent.com.',
+        fr: 'Cette page ne fait qu’afficher la commande. Le téléchargement vient toujours de raw.githubusercontent.com.',
     },
-    trust3Title: { en: 'Nothing is one-way', fr: 'Rien n’est sans retour' },
+    trust3Title: { en: 'Every change can be undone', fr: 'Tout changement est réversible' },
     trust3Body: {
-        en: 'Scripts that change a Proxmox file take a backup first and restore it from their own menu.',
-        fr: 'Les scripts qui modifient un fichier Proxmox font un backup avant, et le restaurent depuis leur propre menu.',
+        en: 'Scripts that touch a Proxmox file save a copy first, and put it back from their own menu.',
+        fr: 'Les scripts qui touchent à un fichier Proxmox en gardent une copie, et la remettent depuis leur propre menu.',
     },
 
     scriptsTitle: { en: 'The scripts', fr: 'Les scripts' },
     scriptsLede: {
-        en: 'Pick one, copy the line, paste it as root. Every script opens a menu, nothing runs behind your back.',
-        fr: 'Choisissez-en un, copiez la ligne, collez-la en root. Chaque script ouvre un menu, rien ne s’exécute dans votre dos.',
+        en: 'Pick one, copy its line, paste it as root. Each script opens a menu and waits for you: nothing runs on its own.',
+        fr: 'Choisissez-en un, copiez sa ligne, collez-la en root. Chaque script ouvre un menu et vous attend : rien ne s’exécute tout seul.',
     },
-    cardRunOn: { en: 'Run it on', fr: 'À lancer' },
+    cardRunOn: { en: 'Runs on', fr: 'S’exécute sur' },
     cardCopyLabel: { en: 'Copy this line into your shell', fr: 'Copiez cette ligne dans votre shell' },
     cardCopy: { en: 'Copy the command', fr: 'Copier la commande' },
     cardCopied: { en: 'Copied', fr: 'Copié' },
@@ -357,16 +361,18 @@ const UI = {
     copyOk: { en: 'Command copied, paste it as root', fr: 'Commande copiée, collez-la en root' },
     copyFail: { en: 'Copy failed, select the line by hand', fr: 'Copie impossible, sélectionnez la ligne à la main' },
 
-    newsTitle: { en: "What's new", fr: 'Nouveautés' },
+    newsTitle: { en: "What's new", fr: 'Quoi de neuf' },
     newsLede: {
-        en: 'Latest change on each script. The full history is in the commits.',
-        fr: 'Dernier changement de chaque script. L’historique complet est dans les commits.',
+        en: 'The latest improvement on each script. Everything else lives in the commit history.',
+        fr: 'La dernière amélioration de chaque script. Tout le reste vit dans l’historique des commits.',
     },
+    newsBadge: { en: 'Latest', fr: 'Nouveau' },
+    newsLink: { en: 'See the script', fr: 'Voir le script' },
 
-    howtoTitle: { en: 'How to run one', fr: 'Comment en lancer un' },
+    howtoTitle: { en: 'Get started in three steps', fr: 'Démarrer en trois étapes' },
     howtoLede: {
-        en: 'Three steps, no installer, nothing left behind on your system.',
-        fr: 'Trois étapes, aucun installeur, rien qui traîne sur votre système.',
+        en: 'No installer, no package to add, nothing left behind on your system.',
+        fr: 'Aucun installeur, aucun paquet à ajouter, rien qui traîne sur votre système.',
     },
     step1Title: { en: 'Open a root shell', fr: 'Ouvrez un shell root' },
     step1Body: {
@@ -375,16 +381,16 @@ const UI = {
     },
     step2Title: { en: 'Paste the line', fr: 'Collez la ligne' },
     step2Body: {
-        en: 'Use the copy button on the card. The line downloads the script from GitHub and runs it, it installs nothing.',
-        fr: 'Utilisez le bouton Copier de la carte. La ligne télécharge le script depuis GitHub et l’exécute, elle n’installe rien.',
+        en: 'Use the copy button on the card. The line fetches the script from GitHub and runs it, it installs nothing.',
+        fr: 'Utilisez le bouton copier de la carte. La ligne récupère le script depuis GitHub et l’exécute, elle n’installe rien.',
     },
     step3Title: { en: 'Follow the menu', fr: 'Suivez le menu' },
     step3Body: {
-        en: 'Scripts that modify Proxmox ask for a confirmation and take a backup first. The same menu restores it.',
-        fr: 'Les scripts qui modifient Proxmox demandent confirmation et font un backup avant. Le même menu le restaure.',
+        en: 'Scripts that modify Proxmox ask for a confirmation and save a copy first. The same menu puts it back.',
+        fr: 'Les scripts qui modifient Proxmox demandent confirmation et gardent une copie avant. Le même menu la remet en place.',
     },
     howtoNote: {
-        en: 'Scripts that restart pveproxy can take up to a minute to finish: Proxmox refreshes its cluster certificates on start. The web interface is unreachable meanwhile, it is expected.',
+        en: 'Scripts that restart pveproxy can take up to a minute: Proxmox refreshes its cluster certificates on start. The web interface is unreachable meanwhile, it is expected.',
         fr: 'Les scripts qui redémarrent pveproxy peuvent mettre jusqu’à une minute : Proxmox régénère ses certificats de cluster au démarrage. L’interface web est injoignable pendant ce temps, c’est normal.',
     },
 
@@ -393,6 +399,7 @@ const UI = {
         en: 'Community project, not affiliated with, endorsed by or sponsored by Proxmox Server Solutions GmbH. Proxmox and the Proxmox logo are trademarks of Proxmox Server Solutions GmbH. These scripts are provided as is, without warranty: read them before running them.',
         fr: 'Projet communautaire, sans aucun lien avec Proxmox Server Solutions GmbH, ni approuvé ni sponsorisé par eux. Proxmox et le logo Proxmox sont des marques de Proxmox Server Solutions GmbH. Ces scripts sont fournis tels quels, sans garantie : lisez-les avant de les lancer.',
     },
+    footerIcons: { en: 'Icons by', fr: 'Icônes par' },
     footerRepo: { en: 'Repository', fr: 'Dépôt' },
     footerIssues: { en: 'Report a problem', fr: 'Signaler un problème' },
     footerProxmox: { en: 'Proxmox VE', fr: 'Proxmox VE' },

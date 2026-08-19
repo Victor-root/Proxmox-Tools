@@ -11,7 +11,7 @@
 <meta property="og:description" content="Open shell scripts for Proxmox VE. One line to run, source readable on GitHub.">
 <meta property="og:type" content="website">
 
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23e57000'/><g fill='%23140d06'><rect x='14' y='16' width='36' height='9' rx='2.5'/><rect x='14' y='28' width='36' height='9' rx='2.5'/><rect x='14' y='40' width='22' height='9' rx='2.5'/></g></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23e57000'/><g fill='none' stroke='%23140d06' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'><path d='M22 24l8 8l-8 8'/><path d='M34 42h10'/></g></svg>">
 
 <!-- Applied before first paint so the page never flashes the wrong theme. -->
 <script>
@@ -30,27 +30,45 @@
 </head>
 <body>
 
+<!-- Icons: Tabler Icons (tabler.io), MIT licence. Drawn once here, reused
+     through <use href="#i-name">. Add a new symbol to extend the set. -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol viewBox="0 0 24 24" id="i-terminal"><path d="M8 9l3 3l-3 3"/><path d="M13 15h3"/><rect x="3" y="4" width="18" height="16" rx="2"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-sparkles"><path d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2z"/><path d="M16 6a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2z"/><path d="M9 18a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6z"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-rocket"><path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"/><path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"/><path d="M15 9m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-code"><path d="M7 8l-4 4l4 4"/><path d="M17 8l4 4l-4 4"/><path d="M14 4l-4 16"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-shield"><path d="M11.46 20.85a12 12 0 0 1 -7.96 -14.85a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 1.22"/><path d="M15 19l2 2l4 -4"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-eye"><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-download"><path d="M19 18a3.5 3.5 0 0 0 0 -7h-1a5 4.5 0 0 0 -11 -2a4.6 4.4 0 0 0 -2.1 8.4"/><path d="M12 13v9"/><path d="M9 19l3 3l3 -3"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-restore"><path d="M9 14l-4 -4l4 -4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-copy"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8v-2a2 2 0 0 0 -2 -2h-8a2 2 0 0 0 -2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-check"><path d="M5 12l5 5l10 -10"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-circle-check"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M9 12l2 2l4 -4"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-github"><path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-sun"><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 12h1m8 -9v1m8 8h1m-9 8v1m-6.4 -15.4l.7 .7m12.1 -.7l-.7 .7m0 11.4l.7 .7m-12.1 -.7l-.7 .7"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-moon"><path d="M12 3c.13 0 .26 0 .39 0a7.5 7.5 0 0 0 7.92 12.45a9 9 0 1 1 -8.31 -12.45z"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-desktop"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M7 20h10"/><path d="M9 16v4"/><path d="M15 16v4"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-language"><path d="M4 5h7"/><path d="M9 3v2c0 4.42 -2.24 8 -5 8"/><path d="M5 9c0 2.14 2.95 3.91 6.7 4"/><path d="M12 20l4 -9l4 9"/><path d="M19.1 18h-6.2"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-server"><rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7v.01"/><path d="M7 17v.01"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-info"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 9h.01"/><path d="M11 12h1v4h1"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-external"><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"/><path d="M11 13l9 -9"/><path d="M15 4h5v5"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-chevron-down"><path d="M6 9l6 6l6 -6"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-chevron-up"><path d="M6 15l6 -6l6 6"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-x"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-browser"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M4 8h16"/><path d="M8 4v4"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-bell-off"><path d="M9 7a4 4 0 0 1 3.6 -2.2a4 4 0 0 1 4 4v1c0 1.2 .3 2 .8 2.8"/><path d="M6.5 6.5a4 4 0 0 0 -.5 2.3v1c0 2.5 -1 3.5 -2 5h13"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/><path d="M3 3l18 18"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-shield-lock"><path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3"/><path d="M12 11m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M12 12v2.5"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-arrow-right"><path d="M5 12h14"/><path d="M13 18l6 -6l-6 -6"/></symbol>
+    <symbol viewBox="0 0 24 24" id="i-clock"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 7v5l3 3"/></symbol>
+</svg>
+
 <a class="skip" href="#scripts" data-i18n="navScripts">Skip to the scripts</a>
 
 <header class="topbar">
   <div class="wrap topbar-inner">
 
     <a class="brand" href="#top" aria-label="Proxmox-Tools">
-      <svg class="brand-logo" viewBox="0 0 64 64" role="img" aria-hidden="true">
-        <defs>
-          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#ff9a2e"/>
-            <stop offset="1" stop-color="#c25e00"/>
-          </linearGradient>
-        </defs>
-        <rect width="64" height="64" rx="15" fill="url(#lg)"/>
-        <g fill="#160e06">
-          <rect x="14" y="16" width="36" height="9" rx="2.5"/>
-          <rect x="14" y="28" width="36" height="9" rx="2.5"/>
-          <rect x="14" y="40" width="22" height="9" rx="2.5"/>
-        </g>
-        <circle cx="44" cy="44.5" r="4" fill="#160e06"/>
-      </svg>
+      <span class="brand-logo" aria-hidden="true"><svg class="ico"><use href="#i-terminal"/></svg></span>
       <span class="brand-text">
         <span class="brand-name">Proxmox<span class="brand-accent">-Tools</span></span>
         <span class="brand-by">by Victor-root</span>
@@ -58,10 +76,9 @@
     </a>
 
     <nav class="topnav" aria-label="Main">
-      <a href="#news" data-i18n="navNews">What's new</a>
-      <a href="#howto" data-i18n="navHowto">How to run</a>
-      <a href="#scripts" data-i18n="navScripts">Scripts</a>
-      <a href="#trust" data-i18n="navTrust">Is it safe</a>
+      <a href="#news"><svg class="ico" aria-hidden="true"><use href="#i-sparkles"/></svg><span data-i18n="navNews">What's new</span></a>
+      <a href="#howto"><svg class="ico" aria-hidden="true"><use href="#i-rocket"/></svg><span data-i18n="navHowto">Get started</span></a>
+      <a href="#scripts"><svg class="ico" aria-hidden="true"><use href="#i-code"/></svg><span data-i18n="navScripts">Scripts</span></a>
     </nav>
 
     <div class="controls">
@@ -74,20 +91,12 @@
 
       <div class="seg" role="group" id="theme-seg">
         <span class="seg-label" data-i18n="themeLabel">Theme</span>
-        <button type="button" data-theme-mode="system" data-i18n-title="themeSystem" title="System">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v11H3z"/><path d="M9 20h6M12 16v4"/></svg>
-        </button>
-        <button type="button" data-theme-mode="light" data-i18n-title="themeLight" title="Light">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M19.1 4.9l-1.9 1.9M6.8 17.2l-1.9 1.9"/></svg>
-        </button>
-        <button type="button" data-theme-mode="dark" data-i18n-title="themeDark" title="Dark">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13.5A8.2 8.2 0 0 1 10.5 4a8.2 8.2 0 1 0 9.5 9.5z"/></svg>
-        </button>
+        <button type="button" data-theme-mode="system" data-i18n-title="themeSystem" title="System"><svg class="ico" aria-hidden="true"><use href="#i-desktop"/></svg></button>
+        <button type="button" data-theme-mode="light" data-i18n-title="themeLight" title="Light"><svg class="ico" aria-hidden="true"><use href="#i-sun"/></svg></button>
+        <button type="button" data-theme-mode="dark" data-i18n-title="themeDark" title="Dark"><svg class="ico" aria-hidden="true"><use href="#i-moon"/></svg></button>
       </div>
 
-      <a class="ghlink" id="nav-repo" href="#" rel="noopener" aria-label="GitHub">
-        <svg viewBox="0 0 16 16" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
-      </a>
+      <a class="ghlink" id="nav-repo" href="#" rel="noopener" aria-label="GitHub"><svg class="ico" aria-hidden="true"><use href="#i-github"/></svg></a>
 
     </div>
   </div>
@@ -99,17 +108,32 @@
     <div class="wrap hero-inner">
       <div class="hero-text">
         <p class="eyebrow"><span class="dot"></span> <span data-i18n="heroEyebrow">Open source shell scripts</span></p>
-        <h1><span data-i18n="heroTitle1">Small tools that make</span> <span class="grad">Proxmox VE</span> <span data-i18n="heroTitle2">less annoying.</span></h1>
+        <h1><span data-i18n="heroTitle1">Handy scripts for everyday</span> <span class="grad">Proxmox VE</span> <span data-i18n="heroTitle2"></span></h1>
         <p class="lede" data-i18n="heroLede"></p>
         <div class="hero-cta">
-          <a class="btn btn-primary" href="#scripts" data-i18n="heroBtnScripts">Browse the scripts</a>
-          <a class="btn btn-ghost" id="hero-repo" href="#" rel="noopener" data-i18n="heroBtnSource">Read the source</a>
+          <a class="btn btn-primary" href="#scripts">
+            <svg class="ico" aria-hidden="true"><use href="#i-code"/></svg>
+            <span data-i18n="heroBtnScripts">Browse the scripts</span>
+          </a>
+          <a class="btn btn-ghost" id="hero-repo" href="#" rel="noopener">
+            <svg class="ico" aria-hidden="true"><use href="#i-github"/></svg>
+            <span data-i18n="heroBtnSource">Read the source</span>
+          </a>
         </div>
       </div>
       <ul class="hero-facts">
-        <li><strong id="fact-count">0</strong><span data-i18n="factScripts">scripts</span></li>
-        <li><strong>0</strong><span data-i18n="factDeps">dependencies</span></li>
-        <li><strong>AGPL</strong><span data-i18n="factLicense">no fork of Proxmox</span></li>
+        <li>
+          <svg class="ico" aria-hidden="true"><use href="#i-code"/></svg>
+          <strong id="fact-count">0</strong><span data-i18n="factScripts">scripts ready to run</span>
+        </li>
+        <li>
+          <svg class="ico" aria-hidden="true"><use href="#i-download"/></svg>
+          <strong>0</strong><span data-i18n="factDeps">dependency to install</span>
+        </li>
+        <li>
+          <svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg>
+          <strong>AGPL</strong><span data-i18n="factLicense">open source</span>
+        </li>
       </ul>
     </div>
     <div class="hero-glow" aria-hidden="true"></div>
@@ -118,15 +142,15 @@
   <section class="strip" id="trust">
     <div class="wrap strip-inner">
       <div class="strip-card">
-        <h3><span class="ico" aria-hidden="true">◎</span> <span data-i18n="trust1Title"></span></h3>
+        <h3><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg> <span data-i18n="trust1Title"></span></h3>
         <p data-i18n="trust1Body"></p>
       </div>
       <div class="strip-card">
-        <h3><span class="ico" aria-hidden="true">⤿</span> <span data-i18n="trust2Title"></span></h3>
+        <h3><svg class="ico" aria-hidden="true"><use href="#i-download"/></svg> <span data-i18n="trust2Title"></span></h3>
         <p data-i18n="trust2Body"></p>
       </div>
       <div class="strip-card">
-        <h3><span class="ico" aria-hidden="true">⟲</span> <span data-i18n="trust3Title"></span></h3>
+        <h3><svg class="ico" aria-hidden="true"><use href="#i-restore"/></svg> <span data-i18n="trust3Title"></span></h3>
         <p data-i18n="trust3Body"></p>
       </div>
     </div>
@@ -135,32 +159,47 @@
   <section class="section section-alt" id="news">
     <div class="wrap">
       <header class="section-head">
-        <h2 data-i18n="newsTitle">What's new</h2>
+        <h2><svg class="ico head-ico" aria-hidden="true"><use href="#i-sparkles"/></svg> <span data-i18n="newsTitle">What's new</span></h2>
         <p data-i18n="newsLede"></p>
       </header>
-      <ul class="news" id="news-list"></ul>
+      <div class="news" id="news-list"></div>
     </div>
   </section>
 
   <section class="section" id="howto">
     <div class="wrap">
       <header class="section-head">
-        <h2 data-i18n="howtoTitle">How to run one</h2>
+        <h2><svg class="ico head-ico" aria-hidden="true"><use href="#i-rocket"/></svg> <span data-i18n="howtoTitle">Get started in three steps</span></h2>
         <p data-i18n="howtoLede"></p>
       </header>
       <ol class="steps">
-        <li><span class="step-n">1</span><h3 data-i18n="step1Title"></h3><p data-i18n="step1Body"></p></li>
-        <li><span class="step-n">2</span><h3 data-i18n="step2Title"></h3><p data-i18n="step2Body"></p></li>
-        <li><span class="step-n">3</span><h3 data-i18n="step3Title"></h3><p data-i18n="step3Body"></p></li>
+        <li>
+          <span class="step-n">1</span>
+          <h3 data-i18n="step1Title"></h3>
+          <p data-i18n="step1Body"></p>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <h3 data-i18n="step2Title"></h3>
+          <p data-i18n="step2Body"></p>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <h3 data-i18n="step3Title"></h3>
+          <p data-i18n="step3Body"></p>
+        </li>
       </ol>
-      <p class="howto-note" data-i18n="howtoNote"></p>
+      <p class="howto-note">
+        <svg class="ico" aria-hidden="true"><use href="#i-clock"/></svg>
+        <span data-i18n="howtoNote"></span>
+      </p>
     </div>
   </section>
 
   <section class="section section-alt" id="scripts">
     <div class="wrap">
       <header class="section-head">
-        <h2 data-i18n="scriptsTitle">The scripts</h2>
+        <h2><svg class="ico head-ico" aria-hidden="true"><use href="#i-code"/></svg> <span data-i18n="scriptsTitle">The scripts</span></h2>
         <p data-i18n="scriptsLede"></p>
       </header>
       <div class="cards" id="cards"></div>
@@ -176,13 +215,17 @@
       <p class="footer-by"><span data-i18n="footerBy">Built by</span> <a id="foot-author" href="#" rel="noopener">Victor-root</a></p>
     </div>
     <nav class="footer-links">
-      <a id="foot-repo" href="#" rel="noopener" data-i18n="footerRepo">Repository</a>
-      <a id="foot-issues" href="#" rel="noopener" data-i18n="footerIssues">Report a problem</a>
-      <a href="https://www.proxmox.com/" rel="noopener" data-i18n="footerProxmox">Proxmox VE</a>
+      <a id="foot-repo" href="#" rel="noopener"><svg class="ico" aria-hidden="true"><use href="#i-github"/></svg><span data-i18n="footerRepo">Repository</span></a>
+      <a id="foot-issues" href="#" rel="noopener"><svg class="ico" aria-hidden="true"><use href="#i-info"/></svg><span data-i18n="footerIssues">Report a problem</span></a>
+      <a href="https://www.proxmox.com/" rel="noopener"><svg class="ico" aria-hidden="true"><use href="#i-external"/></svg><span data-i18n="footerProxmox">Proxmox VE</span></a>
     </nav>
   </div>
   <div class="wrap">
     <p class="disclaimer" data-i18n="footerDisclaimer"></p>
+    <p class="credits">
+      <span data-i18n="footerIcons">Icons by</span>
+      <a href="https://tabler.io/icons" rel="noopener">Tabler Icons</a> (MIT).
+    </p>
   </div>
 </footer>
 
