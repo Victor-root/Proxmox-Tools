@@ -29,6 +29,7 @@
     --radius: 16px;
     --radius-sm: 10px;
     --maxw: 1440px;
+    --topbar-h: 64px;   /* the sticky bar adds a 1px border under it */
 
     /* Scrollbar, same recipe as victor-root.github.io/Omnify: a thin bar with
        no arrow buttons, a track faintly tinted with the accent, and a gradient
@@ -106,8 +107,11 @@
 }
 
 html { scroll-behavior: smooth; }
-/* every anchor target clears the sticky header instead of hiding under it */
-section[id], .card { scroll-margin-top: 86px; }
+/* An anchored section tucks exactly under the sticky bar, border included, so
+   no strip of the previous section stays visible above it. A card is a panel
+   inside a section, it keeps a bit of air instead of touching the bar. */
+main[id], section[id] { scroll-margin-top: calc(var(--topbar-h) + 1px); }
+.card { scroll-margin-top: calc(var(--topbar-h) + 21px); }
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     * { animation: none !important; transition: none !important; }
@@ -158,7 +162,7 @@ code {
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--line-soft);
 }
-.topbar-inner { display: flex; align-items: center; gap: 16px; height: 64px; }
+.topbar-inner { display: flex; align-items: center; gap: 16px; height: var(--topbar-h); }
 
 .brand { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; font-weight: 700; flex-shrink: 0; }
 .brand-logo {
@@ -338,7 +342,6 @@ code {
     border: 1px solid var(--line-soft);
     border-radius: var(--radius);
     overflow: hidden;
-    scroll-margin-top: 84px;
     transition: border-color .2s;
 }
 .card:hover { border-color: var(--line); }
