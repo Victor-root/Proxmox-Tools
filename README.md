@@ -219,6 +219,7 @@ Installs **Fastfetch** and turns it into a clean Proxmox summary displayed every
 * 🎨 writes a ready-to-use Proxmox themed configuration, split in three blocks: hypervisor info, physical resources, network and access
 * 📊 live values: PVE version, CPU temperature and usage, RAM, swap, storage, ZFS pool health, bridge state, local and public IP, DNS, Fail2ban jails
 * 🔐 optional **HTTPS certificate check** on a FQDN you provide, which reads only the public certificate presented by your reverse proxy, never a private key
+* ✍️ or **paste your own** `config.jsonc` straight into the menu: Fastfetch checks it, and it replaces the generated one only if it is valid
 * 🐚 displayed only in **interactive root shells**, never during scripts, file transfers or automation
 * 🧹 disables the old Debian MOTD, with the original state saved for a later restore
 * ♻️ two removal levels: stop the display at every shell session and keep Fastfetch, or remove everything and uninstall the package
