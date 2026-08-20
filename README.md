@@ -1,13 +1,44 @@
-# 🚀 Proxmox-Tools
+<div align="center">
 
-> A growing hub of useful shell scripts for **Proxmox VE**.
->
-> Fast to run. Easy to reuse. Built for real-world homelab and admin workflows.
+<h1>🚀 Proxmox-Tools</h1>
 
-### 🌐 [Browse the scripts on the website](https://victor-root.github.io/Proxmox-Tools/)
+<p>
+  <b>A growing hub of useful shell scripts for Proxmox VE.</b><br>
+  Fast to run. Easy to reuse. Built for real-world homelab and admin workflows.
+</p>
 
-Every script with what it does, what it writes on your machine, the line to run
-it and a preview of its menu. Same files as this repository, nothing else.
+<p>
+  <a href="https://victor-root.github.io/Proxmox-Tools/"><img src="https://img.shields.io/badge/Browse%20the%20scripts-victor--root.github.io-E57000?style=for-the-badge&logo=github&logoColor=white" alt="Browse the scripts on the website"></a>
+</p>
+
+<p>
+  <a href="https://victor-root.github.io/Proxmox-Tools/"><img src="https://img.shields.io/badge/Proxmox%20VE-8.x%20%7C%209.x-E57000?style=for-the-badge&logo=proxmox&logoColor=white" alt="Proxmox VE 8.x and 9.x"></a>
+  <a href="https://victor-root.github.io/Proxmox-Tools/"><img src="https://img.shields.io/badge/Debian-12%20%7C%2013-A81D33?style=for-the-badge&logo=debian&logoColor=white" alt="Debian 12 and 13"></a>
+  <a href="https://github.com/Victor-root/Proxmox-Tools/tree/main/scripts"><img src="https://img.shields.io/badge/Bash-no%20dependency-4EAA25?style=for-the-badge&logo=gnubash&logoColor=white" alt="Plain Bash, no dependency to install"></a>
+</p>
+
+<p>
+  <a href="https://github.com/Victor-root/Proxmox-Tools/tree/main/scripts"><img src="https://img.shields.io/github/directory-file-count/Victor-root/Proxmox-Tools/scripts?style=for-the-badge&logo=gnometerminal&logoColor=white&label=scripts&color=555555" alt="Number of scripts"></a>
+  <a href="https://github.com/Victor-root/Proxmox-Tools/commits/main"><img src="https://img.shields.io/github/last-commit/Victor-root/Proxmox-Tools/main?style=for-the-badge&logo=git&logoColor=white&label=last%20update&color=555555" alt="Last update"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL%20v3-555555?style=for-the-badge&logo=gnu&logoColor=white" alt="GNU AGPL v3 license"></a>
+</p>
+
+<a href="https://victor-root.github.io/Proxmox-Tools/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/website-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset=".github/assets/website-light.png">
+    <img src=".github/assets/website-dark.png" alt="The Proxmox-Tools website: every script with its command and a preview of its menu" width="820">
+  </picture>
+</a>
+
+<p>
+  <b><a href="https://victor-root.github.io/Proxmox-Tools/">victor-root.github.io/Proxmox-Tools</a></b><br>
+  Every script with what it does, what it writes on your machine, the line to run it
+  and a preview of its menu.<br>
+  In English and French, light and dark. Same files as this repository, nothing else.
+</p>
+
+</div>
 
 ---
 
@@ -162,6 +193,42 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 > ⚠️ Run it as **root inside the target LXC** (not on the Proxmox host). On an **unprivileged** container, WireGuard needs `/dev/net/tun` passed through: the script detects this and shows the exact `pct set` commands to run on the host if needed.
 
 </details>
+
+<details>
+<summary><b>🖥️ Fastfetch summary on every root shell</b></summary>
+
+**Script:** `pve-fastfetch-motd.sh`
+
+Installs **Fastfetch** and turns it into a clean Proxmox summary displayed every time a root shell opens:
+
+* 📦 installs the **latest stable Fastfetch release** from GitHub, with automatic **architecture detection** (amd64, arm64, armhf, ppc64el, riscv64, s390x)
+* 🎨 writes a ready-to-use Proxmox themed configuration, split in three blocks: hypervisor info, physical resources, network and access
+* 📊 live values: PVE version, CPU temperature and usage, RAM, swap, storage, ZFS pool health, bridge state, local and public IP, DNS, Fail2ban jails
+* 🔐 optional **HTTPS certificate check** on a FQDN you provide, which reads only the public certificate presented by your reverse proxy, never a private key
+* 🐚 displayed only in **interactive root shells**, never during scripts, file transfers or automation
+* 🧹 disables the old Debian MOTD, with the original state saved for a later restore
+* ♻️ two removal levels: stop the display at every shell session and keep Fastfetch, or remove everything and uninstall the package
+* 💾 automatic **backup** of an existing Fastfetch configuration before writing
+* 🌍 interface and generated labels in English or French, following the server locale
+* 📋 interactive menu
+
+#### Version compatibility
+
+The script only relies on `pveversion`, `apt` and the official Fastfetch packages, so it behaves the same on Proxmox VE **8.x and 9.x**.
+
+It stops with a clear message when it is not run as root on a Proxmox VE host, and running it again is safe: an up-to-date Fastfetch is not downloaded twice, and the login hook and MOTD changes are simply re-applied.
+
+The bridge shown in the network block is detected from the default route, with `vmbr0` as fallback, and no domain, IP or hostname is ever hard coded in the script.
+
+#### Run it directly
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-fastfetch-motd.sh)
+```
+
+> ℹ️ Open a new root shell after the installation to see the result.
+
+</details>
 ---
 
 ## 📂 Repository philosophy
@@ -246,6 +313,16 @@ Good contributions are usually:
 * easy to understand
 * safe to test
 * easy to remove or rollback
+
+---
+
+## 📄 License
+
+This repository is published under the **GNU Affero General Public License v3.0**.
+The full text is in [LICENSE](LICENSE).
+
+You can use, study, change and share these scripts, as long as what you share
+stays under the same license and keeps the credit.
 
 ---
 
