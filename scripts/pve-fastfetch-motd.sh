@@ -47,6 +47,9 @@ tr_msg() {
         fr:menu_cert) echo "Configurer le module certificat HTTPS (FQDN)" ;;
         en:menu_cert) echo "Configure the HTTPS certificate module (FQDN)" ;;
 
+        fr:menu_custom) echo "Utiliser ma propre configuration (copier-coller)" ;;
+        en:menu_custom) echo "Use my own configuration (paste it)" ;;
+
         fr:menu_preview) echo "Aperçu de l'affichage Fastfetch" ;;
         en:menu_preview) echo "Preview the Fastfetch output" ;;
 
@@ -217,6 +220,42 @@ tr_msg() {
 
         fr:cert_disabled) echo "Module certificat désactivé." ;;
         en:cert_disabled) echo "Certificate module disabled." ;;
+
+        fr:paste_title) echo "COLLER VOTRE PROPRE CONFIGURATION" ;;
+        en:paste_title) echo "PASTE YOUR OWN CONFIGURATION" ;;
+
+        fr:paste_body_1) echo "Collez ici le contenu complet de votre fichier config.jsonc." ;;
+        en:paste_body_1) echo "Paste here the whole content of your config.jsonc file." ;;
+
+        fr:paste_body_2) echo "Pour terminer, tapez EOF seul sur une ligne, ou faites Ctrl+D." ;;
+        en:paste_body_2) echo "To finish, type EOF alone on a line, or press Ctrl+D." ;;
+
+        fr:paste_body_3) echo "Rien de collé : rien ne change. La configuration actuelle est sauvegardée avant d'être remplacée." ;;
+        en:paste_body_3) echo "Nothing pasted means nothing changes. The current configuration is backed up before being replaced." ;;
+
+        fr:paste_waiting) echo "En attente de votre configuration..." ;;
+        en:paste_waiting) echo "Waiting for your configuration..." ;;
+
+        fr:paste_empty) echo "Rien n'a été collé, aucune modification." ;;
+        en:paste_empty) echo "Nothing was pasted, no change." ;;
+
+        fr:paste_received) echo "Lignes reçues" ;;
+        en:paste_received) echo "Lines received" ;;
+
+        fr:paste_checking) echo "Vérification de la configuration" ;;
+        en:paste_checking) echo "Checking the configuration" ;;
+
+        fr:paste_invalid) echo "Fastfetch refuse cette configuration, rien n'a été écrit." ;;
+        en:paste_invalid) echo "Fastfetch rejects this configuration, nothing was written." ;;
+
+        fr:paste_installed) echo "Votre configuration est en place" ;;
+        en:paste_installed) echo "Your configuration is in place" ;;
+
+        fr:paste_login_hint) echo "L'affichage à l'ouverture d'un shell root n'est pas actif. Utilisez l'option 1 pour l'activer." ;;
+        en:paste_login_hint) echo "The display on root shell login is not active. Use option 1 to turn it on." ;;
+
+        fr:preview_question) echo "Afficher un aperçu maintenant ?" ;;
+        en:preview_question) echo "Show a preview now?" ;;
 
         fr:status_title) echo "État" ;;
         en:status_title) echo "Status" ;;
@@ -505,6 +544,11 @@ step() {
     else
         printf "%b›%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$label"
         "$@" >"$log" 2>&1 || rc=$?
+        if [[ "$rc" -eq 0 ]]; then
+            printf "%b✓%b %s\n" "${PMX_GREEN}" "${RESET}" "$label"
+        else
+            printf "%b✗%b %s\n" "${PMX_RED}" "${RESET}" "$label"
+        fi
     fi
 
     if [[ "$rc" -ne 0 ]]; then
@@ -1233,6 +1277,74 @@ configure_cert() {
     return 0
 }
 
+# Fastfetch itself is the judge: a configuration it refuses to parse never
+# reaches the file the login shells read.
+config_is_accepted() {
+    local candidate="$1" errors
+    errors="$(fastfetch --config "$candidate" 2>&1 >/dev/null || true)"
+    [[ -z "$errors" ]] && return 0
+    printf '%s\n' "$errors" | sed -e 's/^/  /' >&2
+    return 1
+}
+
+paste_custom_config() {
+    local workdir candidate line lines=0
+
+    if ! fastfetch_is_installed; then
+        say_err "$(tr_msg need_install_first)"
+        return 1
+    fi
+
+    panel "$PMX_BLUE" "$(tr_msg paste_title)" \
+        "$(tr_msg paste_body_1)" \
+        "$(tr_msg paste_body_2)" \
+        "$(tr_msg paste_body_3)"
+    echo
+    say_info "$(tr_msg paste_waiting)"
+    echo
+
+    # Fastfetch only reads a config whose name carries a known extension.
+    workdir="$(mktemp -d)"
+    candidate="${workdir}/config.jsonc"
+
+    while IFS= read -r line; do
+        [[ "$line" == "EOF" ]] && break
+        printf '%s\n' "$line" >>"$candidate"
+        lines=$((lines + 1))
+    done
+
+    if [[ ! -s "$candidate" ]]; then
+        rm -rf "$workdir"
+        echo
+        say_info "$(tr_msg paste_empty)"
+        return 0
+    fi
+
+    echo
+    say_info "$(tr_msg paste_received): ${BOLD}${lines}${RESET}"
+
+    if ! step "$(tr_msg paste_checking)" config_is_accepted "$candidate"; then
+        rm -rf "$workdir"
+        say_err "$(tr_msg paste_invalid)"
+        return 1
+    fi
+
+    backup_current_config
+
+    mkdir -p "$CONFIG_DIR"
+    cp -a "$candidate" "$CONFIG_FILE"
+    rm -rf "$workdir"
+    chmod 0644 "$CONFIG_FILE"
+
+    say_ok "$(tr_msg paste_installed): ${PMX_CYAN}${CONFIG_FILE}${RESET}"
+    profile_is_managed || say_warn "$(tr_msg paste_login_hint)"
+
+    if confirm_default_yes "$(tr_msg preview_question)"; then
+        echo
+        fastfetch --config "$CONFIG_FILE"
+    fi
+}
+
 preview_fastfetch() {
     if ! fastfetch_is_installed; then
         say_err "$(tr_msg need_install_first)"
@@ -1355,14 +1467,15 @@ main_menu() {
         show_banner
         printf " %b1)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_install)"
         printf " %b2)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_cert)"
-        printf " %b3)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_preview)"
-        printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
-        printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_disable_login)"
-        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_remove_all)"
-        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b3)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_custom)"
+        printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_preview)"
+        printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
+        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_disable_login)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_remove_all)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-7]: " choice
+        read -r -p "$(tr_msg choose_option) [1-8]: " choice
         echo
 
         case "$choice" in
@@ -1375,22 +1488,26 @@ main_menu() {
                 pause
                 ;;
             3)
-                menu_action preview_fastfetch
+                menu_action paste_custom_config
                 pause
                 ;;
             4)
-                menu_action show_status
+                menu_action preview_fastfetch
                 pause
                 ;;
             5)
-                menu_action disable_login_display
+                menu_action show_status
                 pause
                 ;;
             6)
-                menu_action remove_everything
+                menu_action disable_login_display
                 pause
                 ;;
             7)
+                menu_action remove_everything
+                pause
+                ;;
+            8)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;

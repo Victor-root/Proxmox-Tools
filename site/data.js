@@ -358,22 +358,22 @@ const SCRIPTS = [
         },
         compat: 'PVE 8.x / 9.x',
         updated: {
-            en: 'New script. Latest stable Fastfetch, package architecture detected, optional HTTPS certificate check.',
-            fr: 'Nouveau script. Dernière version stable de Fastfetch, architecture du paquet détectée, contrôle de certificat HTTPS optionnel.',
+            en: 'New script. Latest stable Fastfetch, optional HTTPS certificate check, or paste your own configuration.',
+            fr: 'Nouveau script. Dernière version stable de Fastfetch, contrôle de certificat HTTPS optionnel, ou collez votre propre configuration.',
         },
         points: {
             en: [
                 'Installs the latest stable Fastfetch release, for your CPU architecture',
                 'PVE version, CPU usage and temperature, ZFS health, bridge, IPs, Fail2ban jails',
                 'Optional expiry check of the certificate served over HTTPS, never a private key',
-                'Printed in interactive root shells only, never during transfers or automation',
+                'Or paste your own config.jsonc, checked by Fastfetch before it replaces anything',
                 'Two removal levels: stop the display, or remove everything and uninstall the package',
             ],
             fr: [
                 'Installe la dernière version stable de Fastfetch, pour votre architecture',
                 'Version PVE, charge et température CPU, santé ZFS, bridge, IP, prisons Fail2ban',
                 'Contrôle optionnel de l’expiration du certificat servi en HTTPS, jamais de clé privée',
-                'Affiché uniquement dans les shells root interactifs, jamais pendant un transfert ou un script',
+                'Ou collez votre propre config.jsonc, vérifiée par Fastfetch avant de remplacer quoi que ce soit',
                 'Deux niveaux de suppression : arrêter l’affichage, ou tout retirer et désinstaller le paquet',
             ],
         },
@@ -408,13 +408,14 @@ const SCRIPTS = [
             menu: [
                 'Install / update Fastfetch and the login display',
                 'Configure the HTTPS certificate module (FQDN)',
+                'Use my own configuration (paste it)',
                 'Preview the Fastfetch output',
                 'Show status',
                 'Disable the display on every shell session (keep Fastfetch)',
                 'Remove everything (display, configuration and Fastfetch)',
                 'Quit',
             ],
-            prompt: 'Choose an option [1-7]:',
+            prompt: 'Choose an option [1-8]:',
         },
     },
 ];
