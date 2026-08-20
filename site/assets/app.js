@@ -201,7 +201,7 @@
             '  <ul class="touch-list">' + files + '</ul>',
             t.installs ? meta('package', UI.touchesInstalls, t.installs) : '',
             meta('archive', UI.touchesBackup, t.backup),
-            meta('refresh', UI.touchesRestarts, t.restarts),
+            t.restarts ? meta('refresh', UI.touchesRestarts, t.restarts) : '',
             '</details>',
         ].join('\n');
     }
