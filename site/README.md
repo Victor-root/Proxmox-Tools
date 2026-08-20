@@ -65,7 +65,8 @@ The run command, the "read the source" link and the history link are built from
 },
 ```
 
-`panel`, `note` and `touches.installs` can be removed if the script has none.
+`panel`, `note`, `touches.installs` and `touches.restarts` can be removed if the
+script has none.
 
 Fill `touches` from the script itself, never from memory: the paths at the top
 of the file, the backup directory it builds, the services it restarts. It is
@@ -116,6 +117,14 @@ cd site && python3 -m http.server 8000
 
 Then open `http://localhost:8000`. Editing `data.js` and reloading is enough,
 there is nothing to rebuild.
+
+## The screenshot shown in the main README
+
+`.github/assets/website-dark.png` and `website-light.png` are the picture of
+this page displayed at the top of the repository README, one per browser theme.
+Refresh them when the top of the page changes: serve the site locally, take the
+first 1280 x 640 pixels of the window in each theme, at twice the resolution,
+and compress them so each file stays around 150 kB.
 
 ## First deploy
 

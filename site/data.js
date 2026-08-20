@@ -27,7 +27,7 @@
  * touches.files    [{ path, role }], every file the script writes or creates
  * touches.installs optional, the packages it adds
  * touches.backup   where the copy it keeps before changing anything goes
- * touches.restarts the services it restarts
+ * touches.restarts optional, the services it restarts
  *
  * terminal.banner   "proxmox" or "wireguard", the ASCII logo to draw
  * terminal.theme    "orange" (Proxmox scripts) or "red" (WireGuard script)
@@ -348,6 +348,84 @@ const SCRIPTS = [
                 'Quit',
             ],
             prompt: 'Your choice [1]:',
+        },
+    },
+    {
+        id: 'fastfetch-motd',
+        icon: 'terminal',
+        file: 'pve-fastfetch-motd.sh',
+        target: 'pve',
+        name: {
+            en: 'Fastfetch summary at login',
+            fr: 'Résumé Fastfetch à la connexion',
+        },
+        tagline: {
+            en: 'Replaces the old Debian MOTD with a live summary of the node, printed when a root shell opens.',
+            fr: 'Remplace l’ancien MOTD Debian par un résumé à jour du nœud, affiché à l’ouverture d’un shell root.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 8.x / 9.x',
+        updated: {
+            en: 'New script. Latest stable Fastfetch, package architecture detected, optional HTTPS certificate check.',
+            fr: 'Nouveau script. Dernière version stable de Fastfetch, architecture du paquet détectée, contrôle de certificat HTTPS optionnel.',
+        },
+        points: {
+            en: [
+                'Installs the latest stable Fastfetch release, for your CPU architecture',
+                'PVE version, CPU usage and temperature, ZFS health, bridge, IPs, Fail2ban jails',
+                'Optional expiry check of the certificate served over HTTPS, never a private key',
+                'Printed in interactive root shells only, never during transfers or automation',
+                'Two removal levels: stop the display, or remove everything and uninstall the package',
+            ],
+            fr: [
+                'Installe la dernière version stable de Fastfetch, pour votre architecture',
+                'Version PVE, charge et température CPU, santé ZFS, bridge, IP, prisons Fail2ban',
+                'Contrôle optionnel de l’expiration du certificat servi en HTTPS, jamais de clé privée',
+                'Affiché uniquement dans les shells root interactifs, jamais pendant un transfert ou un script',
+                'Deux niveaux de suppression : arrêter l’affichage, ou tout retirer et désinstaller le paquet',
+            ],
+        },
+        touches: {
+            files: [
+                { path: '/root/.config/fastfetch/config.jsonc', role: { en: 'created, what the summary shows', fr: 'créé, le contenu du résumé' } },
+                { path: '/etc/profile.d/99-fastfetch-motd.sh', role: { en: 'created, prints the summary in interactive root shells', fr: 'créé, affiche le résumé dans les shells root interactifs' } },
+                { path: '/etc/motd', role: { en: 'emptied, saved beforehand and put back on removal', fr: 'vidé, sauvegardé avant et remis lors de la suppression' } },
+                { path: '/etc/update-motd.d/10-uname', role: { en: 'execute bit removed, given back on removal', fr: 'droit d’exécution retiré, rendu lors de la suppression' } },
+            ],
+            installs: 'fastfetch',
+            backup: '/root/pve-fastfetch-motd-backup-original/',
+        },
+        note: {
+            en: 'The certificate module is only added if you enter a FQDN, and it reads the public certificate presented over HTTPS, nothing else. Open a new root shell to see the result.',
+            fr: 'Le module certificat n’est ajouté que si vous saisissez un FQDN, et il lit le certificat public présenté en HTTPS, rien d’autre. Ouvrez un nouveau shell root pour voir le résultat.',
+        },
+        terminal: {
+            banner: 'proxmox',
+            theme: 'orange',
+            host: 'root@pve01',
+            subtitle: 'Fastfetch MOTD',
+            panel: {
+                title: 'Status',
+                lines: [
+                    'Fastfetch: installed 2.67.1',
+                    'Configuration: managed by this script',
+                    'Login display: enabled',
+                    'Old Debian MOTD: disabled',
+                ],
+            },
+            menu: [
+                'Install / update Fastfetch and the login display',
+                'Configure the HTTPS certificate module (FQDN)',
+                'Preview the Fastfetch output',
+                'Show status',
+                'Disable the display on every shell session (keep Fastfetch)',
+                'Remove everything (display, configuration and Fastfetch)',
+                'Quit',
+            ],
+            prompt: 'Choose an option [1-7]:',
         },
     },
 ];
