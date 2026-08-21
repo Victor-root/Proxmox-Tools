@@ -8,6 +8,15 @@ DATACENTER_CFG="/etc/pve/datacenter.cfg"
 PROFILE_LOCALE_FILE="/etc/profile.d/proxmox-tools-locale.sh"
 TIMEZONE_FILE="/etc/timezone"
 
+# The mobile interface is a separate application. Its page already receives the
+# language of datacenter.cfg, but it keeps its own language in the browser store
+# and never looks at that value, so it always starts in English. These few lines
+# copy the server default into that store, and only when the browser has never
+# chosen a language: a choice made in the mobile settings still wins.
+MOBILE_INDEX_TPL="/usr/share/pve-yew-mobile-gui/index.html.tpl"
+MOBILE_SNIPPET_BEGIN="<!-- BEGIN Proxmox-Tools default language -->"
+MOBILE_SNIPPET_END="<!-- END Proxmox-Tools default language -->"
+
 # ------------------------------------------------------------
 # Full script i18n
 # - All user-facing text is stored below for all supported Proxmox UI languages.
@@ -382,6 +391,22 @@ en|label_generated_locale|Generated locale
 en|label_shell_profile|Shell profile override
 en|status_ok|OK
 en|status_missing|MISSING
+en|menu_mobile_apply|Apply the default language to the mobile interface
+en|menu_mobile_remove|Remove that setting from the mobile interface
+en|mobile_title|MOBILE INTERFACE
+en|mobile_body_1|The Proxmox VE mobile interface is a separate application. It ignores the language of datacenter.cfg and starts in English until someone picks a language in its own settings.
+en|mobile_body_2|This adds a few lines to its page, so a browser that never chose a language starts with the one from datacenter.cfg. A choice made in the mobile settings still wins.
+en|mobile_body_3|The file belongs to Proxmox VE: an update of the mobile interface package drops these lines, and this option puts them back.
+en|mobile_applied|Default language applied to the mobile interface.
+en|mobile_removed|Setting removed from the mobile interface.
+en|mobile_already_applied|Already applied to the mobile interface. Nothing changed.
+en|mobile_not_applied|Not applied to the mobile interface.
+en|mobile_missing|The mobile interface is not installed on this host.
+en|mobile_failed|The mobile interface page could not be changed.
+en|mobile_reload_hint|Close and reopen the mobile interface to see the result.
+en|label_mobile_language|Mobile interface default
+en|status_applied|applied
+en|status_not_applied|not applied
 es|script_title|Utilidad de idioma predeterminado
 es|repo_hint|Configuración interactiva del idioma de Proxmox VE
 es|ssh_warning_title|Consejo de seguridad
@@ -670,6 +695,22 @@ fr|label_generated_locale|Locale générée
 fr|label_shell_profile|Surcharge profil shell
 fr|status_ok|OK
 fr|status_missing|MANQUANTE
+fr|menu_mobile_apply|Appliquer la langue par défaut à l'interface mobile
+fr|menu_mobile_remove|Retirer ce réglage de l'interface mobile
+fr|mobile_title|INTERFACE MOBILE
+fr|mobile_body_1|L'interface mobile de Proxmox VE est une application distincte. Elle ignore la langue de datacenter.cfg et démarre en anglais tant que personne ne choisit une langue dans ses propres réglages.
+fr|mobile_body_2|Ceci ajoute quelques lignes à sa page, pour qu'un navigateur qui n'a jamais choisi de langue démarre avec celle de datacenter.cfg. Un choix fait dans les réglages mobiles reste prioritaire.
+fr|mobile_body_3|Le fichier appartient à Proxmox VE : une mise à jour du paquet de l'interface mobile efface ces lignes, et cette option les remet.
+fr|mobile_applied|Langue par défaut appliquée à l'interface mobile.
+fr|mobile_removed|Réglage retiré de l'interface mobile.
+fr|mobile_already_applied|Déjà appliqué à l'interface mobile. Aucune modification.
+fr|mobile_not_applied|Pas appliqué à l'interface mobile.
+fr|mobile_missing|L'interface mobile n'est pas installée sur cet hôte.
+fr|mobile_failed|La page de l'interface mobile n'a pas pu être modifiée.
+fr|mobile_reload_hint|Fermez et rouvrez l'interface mobile pour voir le résultat.
+fr|label_mobile_language|Défaut de l'interface mobile
+fr|status_applied|appliqué
+fr|status_not_applied|non appliqué
 gl|script_title|Utilidade de idioma predeterminado
 gl|repo_hint|Configuración interactiva do idioma de Proxmox VE
 gl|ssh_warning_title|Consello de seguridade
@@ -2548,6 +2589,11 @@ create_backup() {
     backup_file "$DATACENTER_CFG" "$dir"
     backup_file "$PROFILE_LOCALE_FILE" "$dir"
     backup_file "$TIMEZONE_FILE" "$dir"
+    # Only when it exists: a backup that recorded it as absent would delete it
+    # on restore, on a host where it arrived with a later Proxmox VE.
+    if mobile_tpl_exists; then
+        backup_file "$MOBILE_INDEX_TPL" "$dir"
+    fi
 
     {
         echo "created_at=$(date --iso-8601=seconds)"
@@ -2766,6 +2812,55 @@ set_web_language() {
     fi
 }
 
+mobile_tpl_exists() {
+    [[ -f "$MOBILE_INDEX_TPL" ]]
+}
+
+mobile_language_applied() {
+    mobile_tpl_exists && grep -qF "$MOBILE_SNIPPET_BEGIN" "$MOBILE_INDEX_TPL"
+}
+
+# The block goes right before </head>, so it runs once the page has defined the
+# server values and before the application itself starts.
+add_mobile_language_snippet() {
+    local tmp
+    tmp="$(mktemp)"
+
+    awk -v begin="$MOBILE_SNIPPET_BEGIN" -v end="$MOBILE_SNIPPET_END" '
+        !inserted && /<\/head>/ {
+            print "  " begin
+            print "  <script type=\"text/javascript\">"
+            print "    try {"
+            print "        if (Proxmox.defaultLang && !localStorage.getItem(\"Language\")) {"
+            print "            localStorage.setItem(\"Language\", JSON.stringify(Proxmox.defaultLang));"
+            print "        }"
+            print "    } catch (e) { /* storage unavailable, keep the built in language */ }"
+            print "  </script>"
+            print "  " end
+            inserted = 1
+        }
+        { print }
+    ' "$MOBILE_INDEX_TPL" >"$tmp"
+
+    # Written through the existing file to keep its owner and permissions.
+    cat "$tmp" >"$MOBILE_INDEX_TPL"
+    rm -f "$tmp"
+}
+
+remove_mobile_language_snippet() {
+    local tmp
+    tmp="$(mktemp)"
+
+    awk -v begin="$MOBILE_SNIPPET_BEGIN" -v end="$MOBILE_SNIPPET_END" '
+        index($0, begin) { skip = 1 }
+        !skip { print }
+        index($0, end) { skip = 0 }
+    ' "$MOBILE_INDEX_TPL" >"$tmp"
+
+    cat "$tmp" >"$MOBILE_INDEX_TPL"
+    rm -f "$tmp"
+}
+
 set_timezone_and_ntp() {
     local timezone="$1"
     timedatectl set-timezone "$timezone"
@@ -2892,7 +2987,7 @@ choose_and_apply() {
 }
 
 show_status() {
-    local dc_lang locale_value default_lc_all_value tz_value profile_status generated_status current_shell current_lc_all
+    local dc_lang locale_value default_lc_all_value tz_value profile_status generated_status current_shell current_lc_all mobile_status
 
     dc_lang="$(current_datacenter_language || true)"
     locale_value="$(current_default_locale || true)"
@@ -2914,6 +3009,14 @@ show_status() {
         profile_status="$(tr_msg not_set)"
     fi
 
+    if mobile_language_applied; then
+        mobile_status="$(tr_msg status_applied)"
+    elif mobile_tpl_exists; then
+        mobile_status="$(tr_msg status_not_applied)"
+    else
+        mobile_status="$(tr_msg mobile_missing)"
+    fi
+
     if [[ -n "$locale_value" && "$locale_value" != "$(tr_msg not_set)" ]] && locale -a 2>/dev/null | grep -qi "^${locale_value%.UTF-8}\(\.utf8\|\.UTF-8\)$"; then
         generated_status="$(tr_msg status_ok)"
     else
@@ -2928,7 +3031,75 @@ show_status() {
         "$(tr_msg label_current_shell_lc_all): ${BOLD}${current_lc_all}${RESET}" \
         "$(tr_msg label_generated_locale): ${BOLD}${generated_status}${RESET}" \
         "$(tr_msg label_timezone): ${BOLD}${tz_value}${RESET}" \
-        "$(tr_msg label_shell_profile): ${BOLD}${profile_status}${RESET}"
+        "$(tr_msg label_shell_profile): ${BOLD}${profile_status}${RESET}" \
+        "$(tr_msg label_mobile_language): ${BOLD}${mobile_status}${RESET}"
+}
+
+apply_mobile_language() {
+    local answer backup_dir
+
+    if ! mobile_tpl_exists; then
+        say_err "$(tr_msg mobile_missing)"
+        return 1
+    fi
+
+    if mobile_language_applied; then
+        say_ok "$(tr_msg mobile_already_applied)"
+        return 0
+    fi
+
+    panel "$PMX_BLUE" "$(tr_msg mobile_title)" \
+        "$(tr_msg mobile_body_1)" \
+        "$(tr_msg mobile_body_2)" \
+        "$(tr_msg mobile_body_3)"
+    echo
+
+    printf "%b?%b %b%s ? [%s]%b : " "${PMX_AMBER}" "${RESET}" "${BOLD}" "$(tr_msg confirm_apply)" "$(tr_msg yes_no_default_no)" "${RESET}"
+    read -r answer
+    if ! is_yes "$answer"; then
+        say_info "$(tr_msg cancelled)"
+        return 0
+    fi
+
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
+
+    add_mobile_language_snippet
+
+    if ! mobile_language_applied; then
+        say_err "$(tr_msg mobile_failed)"
+        return 1
+    fi
+
+    restart_pveproxy
+    echo
+    say_ok "$(tr_msg mobile_applied)"
+    say_info "$(tr_msg mobile_reload_hint)"
+    say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
+}
+
+remove_mobile_language() {
+    local backup_dir
+
+    if ! mobile_language_applied; then
+        say_info "$(tr_msg mobile_not_applied)"
+        return 0
+    fi
+
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
+
+    remove_mobile_language_snippet
+
+    if mobile_language_applied; then
+        say_err "$(tr_msg mobile_failed)"
+        return 1
+    fi
+
+    restart_pveproxy
+    echo
+    say_ok "$(tr_msg mobile_removed)"
+    say_info "$(tr_msg mobile_reload_hint)"
 }
 
 main_menu() {
@@ -2942,11 +3113,13 @@ main_menu() {
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_languages)"
         printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
-        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_apply)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_remove)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
         local choice
-        read -r -p "$(tr_msg choose_option) [1-7]: " choice
+        read -r -p "$(tr_msg choose_option) [1-9]: " choice
         echo
 
         case "$choice" in
@@ -2956,7 +3129,9 @@ main_menu() {
             4) show_status; pause ;;
             5) show_languages; pause ;;
             6) show_backups ;;
-            7) say_info "$(tr_msg bye)"; exit 0 ;;
+            7) apply_mobile_language || true; pause ;;
+            8) remove_mobile_language || true; pause ;;
+            9) say_info "$(tr_msg bye)"; exit 0 ;;
             *) say_err "$(tr_msg invalid_choice)"; pause ;;
         esac
     done
