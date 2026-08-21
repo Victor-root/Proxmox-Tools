@@ -3,6 +3,8 @@ set -euo pipefail
 
 PATCH_PREFIX="/root/pve-subscription-notice-patch"
 PX_FILE="/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"
+API2TOOLS_FILE="/usr/share/perl5/PVE/API2Tools.pm"
+MOBILE_GUI_DIR="/usr/share/pve-yew-mobile-gui"
 APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-remove-subscription-notice"
 
 # Proxmox.Utils.checked_command() asks the API for the subscription status and
@@ -12,6 +14,16 @@ APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-remove-subscription-notice"
 PATCH_SED_EXPR='s/checked_command: function[[:space:]]*(orig_cmd) {/& orig_cmd(); return;/'
 PATCH_MARKER='orig_cmd(); return;'
 STOCK_MARKER='checked_command: function'
+
+# The mobile interface is a separate application, compiled to WebAssembly, so
+# the JavaScript patch above never reaches it. Its dashboard nags when the node
+# list comes back without a support level, and that level is filled here, in one
+# line of Perl. The per node subscription endpoint is left alone: the
+# Subscription panel keeps reporting the truth, and nothing gets unlocked.
+MOBILE_SED_EXPR='s/\$entry->{level} = \$d->\[1\];/$entry->{level} = $d->[1] || q{c};/'
+MOBILE_REVERT_SED_EXPR='s/\$entry->{level} = \$d->\[1\] || q{c};/$entry->{level} = $d->[1];/'
+MOBILE_MARKER='$d->[1] || q{c}'
+MOBILE_STOCK_MARKER='$entry->{level} = $d->[1];'
 
 # ------------------------------------------------------------
 # Language detection (EN default, FR if system locale starts with fr)
@@ -53,6 +65,12 @@ tr_msg() {
 
         fr:menu_hook_disable) echo "Ne plus réappliquer automatiquement" ;;
         en:menu_hook_disable) echo "Stop re-applying automatically" ;;
+
+        fr:menu_mobile_apply) echo "Supprimer aussi le popup sur l'interface mobile" ;;
+        en:menu_mobile_apply) echo "Remove the popup on the mobile interface too" ;;
+
+        fr:menu_mobile_restore) echo "Remettre l'interface mobile d'origine" ;;
+        en:menu_mobile_restore) echo "Put the mobile interface back as it was" ;;
 
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
@@ -212,6 +230,48 @@ tr_msg() {
 
         fr:version_installed) echo "Installé" ;;
         en:version_installed) echo "Installed" ;;
+
+        fr:mobile_title) echo "INTERFACE MOBILE" ;;
+        en:mobile_title) echo "MOBILE INTERFACE" ;;
+
+        fr:mobile_body_1) echo "L'interface mobile de Proxmox VE est une application distincte, compilée, que le patch de l'interface web ne touche pas." ;;
+        en:mobile_body_1) echo "The Proxmox VE mobile interface is a separate, compiled application that the web interface patch does not reach." ;;
+
+        fr:mobile_body_2) echo "Son tableau de bord affiche le popup quand la liste des nœuds ne renvoie aucun niveau de support. Ce patch remplit ce champ, en une ligne de Perl." ;;
+        en:mobile_body_2) echo "Its dashboard shows the popup when the node list comes back without a support level. This patch fills that field, in one line of Perl." ;;
+
+        fr:mobile_body_3) echo "Différence avec le patch de l'interface web : celui-ci change ce que l'API répond sur le niveau de support des nœuds. Un outil de supervision qui lit cette liste verra donc « community »." ;;
+        en:mobile_body_3) echo "Difference with the web interface patch: this one changes what the API answers about the support level of the nodes. A monitoring tool reading that list will therefore see 'community'." ;;
+
+        fr:mobile_body_4) echo "La page Subscription continue d'afficher l'absence d'abonnement, et rien n'est débloqué : le dépôt entreprise demande toujours une vraie clé." ;;
+        en:mobile_body_4) echo "The Subscription panel keeps reporting that there is no subscription, and nothing is unlocked: the enterprise repository still needs a real key." ;;
+
+        fr:mobile_applied) echo "Popup supprimé sur l'interface mobile." ;;
+        en:mobile_applied) echo "Popup removed on the mobile interface." ;;
+
+        fr:mobile_reverted) echo "Interface mobile remise dans son état d'origine." ;;
+        en:mobile_reverted) echo "Mobile interface put back as it was." ;;
+
+        fr:mobile_already_applied) echo "Le patch mobile est déjà présent. Aucune modification appliquée." ;;
+        en:mobile_already_applied) echo "The mobile patch is already present. No changes applied." ;;
+
+        fr:mobile_not_applied) echo "Le patch mobile n'est pas présent." ;;
+        en:mobile_not_applied) echo "The mobile patch is not present." ;;
+
+        fr:mobile_incompatible) echo "Le code attendu n'a pas été trouvé. Cette version de Proxmox VE n'est pas prise en charge par le patch mobile." ;;
+        en:mobile_incompatible) echo "The expected code was not found. This Proxmox VE version is not supported by the mobile patch." ;;
+
+        fr:mobile_gui_missing) echo "L'interface mobile ne semble pas installée sur cet hôte, le patch ne servira à rien ici." ;;
+        en:mobile_gui_missing) echo "The mobile interface does not look installed on this host, the patch will not do anything here." ;;
+
+        fr:mobile_reload_hint) echo "Fermez et rouvrez l'interface mobile pour voir le résultat." ;;
+        en:mobile_reload_hint) echo "Close and reopen the mobile interface to see the result." ;;
+
+        fr:status_mobile) echo "Popup sur mobile" ;;
+        en:status_mobile) echo "Popup on mobile" ;;
+
+        fr:restart_api) echo "Redémarrage de pvedaemon et pveproxy..." ;;
+        en:restart_api) echo "Restarting pvedaemon and pveproxy..." ;;
 
         fr:banner_subtitle) echo "Subscription Notice Remover" ;;
         en:banner_subtitle) echo "Subscription Notice Remover" ;;
@@ -373,6 +433,12 @@ restart_pveproxy() {
     systemctl restart pveproxy.service
 }
 
+restart_api_services() {
+    say_info "$(tr_msg restart_api)"
+    printf "  %b%s%b\n" "${PMX_GREY}" "$(tr_msg restart_proxy_wait)" "${RESET}"
+    systemctl restart pvedaemon.service pveproxy.service
+}
+
 is_patched() {
     grep -qF "$PATCH_MARKER" "$PX_FILE"
 }
@@ -383,6 +449,26 @@ is_patchable() {
 
 apply_sed_patch() {
     sed -i "$PATCH_SED_EXPR" "$PX_FILE"
+}
+
+mobile_file_exists() {
+    [[ -f "$API2TOOLS_FILE" ]]
+}
+
+mobile_is_patched() {
+    mobile_file_exists && grep -qF "$MOBILE_MARKER" "$API2TOOLS_FILE"
+}
+
+mobile_is_patchable() {
+    mobile_file_exists && grep -qF "$MOBILE_STOCK_MARKER" "$API2TOOLS_FILE"
+}
+
+apply_mobile_sed_patch() {
+    sed -i "$MOBILE_SED_EXPR" "$API2TOOLS_FILE"
+}
+
+revert_mobile_sed_patch() {
+    sed -i "$MOBILE_REVERT_SED_EXPR" "$API2TOOLS_FILE"
 }
 
 # ------------------------------------------------------------
@@ -404,16 +490,25 @@ create_backup() {
     mkdir -p "$dir"
 
     cp -av "$PX_FILE" "$dir/" >/dev/null
+    if mobile_file_exists; then
+        cp -av "$API2TOOLS_FILE" "$dir/" >/dev/null
+    fi
 
     {
         echo "created_at=$(date --iso-8601=seconds)"
         echo "hostname=$(hostname)"
         echo "px_file=$PX_FILE"
+        if mobile_file_exists; then
+            echo "api2tools_file=$API2TOOLS_FILE"
+        fi
         echo
         pveversion -v 2>/dev/null || true
     } >"$dir/INFO.txt"
 
     sha256sum "$dir/$(basename "$PX_FILE")" >"$dir/SHA256SUMS.txt"
+    if mobile_file_exists; then
+        sha256sum "$dir/$(basename "$API2TOOLS_FILE")" >>"$dir/SHA256SUMS.txt"
+    fi
     echo "$dir"
 }
 
@@ -436,19 +531,38 @@ hook_is_enabled() {
     [[ -f "$APT_HOOK_FILE" ]]
 }
 
-enable_hook() {
-    if hook_is_enabled; then
-        say_info "$(tr_msg hook_already_enabled)"
-        return 0
-    fi
-
+# The hook only carries the patches that are applied when it is written, so a
+# user who never asked for the mobile one never gets it back after an update.
+write_hook_file() {
     cat >"$APT_HOOK_FILE" <<EOF_HOOK
 // Managed by Proxmox-Tools pve-remove-subscription-notice.sh
 // Re-applies the patch when a package update restores the stock file.
 DPkg::Post-Invoke {"if [ -s ${PX_FILE} ] && ! grep -q '${PATCH_MARKER}' ${PX_FILE}; then sed -i '${PATCH_SED_EXPR}' ${PX_FILE}; systemctl restart pveproxy.service >/dev/null 2>&1 || true; fi || true"; };
 EOF_HOOK
 
+    if mobile_is_patched; then
+        cat >>"$APT_HOOK_FILE" <<EOF_HOOK
+// Same for the mobile interface, as long as that patch stays applied.
+DPkg::Post-Invoke {"if [ -s ${API2TOOLS_FILE} ] && ! grep -qF '${MOBILE_MARKER}' ${API2TOOLS_FILE}; then sed -i '${MOBILE_SED_EXPR}' ${API2TOOLS_FILE}; systemctl restart pvedaemon.service pveproxy.service >/dev/null 2>&1 || true; fi || true"; };
+EOF_HOOK
+    fi
+
     chmod 0644 "$APT_HOOK_FILE"
+}
+
+# Keep the hook in step with the patches that are actually applied.
+refresh_hook_file() {
+    hook_is_enabled || return 0
+    write_hook_file
+}
+
+enable_hook() {
+    if hook_is_enabled; then
+        say_info "$(tr_msg hook_already_enabled)"
+        return 0
+    fi
+
+    write_hook_file
     say_ok "$(tr_msg hook_enabled)"
     say_info "$(tr_msg hook_file): ${PMX_CYAN}${APT_HOOK_FILE}${RESET}"
 }
@@ -467,8 +581,76 @@ disable_hook() {
 # Actions
 # ------------------------------------------------------------
 
+apply_mobile_patch() {
+    if mobile_is_patched; then
+        say_ok "$(tr_msg mobile_already_applied)"
+        return 0
+    fi
+
+    if ! mobile_is_patchable; then
+        say_err "$(tr_msg mobile_incompatible)"
+        say_info "$(tr_msg no_file_modified)"
+        return 1
+    fi
+
+    panel "$PMX_AMBER" "$(tr_msg mobile_title)" \
+        "$(tr_msg mobile_body_1)" \
+        "$(tr_msg mobile_body_2)" \
+        "$(tr_msg mobile_body_3)" \
+        "$(tr_msg mobile_body_4)"
+
+    [[ -d "$MOBILE_GUI_DIR" ]] || say_warn "$(tr_msg mobile_gui_missing)"
+
+    if ! confirm_yes; then
+        say_info "$(tr_msg cancelled)"
+        return 0
+    fi
+
+    local backup_dir
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
+
+    apply_mobile_sed_patch
+
+    if ! mobile_is_patched; then
+        say_err "$(tr_msg patch_failed)"
+        return 1
+    fi
+
+    refresh_hook_file
+    restart_api_services
+    echo
+    say_ok "$(tr_msg mobile_applied)"
+    say_info "$(tr_msg mobile_reload_hint)"
+    say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
+}
+
+revert_mobile_patch() {
+    if ! mobile_is_patched; then
+        say_info "$(tr_msg mobile_not_applied)"
+        return 0
+    fi
+
+    local backup_dir
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
+
+    revert_mobile_sed_patch
+
+    if mobile_is_patched; then
+        say_err "$(tr_msg patch_failed)"
+        return 1
+    fi
+
+    refresh_hook_file
+    restart_api_services
+    echo
+    say_ok "$(tr_msg mobile_reverted)"
+    say_info "$(tr_msg mobile_reload_hint)"
+}
+
 show_status() {
-    local px_version notice_state hook_state
+    local px_version notice_state hook_state mobile_state
 
     px_version="$(installed_pkg_version proxmox-widget-toolkit)"
 
@@ -486,9 +668,18 @@ show_status() {
         hook_state="${PMX_GREY}$(tr_msg status_disabled)${RESET}"
     fi
 
+    if mobile_is_patched; then
+        mobile_state="${PMX_GREEN}$(tr_msg status_removed)${RESET}"
+    elif mobile_is_patchable; then
+        mobile_state="${PMX_AMBER}$(tr_msg status_present)${RESET}"
+    else
+        mobile_state="${PMX_RED}$(tr_msg mobile_incompatible)${RESET}"
+    fi
+
     panel "$PMX_ORANGE" "$(tr_msg status_title)" \
         "$(tr_msg detected_version): proxmox-widget-toolkit ${BOLD}${px_version:-?}${RESET}" \
         "$(tr_msg status_notice): ${BOLD}${notice_state}" \
+        "$(tr_msg status_mobile): ${BOLD}${mobile_state}" \
         "$(tr_msg status_auto_reapply): ${BOLD}${hook_state}"
 }
 
@@ -553,6 +744,7 @@ confirm_backup_versions() {
 
 restore_specific() {
     local dir="$1"
+    local saved_api2tools
     [[ -d "$dir" ]] || { say_err "$(tr_msg file_not_found): $dir"; return 1; }
     [[ -f "$dir/$(basename "$PX_FILE")" ]] || { say_err "$(tr_msg file_not_found): $dir/$(basename "$PX_FILE")"; return 1; }
 
@@ -560,7 +752,17 @@ restore_specific() {
 
     cp -av "$dir/$(basename "$PX_FILE")" "$PX_FILE"
 
-    restart_pveproxy
+    # Backups taken before the mobile patch existed only hold the JavaScript
+    # file, so the Perl one is restored only when the backup carries it.
+    saved_api2tools="$dir/$(basename "$API2TOOLS_FILE")"
+    if [[ -f "$saved_api2tools" ]] && mobile_file_exists; then
+        cp -av "$saved_api2tools" "$API2TOOLS_FILE"
+        refresh_hook_file
+        restart_api_services
+    else
+        restart_pveproxy
+    fi
+
     say_ok "$(tr_msg restore_done): ${PMX_CYAN}${dir}${RESET}"
 
     if hook_is_enabled; then
@@ -645,10 +847,12 @@ main_menu() {
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
         printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
         printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
-        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_apply)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_restore)"
+        printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-8]: " choice
+        read -r -p "$(tr_msg choose_option) [1-10]: " choice
         echo
 
         case "$choice" in
@@ -679,6 +883,14 @@ main_menu() {
                 pause
                 ;;
             8)
+                menu_action apply_mobile_patch
+                pause
+                ;;
+            9)
+                menu_action revert_mobile_patch
+                pause
+                ;;
+            10)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;

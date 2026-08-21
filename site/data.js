@@ -147,19 +147,21 @@ const SCRIPTS = [
         },
         compat: 'PVE 8.0 → 9.2',
         updated: {
-            en: 'New script. Optional APT hook re-applies the patch after a package update.',
-            fr: 'Nouveau script. Un hook APT optionnel réapplique le patch après une mise à jour.',
+            en: 'Separate option for the mobile interface, which is another application and keeps its own popup.',
+            fr: 'Option séparée pour l’interface mobile, une autre application qui garde son propre popup.',
         },
         points: {
             en: [
                 'No more popup at every login',
                 'Package versions, system report, APT refresh and add repository keep working',
+                'Separate option for the mobile interface, patched on its own with its own way back',
                 'Optional automatic re-apply after a package update',
                 'Automatic backup before patching, restore from the menu',
             ],
             fr: [
                 'Plus de popup à chaque connexion',
                 'Versions des paquets, rapport système, actualisation APT et ajout de dépôt continuent de fonctionner',
+                'Option séparée pour l’interface mobile, patchée à part avec son propre retour arrière',
                 'Réapplication automatique optionnelle après une mise à jour',
                 'Backup automatique avant le patch, restauration depuis le menu',
             ],
@@ -167,14 +169,15 @@ const SCRIPTS = [
         touches: {
             files: [
                 { path: '/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js', role: { en: 'one line changed, the one that shows the popup', fr: 'une ligne modifiée, celle qui affiche le popup' } },
+                { path: '/usr/share/perl5/PVE/API2Tools.pm', role: { en: 'one line changed, only if you patch the mobile interface too', fr: 'une ligne modifiée, seulement si vous patchez aussi l’interface mobile' } },
                 { path: '/etc/apt/apt.conf.d/99-pve-remove-subscription-notice', role: { en: 'created only if you turn on the automatic re-apply', fr: 'créé seulement si vous activez la réapplication automatique' } },
             ],
             backup: '/root/pve-subscription-notice-patch-<date>/',
-            restarts: 'pveproxy',
+            restarts: 'pveproxy, pvedaemon with the mobile patch',
         },
         note: {
-            en: 'Proxmox VE stays free software either way. A subscription funds its development and unlocks the enterprise repository.',
-            fr: 'Proxmox VE reste un logiciel libre dans tous les cas. Un abonnement finance son développement et donne accès au dépôt entreprise.',
+            en: 'Proxmox VE stays free software either way. A subscription funds its development and unlocks the enterprise repository. The mobile option goes one step further than the web one: it changes what the API answers about the support level of the nodes, and the script says so before touching anything.',
+            fr: 'Proxmox VE reste un logiciel libre dans tous les cas. Un abonnement finance son développement et donne accès au dépôt entreprise. L’option mobile va un cran plus loin que celle du web : elle change ce que l’API répond sur le niveau de support des nœuds, et le script le dit avant de toucher à quoi que ce soit.',
         },
         terminal: {
             banner: 'proxmox',
@@ -186,6 +189,7 @@ const SCRIPTS = [
                 lines: [
                     'Detected version: proxmox-widget-toolkit 5.2.8',
                     'Subscription notice: removed',
+                    'Popup on mobile: removed',
                     'Automatic re-apply: enabled',
                 ],
             },
@@ -197,9 +201,11 @@ const SCRIPTS = [
                 'List backups',
                 'Re-apply automatically after an update',
                 'Stop re-applying automatically',
+                'Remove the popup on the mobile interface too',
+                'Put the mobile interface back as it was',
                 'Quit',
             ],
-            prompt: 'Choose an option [1-8]:',
+            prompt: 'Choose an option [1-10]:',
         },
     },
     {
