@@ -1307,7 +1307,9 @@ paste_custom_config() {
     workdir="$(mktemp -d)"
     candidate="${workdir}/config.jsonc"
 
-    while IFS= read -r line; do
+    # Ctrl+D pressed right after the last character ends the read without a
+    # newline: the test on $line keeps that last line instead of losing it.
+    while IFS= read -r line || [[ -n "$line" ]]; do
         [[ "$line" == "EOF" ]] && break
         printf '%s\n' "$line" >>"$candidate"
         lines=$((lines + 1))
