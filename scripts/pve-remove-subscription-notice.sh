@@ -261,8 +261,11 @@ tr_msg() {
         fr:mobile_incompatible) echo "Le code attendu n'a pas été trouvé. Cette version de Proxmox VE n'est pas prise en charge par le patch mobile." ;;
         en:mobile_incompatible) echo "The expected code was not found. This Proxmox VE version is not supported by the mobile patch." ;;
 
-        fr:mobile_gui_missing) echo "L'interface mobile ne semble pas installée sur cet hôte, le patch ne servira à rien ici." ;;
-        en:mobile_gui_missing) echo "The mobile interface does not look installed on this host, the patch will not do anything here." ;;
+        fr:mobile_gui_missing) echo "Cette interface mobile n'existe qu'à partir de Proxmox VE 9 et n'est pas installée ici. Sur Proxmox VE 8, l'interface mobile est l'ancienne, que ce patch ne touche pas." ;;
+        en:mobile_gui_missing) echo "This mobile interface only exists from Proxmox VE 9 on, and is not installed here. On Proxmox VE 8 the mobile interface is the older one, which this patch does not touch." ;;
+
+        fr:status_mobile_unavailable) echo "sans objet (Proxmox VE 9 requis)" ;;
+        en:status_mobile_unavailable) echo "not applicable (needs Proxmox VE 9)" ;;
 
         fr:mobile_reload_hint) echo "Fermez et rouvrez l'interface mobile pour voir le résultat." ;;
         en:mobile_reload_hint) echo "Close and reopen the mobile interface to see the result." ;;
@@ -593,13 +596,19 @@ apply_mobile_patch() {
         return 1
     fi
 
+    # Nothing to gain on Proxmox VE 8: its mobile interface is the older one,
+    # which does not read the support level this patch fills.
+    if [[ ! -d "$MOBILE_GUI_DIR" ]]; then
+        say_err "$(tr_msg mobile_gui_missing)"
+        say_info "$(tr_msg no_file_modified)"
+        return 1
+    fi
+
     panel "$PMX_AMBER" "$(tr_msg mobile_title)" \
         "$(tr_msg mobile_body_1)" \
         "$(tr_msg mobile_body_2)" \
         "$(tr_msg mobile_body_3)" \
         "$(tr_msg mobile_body_4)"
-
-    [[ -d "$MOBILE_GUI_DIR" ]] || say_warn "$(tr_msg mobile_gui_missing)"
 
     if ! confirm_yes; then
         say_info "$(tr_msg cancelled)"
@@ -670,6 +679,8 @@ show_status() {
 
     if mobile_is_patched; then
         mobile_state="${PMX_GREEN}$(tr_msg status_removed)${RESET}"
+    elif [[ ! -d "$MOBILE_GUI_DIR" ]]; then
+        mobile_state="${PMX_GREY}$(tr_msg status_mobile_unavailable)${RESET}"
     elif mobile_is_patchable; then
         mobile_state="${PMX_AMBER}$(tr_msg status_present)${RESET}"
     else

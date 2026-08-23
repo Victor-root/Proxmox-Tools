@@ -79,7 +79,7 @@ Removes the **"No valid subscription"** popup from the Proxmox VE web interface:
 
 * 🔕 no more popup at every login
 * 🧩 the buttons that depend on that check keep working (package versions, system report, APT refresh, add repository)
-* 📱 separate option for the **mobile interface**, which is another application entirely and needs its own patch
+* 📱 separate option for the **mobile interface** of **Proxmox VE 9**, which is another application entirely and needs its own patch
 * 🔁 optional **automatic re-apply** after a package update, through an APT hook
 * 💾 automatic **backup** before patching
 * ♻️ built-in **restore** options
@@ -97,7 +97,7 @@ The widely shared one-liner for this comments out the popup itself, which also s
 
 #### About the mobile interface
 
-The Proxmox VE mobile interface is a separate application compiled to WebAssembly, so the JavaScript patch above never reaches it and its popup keeps showing on a phone. It nags when the node list comes back without a support level, and that level is filled by one line of Perl in `PVE/API2Tools.pm`, which is what option 8 patches, with its own backup and its own way back.
+**Proxmox VE 9 only.** The mobile interface of Proxmox VE 9 is a separate application compiled to WebAssembly, so the JavaScript patch above never reaches it and its popup keeps showing on a phone. Proxmox VE 8 ships a different, older mobile interface that this patch does not touch, so on 8 the script refuses the option instead of changing a file for nothing. It nags when the node list comes back without a support level, and that level is filled by one line of Perl in `PVE/API2Tools.pm`, which is what option 8 patches, with its own backup and its own way back.
 
 That patch is offered separately because it is not the same kind of change: it modifies what the API answers about the support level of the nodes, so a monitoring tool reading that list will see `community`. The per node subscription endpoint is left alone, the Subscription panel keeps reporting that there is no subscription, and nothing is unlocked: the enterprise repository still needs a real key. The script spells all of this out and asks for confirmation before touching anything.
 
