@@ -111,7 +111,7 @@ Changes the default **Proxmox VE language** for both the shell and the web inter
 
 * 🌍 set the default **system locale**
 * 🖥️ set the default **Proxmox VE web UI language**
-* 📱 optional: apply that same default to the **mobile interface**, which otherwise always starts in English
+* 📱 optional, **Proxmox VE 9 only**: apply that same default to its **mobile interface**, which otherwise always starts in English
 * 🧠 auto-detect the server language for the script interface
 * 🇬🇧 fallback to **English** if the detected language is unsupported
 * 🕒 optionally configure timezone and NTP
@@ -129,7 +129,7 @@ Proxmox VE only accepts a fixed list of languages for its web interface. For a l
 
 #### About the mobile interface
 
-The mobile interface is a separate application, and it does not read the language of `datacenter.cfg`. It keeps its own language in the browser storage, so it starts in English on every new device and in every private window, until someone picks a language in its settings.
+**Proxmox VE 9 only.** The mobile interface of Proxmox VE 9 is a separate application, and it does not read the language of `datacenter.cfg`. Proxmox VE 8 ships a different, older mobile interface, so on 8 the option reports that this interface is not installed and changes nothing. It keeps its own language in the browser storage, so it starts in English on every new device and in every private window, until someone picks a language in its settings.
 
 Option 7 adds a few lines to its page so a browser that never chose a language starts with the one from `datacenter.cfg`. A choice made in the mobile settings still wins, and option 8 removes those lines. The page belongs to Proxmox VE, so an update of the mobile interface package drops them and the option simply puts them back.
 
