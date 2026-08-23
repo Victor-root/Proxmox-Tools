@@ -105,7 +105,7 @@ ar|status_ok|OK
 ar|status_missing|مفقود
 ar|menu_mobile_apply|تطبيق اللغة الافتراضية على واجهة الهاتف
 ar|menu_mobile_remove|إزالة هذا الإعداد من واجهة الهاتف
-ar|mobile_title|واجهة الهاتف
+ar|mobile_title|واجهة الهاتف (Proxmox VE 9+)
 ar|mobile_body_1|واجهة الهاتف في Proxmox VE تطبيق منفصل. تتجاهل اللغة الموجودة في datacenter.cfg وتبدأ بالإنجليزية حتى يختار أحدهم لغة في إعداداتها الخاصة.
 ar|mobile_body_2|يضيف هذا بضعة أسطر إلى صفحتها، ليبدأ المتصفح الذي لم يختر لغة قط باللغة الموجودة في datacenter.cfg. ويبقى الاختيار المحفوظ في إعدادات الهاتف هو الأولوية.
 ar|mobile_body_3|الملف يخص Proxmox VE: تحديث حزمة واجهة الهاتف يحذف هذه الأسطر، وهذا الخيار يعيدها.
@@ -113,7 +113,7 @@ ar|mobile_applied|تم تطبيق اللغة الافتراضية على واج�
 ar|mobile_removed|تمت إزالة الإعداد من واجهة الهاتف.
 ar|mobile_already_applied|مطبق بالفعل على واجهة الهاتف. لا تغييرات.
 ar|mobile_not_applied|غير مطبق على واجهة الهاتف.
-ar|mobile_missing|واجهة الهاتف غير مثبتة على هذا المضيف.
+ar|mobile_missing|واجهة الهاتف غير مثبتة على هذا المضيف. (Proxmox VE 9+)
 ar|mobile_failed|تعذّر تعديل صفحة واجهة الهاتف.
 ar|mobile_reload_hint|أغلق واجهة الهاتف ثم افتحها من جديد لرؤية النتيجة.
 ar|label_mobile_language|افتراضي واجهة الهاتف
@@ -193,7 +193,7 @@ ca|status_ok|OK
 ca|status_missing|MANCA
 ca|menu_mobile_apply|Aplica la llengua per defecte a la interfície mòbil
 ca|menu_mobile_remove|Treu aquest ajust de la interfície mòbil
-ca|mobile_title|INTERFÍCIE MÒBIL
+ca|mobile_title|INTERFÍCIE MÒBIL (Proxmox VE 9+)
 ca|mobile_body_1|La interfície mòbil de Proxmox VE és una aplicació a part. Ignora la llengua de datacenter.cfg i s'inicia en anglès fins que algú tria una llengua als seus propis ajustos.
 ca|mobile_body_2|Això afegeix unes línies a la seva pàgina, perquè un navegador que mai no ha triat llengua s'iniciï amb la de datacenter.cfg. Una tria feta als ajustos mòbils continua tenint prioritat.
 ca|mobile_body_3|El fitxer pertany a Proxmox VE: una actualització del paquet de la interfície mòbil esborra aquestes línies, i aquesta opció les torna a posar.
@@ -201,7 +201,7 @@ ca|mobile_applied|Llengua per defecte aplicada a la interfície mòbil.
 ca|mobile_removed|Ajust tret de la interfície mòbil.
 ca|mobile_already_applied|Ja aplicat a la interfície mòbil. Cap canvi.
 ca|mobile_not_applied|No aplicat a la interfície mòbil.
-ca|mobile_missing|La interfície mòbil no està instal·lada en aquest amfitrió.
+ca|mobile_missing|La interfície mòbil no està instal·lada en aquest amfitrió. (Proxmox VE 9+)
 ca|mobile_failed|No s'ha pogut modificar la pàgina de la interfície mòbil.
 ca|mobile_reload_hint|Tanca i torna a obrir la interfície mòbil per veure el resultat.
 ca|label_mobile_language|Valor per defecte de la interfície mòbil
@@ -281,7 +281,7 @@ da|status_ok|OK
 da|status_missing|MANGLER
 da|menu_mobile_apply|Anvend standardsproget på den mobile grænseflade
 da|menu_mobile_remove|Fjern den indstilling fra den mobile grænseflade
-da|mobile_title|MOBIL GRÆNSEFLADE
+da|mobile_title|MOBIL GRÆNSEFLADE (Proxmox VE 9+)
 da|mobile_body_1|Proxmox VE's mobile grænseflade er et separat program. Det ignorerer sproget i datacenter.cfg og starter på engelsk, indtil nogen vælger et sprog i dets egne indstillinger.
 da|mobile_body_2|Dette tilføjer nogle få linjer til dets side, så en browser, der aldrig har valgt et sprog, starter med det fra datacenter.cfg. Et valg truffet i de mobile indstillinger gælder stadig.
 da|mobile_body_3|Filen tilhører Proxmox VE: en opdatering af pakken til den mobile grænseflade fjerner linjerne, og denne mulighed sætter dem tilbage.
@@ -289,7 +289,7 @@ da|mobile_applied|Standardsproget anvendt på den mobile grænseflade.
 da|mobile_removed|Indstillingen fjernet fra den mobile grænseflade.
 da|mobile_already_applied|Allerede anvendt på den mobile grænseflade. Intet ændret.
 da|mobile_not_applied|Ikke anvendt på den mobile grænseflade.
-da|mobile_missing|Den mobile grænseflade er ikke installeret på denne vært.
+da|mobile_missing|Den mobile grænseflade er ikke installeret på denne vært. (Proxmox VE 9+)
 da|mobile_failed|Siden for den mobile grænseflade kunne ikke ændres.
 da|mobile_reload_hint|Luk og åbn den mobile grænseflade igen for at se resultatet.
 da|label_mobile_language|Standard for mobil grænseflade
@@ -369,7 +369,7 @@ de|status_ok|OK
 de|status_missing|FEHLT
 de|menu_mobile_apply|Standardsprache auf die mobile Oberfläche anwenden
 de|menu_mobile_remove|Diese Einstellung von der mobilen Oberfläche entfernen
-de|mobile_title|MOBILE OBERFLÄCHE
+de|mobile_title|MOBILE OBERFLÄCHE (Proxmox VE 9+)
 de|mobile_body_1|Die mobile Oberfläche von Proxmox VE ist eine eigene Anwendung. Sie ignoriert die Sprache aus datacenter.cfg und startet auf Englisch, bis jemand in ihren eigenen Einstellungen eine Sprache wählt.
 de|mobile_body_2|Dies fügt ihrer Seite ein paar Zeilen hinzu, damit ein Browser, der noch nie eine Sprache gewählt hat, mit der aus datacenter.cfg startet. Eine in den mobilen Einstellungen getroffene Wahl hat weiterhin Vorrang.
 de|mobile_body_3|Die Datei gehört zu Proxmox VE: ein Update des Pakets der mobilen Oberfläche entfernt diese Zeilen, und diese Option setzt sie wieder ein.
@@ -377,7 +377,7 @@ de|mobile_applied|Standardsprache auf die mobile Oberfläche angewendet.
 de|mobile_removed|Einstellung von der mobilen Oberfläche entfernt.
 de|mobile_already_applied|Bereits auf die mobile Oberfläche angewendet. Nichts geändert.
 de|mobile_not_applied|Nicht auf die mobile Oberfläche angewendet.
-de|mobile_missing|Die mobile Oberfläche ist auf diesem Host nicht installiert.
+de|mobile_missing|Die mobile Oberfläche ist auf diesem Host nicht installiert. (Proxmox VE 9+)
 de|mobile_failed|Die Seite der mobilen Oberfläche konnte nicht geändert werden.
 de|mobile_reload_hint|Schließen Sie die mobile Oberfläche und öffnen Sie sie erneut, um das Ergebnis zu sehen.
 de|label_mobile_language|Standard der mobilen Oberfläche
@@ -457,7 +457,7 @@ en|status_ok|OK
 en|status_missing|MISSING
 en|menu_mobile_apply|Apply the default language to the mobile interface
 en|menu_mobile_remove|Remove that setting from the mobile interface
-en|mobile_title|MOBILE INTERFACE
+en|mobile_title|MOBILE INTERFACE (Proxmox VE 9+)
 en|mobile_body_1|The Proxmox VE mobile interface is a separate application. It ignores the language of datacenter.cfg and starts in English until someone picks a language in its own settings.
 en|mobile_body_2|This adds a few lines to its page, so a browser that never chose a language starts with the one from datacenter.cfg. A choice made in the mobile settings still wins.
 en|mobile_body_3|The file belongs to Proxmox VE: an update of the mobile interface package drops these lines, and this option puts them back.
@@ -465,7 +465,7 @@ en|mobile_applied|Default language applied to the mobile interface.
 en|mobile_removed|Setting removed from the mobile interface.
 en|mobile_already_applied|Already applied to the mobile interface. Nothing changed.
 en|mobile_not_applied|Not applied to the mobile interface.
-en|mobile_missing|The mobile interface is not installed on this host.
+en|mobile_missing|The mobile interface is not installed on this host. (Proxmox VE 9+)
 en|mobile_failed|The mobile interface page could not be changed.
 en|mobile_reload_hint|Close and reopen the mobile interface to see the result.
 en|label_mobile_language|Mobile interface default
@@ -545,7 +545,7 @@ es|status_ok|OK
 es|status_missing|FALTA
 es|menu_mobile_apply|Aplicar el idioma predeterminado a la interfaz móvil
 es|menu_mobile_remove|Quitar ese ajuste de la interfaz móvil
-es|mobile_title|INTERFAZ MÓVIL
+es|mobile_title|INTERFAZ MÓVIL (Proxmox VE 9+)
 es|mobile_body_1|La interfaz móvil de Proxmox VE es una aplicación aparte. Ignora el idioma de datacenter.cfg y arranca en inglés hasta que alguien elige un idioma en sus propios ajustes.
 es|mobile_body_2|Esto añade unas líneas a su página, para que un navegador que nunca ha elegido idioma arranque con el de datacenter.cfg. Una elección hecha en los ajustes móviles sigue teniendo prioridad.
 es|mobile_body_3|El archivo pertenece a Proxmox VE: una actualización del paquete de la interfaz móvil borra esas líneas, y esta opción las vuelve a poner.
@@ -553,7 +553,7 @@ es|mobile_applied|Idioma predeterminado aplicado a la interfaz móvil.
 es|mobile_removed|Ajuste quitado de la interfaz móvil.
 es|mobile_already_applied|Ya aplicado a la interfaz móvil. Sin cambios.
 es|mobile_not_applied|No aplicado a la interfaz móvil.
-es|mobile_missing|La interfaz móvil no está instalada en este host.
+es|mobile_missing|La interfaz móvil no está instalada en este host. (Proxmox VE 9+)
 es|mobile_failed|No se ha podido modificar la página de la interfaz móvil.
 es|mobile_reload_hint|Cierre y vuelva a abrir la interfaz móvil para ver el resultado.
 es|label_mobile_language|Predeterminado de la interfaz móvil
@@ -633,7 +633,7 @@ eu|status_ok|OK
 eu|status_missing|FALTA
 eu|menu_mobile_apply|Ezarri hizkuntza lehenetsia interfaze mugikorrean
 eu|menu_mobile_remove|Kendu ezarpen hori interfaze mugikorretik
-eu|mobile_title|INTERFAZE MUGIKORRA
+eu|mobile_title|INTERFAZE MUGIKORRA (Proxmox VE 9+)
 eu|mobile_body_1|Proxmox VE-ren interfaze mugikorra aplikazio bereizia da. datacenter.cfg fitxategiko hizkuntzari ez dio jaramonik egiten eta ingelesez abiatzen da norbaitek bere ezarpenetan hizkuntza bat aukeratu arte.
 eu|mobile_body_2|Honek lerro batzuk gehitzen dizkio bere orriari, inoiz hizkuntzarik aukeratu ez duen nabigatzailea datacenter.cfg-koarekin abia dadin. Ezarpen mugikorretan egindako aukerak lehentasuna du oraindik.
 eu|mobile_body_3|Fitxategia Proxmox VE-rena da: interfaze mugikorraren paketea eguneratzean lerro horiek ezabatzen dira, eta aukera honek berriro jartzen ditu.
@@ -641,7 +641,7 @@ eu|mobile_applied|Hizkuntza lehenetsia interfaze mugikorrean ezarri da.
 eu|mobile_removed|Ezarpena kendu da interfaze mugikorretik.
 eu|mobile_already_applied|Dagoeneko ezarrita dago interfaze mugikorrean. Ez da ezer aldatu.
 eu|mobile_not_applied|Ez dago ezarrita interfaze mugikorrean.
-eu|mobile_missing|Interfaze mugikorra ez dago instalatuta ostalari honetan.
+eu|mobile_missing|Interfaze mugikorra ez dago instalatuta ostalari honetan. (Proxmox VE 9+)
 eu|mobile_failed|Ezin izan da interfaze mugikorraren orria aldatu.
 eu|mobile_reload_hint|Itxi eta ireki berriro interfaze mugikorra emaitza ikusteko.
 eu|label_mobile_language|Interfaze mugikorraren lehenetsia
@@ -721,7 +721,7 @@ fa|status_ok|OK
 fa|status_missing|موجود نیست
 fa|menu_mobile_apply|اعمال زبان پیش‌فرض روی رابط موبایل
 fa|menu_mobile_remove|حذف این تنظیم از رابط موبایل
-fa|mobile_title|رابط موبایل
+fa|mobile_title|رابط موبایل (Proxmox VE 9+)
 fa|mobile_body_1|رابط موبایل Proxmox VE یک برنامه جداگانه است. زبان datacenter.cfg را نادیده می‌گیرد و تا زمانی که کسی در تنظیمات خودش زبانی انتخاب نکند با انگلیسی شروع می‌شود.
 fa|mobile_body_2|این چند خط به صفحه آن اضافه می‌کند تا مرورگری که هرگز زبانی انتخاب نکرده با زبان datacenter.cfg شروع شود. انتخاب انجام‌شده در تنظیمات موبایل همچنان اولویت دارد.
 fa|mobile_body_3|این فایل متعلق به Proxmox VE است: به‌روزرسانی بسته رابط موبایل این خط‌ها را حذف می‌کند و این گزینه دوباره آنها را می‌گذارد.
@@ -729,7 +729,7 @@ fa|mobile_applied|زبان پیش‌فرض روی رابط موبایل اعما
 fa|mobile_removed|تنظیم از رابط موبایل حذف شد.
 fa|mobile_already_applied|از قبل روی رابط موبایل اعمال شده است. تغییری ایجاد نشد.
 fa|mobile_not_applied|روی رابط موبایل اعمال نشده است.
-fa|mobile_missing|رابط موبایل روی این میزبان نصب نیست.
+fa|mobile_missing|رابط موبایل روی این میزبان نصب نیست. (Proxmox VE 9+)
 fa|mobile_failed|صفحه رابط موبایل تغییر نکرد.
 fa|mobile_reload_hint|برای دیدن نتیجه، رابط موبایل را ببندید و دوباره باز کنید.
 fa|label_mobile_language|پیش‌فرض رابط موبایل
@@ -809,7 +809,7 @@ fr|status_ok|OK
 fr|status_missing|MANQUANTE
 fr|menu_mobile_apply|Appliquer la langue par défaut à l'interface mobile
 fr|menu_mobile_remove|Retirer ce réglage de l'interface mobile
-fr|mobile_title|INTERFACE MOBILE
+fr|mobile_title|INTERFACE MOBILE (Proxmox VE 9+)
 fr|mobile_body_1|L'interface mobile de Proxmox VE est une application distincte. Elle ignore la langue de datacenter.cfg et démarre en anglais tant que personne ne choisit une langue dans ses propres réglages.
 fr|mobile_body_2|Ceci ajoute quelques lignes à sa page, pour qu'un navigateur qui n'a jamais choisi de langue démarre avec celle de datacenter.cfg. Un choix fait dans les réglages mobiles reste prioritaire.
 fr|mobile_body_3|Le fichier appartient à Proxmox VE : une mise à jour du paquet de l'interface mobile efface ces lignes, et cette option les remet.
@@ -817,7 +817,7 @@ fr|mobile_applied|Langue par défaut appliquée à l'interface mobile.
 fr|mobile_removed|Réglage retiré de l'interface mobile.
 fr|mobile_already_applied|Déjà appliqué à l'interface mobile. Aucune modification.
 fr|mobile_not_applied|Pas appliqué à l'interface mobile.
-fr|mobile_missing|L'interface mobile n'est pas installée sur cet hôte.
+fr|mobile_missing|L'interface mobile n'est pas installée sur cet hôte. (Proxmox VE 9+)
 fr|mobile_failed|La page de l'interface mobile n'a pas pu être modifiée.
 fr|mobile_reload_hint|Fermez et rouvrez l'interface mobile pour voir le résultat.
 fr|label_mobile_language|Défaut de l'interface mobile
@@ -897,7 +897,7 @@ gl|status_ok|OK
 gl|status_missing|FALTA
 gl|menu_mobile_apply|Aplicar o idioma predeterminado á interface móbil
 gl|menu_mobile_remove|Retirar ese axuste da interface móbil
-gl|mobile_title|INTERFACE MÓBIL
+gl|mobile_title|INTERFACE MÓBIL (Proxmox VE 9+)
 gl|mobile_body_1|A interface móbil de Proxmox VE é unha aplicación á parte. Ignora o idioma de datacenter.cfg e arranca en inglés ata que alguén escolle un idioma nos seus propios axustes.
 gl|mobile_body_2|Isto engade unhas liñas á súa páxina, para que un navegador que nunca escolleu idioma arranque co de datacenter.cfg. Unha escolla feita nos axustes móbiles segue tendo prioridade.
 gl|mobile_body_3|O ficheiro pertence a Proxmox VE: unha actualización do paquete da interface móbil borra esas liñas, e esta opción vólveas poñer.
@@ -905,7 +905,7 @@ gl|mobile_applied|Idioma predeterminado aplicado á interface móbil.
 gl|mobile_removed|Axuste retirado da interface móbil.
 gl|mobile_already_applied|Xa aplicado á interface móbil. Sen cambios.
 gl|mobile_not_applied|Non aplicado á interface móbil.
-gl|mobile_missing|A interface móbil non está instalada neste host.
+gl|mobile_missing|A interface móbil non está instalada neste host. (Proxmox VE 9+)
 gl|mobile_failed|Non se puido modificar a páxina da interface móbil.
 gl|mobile_reload_hint|Peche e volva abrir a interface móbil para ver o resultado.
 gl|label_mobile_language|Predeterminado da interface móbil
@@ -985,7 +985,7 @@ he|status_ok|OK
 he|status_missing|חסר
 he|menu_mobile_apply|החלת שפת ברירת המחדל על ממשק הנייד
 he|menu_mobile_remove|הסרת ההגדרה הזו מממשק הנייד
-he|mobile_title|ממשק נייד
+he|mobile_title|ממשק נייד (Proxmox VE 9+)
 he|mobile_body_1|ממשק הנייד של Proxmox VE הוא יישום נפרד. הוא מתעלם מהשפה שב-datacenter.cfg ומופעל באנגלית עד שמישהו בוחר שפה בהגדרות שלו.
 he|mobile_body_2|פעולה זו מוסיפה כמה שורות לדף שלו, כך שדפדפן שמעולם לא בחר שפה יתחיל עם זו שב-datacenter.cfg. בחירה שנעשתה בהגדרות הנייד עדיין גוברת.
 he|mobile_body_3|הקובץ שייך ל-Proxmox VE: עדכון של חבילת ממשק הנייד מוחק את השורות האלה, והאפשרות הזו מחזירה אותן.
@@ -993,7 +993,7 @@ he|mobile_applied|שפת ברירת המחדל הוחלה על ממשק הניי
 he|mobile_removed|ההגדרה הוסרה מממשק הנייד.
 he|mobile_already_applied|כבר הוחל על ממשק הנייד. לא בוצע שינוי.
 he|mobile_not_applied|לא הוחל על ממשק הנייד.
-he|mobile_missing|ממשק הנייד אינו מותקן על מארח זה.
+he|mobile_missing|ממשק הנייד אינו מותקן על מארח זה. (Proxmox VE 9+)
 he|mobile_failed|לא ניתן היה לשנות את הדף של ממשק הנייד.
 he|mobile_reload_hint|סגור ופתח מחדש את ממשק הנייד כדי לראות את התוצאה.
 he|label_mobile_language|ברירת המחדל של ממשק הנייד
@@ -1073,7 +1073,7 @@ hr|status_ok|OK
 hr|status_missing|NEDOSTAJE
 hr|menu_mobile_apply|Primijeni zadani jezik na mobilno sučelje
 hr|menu_mobile_remove|Ukloni tu postavku s mobilnog sučelja
-hr|mobile_title|MOBILNO SUČELJE
+hr|mobile_title|MOBILNO SUČELJE (Proxmox VE 9+)
 hr|mobile_body_1|Mobilno sučelje Proxmox VE-a zasebna je aplikacija. Zanemaruje jezik iz datacenter.cfg i pokreće se na engleskom dok netko ne odabere jezik u njegovim vlastitim postavkama.
 hr|mobile_body_2|Ovo dodaje nekoliko redaka na njegovu stranicu, kako bi preglednik koji nikada nije odabrao jezik krenuo s onim iz datacenter.cfg. Odabir napravljen u mobilnim postavkama i dalje ima prednost.
 hr|mobile_body_3|Datoteka pripada Proxmox VE-u: ažuriranje paketa mobilnog sučelja briše te retke, a ova ih opcija vraća.
@@ -1081,7 +1081,7 @@ hr|mobile_applied|Zadani jezik primijenjen na mobilno sučelje.
 hr|mobile_removed|Postavka uklonjena s mobilnog sučelja.
 hr|mobile_already_applied|Već primijenjeno na mobilno sučelje. Ništa nije promijenjeno.
 hr|mobile_not_applied|Nije primijenjeno na mobilno sučelje.
-hr|mobile_missing|Mobilno sučelje nije instalirano na ovom poslužitelju.
+hr|mobile_missing|Mobilno sučelje nije instalirano na ovom poslužitelju. (Proxmox VE 9+)
 hr|mobile_failed|Stranicu mobilnog sučelja nije bilo moguće promijeniti.
 hr|mobile_reload_hint|Zatvorite i ponovno otvorite mobilno sučelje da vidite rezultat.
 hr|label_mobile_language|Zadano za mobilno sučelje
@@ -1161,7 +1161,7 @@ hu|status_ok|OK
 hu|status_missing|HIÁNYZIK
 hu|menu_mobile_apply|Az alapértelmezett nyelv alkalmazása a mobilfelületre
 hu|menu_mobile_remove|A beállítás eltávolítása a mobilfelületről
-hu|mobile_title|MOBILFELÜLET
+hu|mobile_title|MOBILFELÜLET (Proxmox VE 9+)
 hu|mobile_body_1|A Proxmox VE mobilfelülete külön alkalmazás. Figyelmen kívül hagyja a datacenter.cfg nyelvét, és angolul indul, amíg valaki nem választ nyelvet a saját beállításaiban.
 hu|mobile_body_2|Ez néhány sort ad a lapjához, hogy egy böngésző, amely még sosem választott nyelvet, a datacenter.cfg nyelvével induljon. A mobilbeállításokban tett választás továbbra is elsőbbséget élvez.
 hu|mobile_body_3|A fájl a Proxmox VE-hez tartozik: a mobilfelület csomagjának frissítése törli ezeket a sorokat, ez a lehetőség pedig visszateszi őket.
@@ -1169,7 +1169,7 @@ hu|mobile_applied|Az alapértelmezett nyelv alkalmazva a mobilfelületre.
 hu|mobile_removed|A beállítás eltávolítva a mobilfelületről.
 hu|mobile_already_applied|Már alkalmazva van a mobilfelületen. Nincs változás.
 hu|mobile_not_applied|Nincs alkalmazva a mobilfelületen.
-hu|mobile_missing|A mobilfelület nincs telepítve ezen a gépen.
+hu|mobile_missing|A mobilfelület nincs telepítve ezen a gépen. (Proxmox VE 9+)
 hu|mobile_failed|A mobilfelület lapját nem sikerült módosítani.
 hu|mobile_reload_hint|Zárja be és nyissa meg újra a mobilfelületet az eredmény megtekintéséhez.
 hu|label_mobile_language|Mobilfelület alapértelmezése
@@ -1249,7 +1249,7 @@ it|status_ok|OK
 it|status_missing|MANCANTE
 it|menu_mobile_apply|Applica la lingua predefinita all'interfaccia mobile
 it|menu_mobile_remove|Rimuovi questa impostazione dall'interfaccia mobile
-it|mobile_title|INTERFACCIA MOBILE
+it|mobile_title|INTERFACCIA MOBILE (Proxmox VE 9+)
 it|mobile_body_1|L'interfaccia mobile di Proxmox VE è un'applicazione separata. Ignora la lingua di datacenter.cfg e parte in inglese finché qualcuno non sceglie una lingua nelle sue impostazioni.
 it|mobile_body_2|Questo aggiunge qualche riga alla sua pagina, così un browser che non ha mai scelto una lingua parte con quella di datacenter.cfg. Una scelta fatta nelle impostazioni mobili resta prioritaria.
 it|mobile_body_3|Il file appartiene a Proxmox VE: un aggiornamento del pacchetto dell'interfaccia mobile cancella queste righe, e questa opzione le rimette.
@@ -1257,7 +1257,7 @@ it|mobile_applied|Lingua predefinita applicata all'interfaccia mobile.
 it|mobile_removed|Impostazione rimossa dall'interfaccia mobile.
 it|mobile_already_applied|Già applicata all'interfaccia mobile. Nessuna modifica.
 it|mobile_not_applied|Non applicata all'interfaccia mobile.
-it|mobile_missing|L'interfaccia mobile non è installata su questo host.
+it|mobile_missing|L'interfaccia mobile non è installata su questo host. (Proxmox VE 9+)
 it|mobile_failed|Non è stato possibile modificare la pagina dell'interfaccia mobile.
 it|mobile_reload_hint|Chiudi e riapri l'interfaccia mobile per vedere il risultato.
 it|label_mobile_language|Predefinito dell'interfaccia mobile
@@ -1337,7 +1337,7 @@ ja|status_ok|OK
 ja|status_missing|不足
 ja|menu_mobile_apply|デフォルト言語をモバイルインターフェースに適用
 ja|menu_mobile_remove|この設定をモバイルインターフェースから削除
-ja|mobile_title|モバイルインターフェース
+ja|mobile_title|モバイルインターフェース (Proxmox VE 9+)
 ja|mobile_body_1|Proxmox VE のモバイルインターフェースは別のアプリケーションです。datacenter.cfg の言語を無視し、その設定で言語を選ぶまで英語で起動します。
 ja|mobile_body_2|これはページに数行を追加し、言語を選んだことのないブラウザーが datacenter.cfg の言語で起動するようにします。モバイル設定での選択は引き続き優先されます。
 ja|mobile_body_3|このファイルは Proxmox VE のものです。モバイルインターフェースのパッケージを更新するとこの数行は消えますが、この項目で元に戻せます。
@@ -1345,7 +1345,7 @@ ja|mobile_applied|デフォルト言語をモバイルインターフェース�
 ja|mobile_removed|設定をモバイルインターフェースから削除しました。
 ja|mobile_already_applied|すでにモバイルインターフェースに適用済みです。変更はありません。
 ja|mobile_not_applied|モバイルインターフェースには適用されていません。
-ja|mobile_missing|このホストにはモバイルインターフェースがインストールされていません。
+ja|mobile_missing|このホストにはモバイルインターフェースがインストールされていません。 (Proxmox VE 9+)
 ja|mobile_failed|モバイルインターフェースのページを変更できませんでした。
 ja|mobile_reload_hint|結果を確認するには、モバイルインターフェースを閉じて開き直してください。
 ja|label_mobile_language|モバイルインターフェースの既定
@@ -1425,7 +1425,7 @@ ka|status_ok|OK
 ka|status_missing|აკლია
 ka|menu_mobile_apply|ნაგულისხმევი ენის გამოყენება მობილურ ინტერფეისზე
 ka|menu_mobile_remove|ამ პარამეტრის მოხსნა მობილური ინტერფეისიდან
-ka|mobile_title|მობილური ინტერფეისი
+ka|mobile_title|მობილური ინტერფეისი (Proxmox VE 9+)
 ka|mobile_body_1|Proxmox VE-ის მობილური ინტერფეისი ცალკე აპლიკაციაა. ის უგულებელყოფს datacenter.cfg-ის ენას და ინგლისურად იწყება, სანამ ვინმე მის საკუთარ პარამეტრებში ენას არ აირჩევს.
 ka|mobile_body_2|ეს ამატებს რამდენიმე ხაზს მის გვერდზე, რათა ბრაუზერი, რომელსაც ენა არასდროს აურჩევია, datacenter.cfg-ის ენით დაიწყოს. მობილურ პარამეტრებში გაკეთებულ არჩევანს მაინც აქვს უპირატესობა.
 ka|mobile_body_3|ფაილი Proxmox VE-ს ეკუთვნის: მობილური ინტერფეისის პაკეტის განახლება შლის ამ ხაზებს, ეს პარამეტრი კი აბრუნებს მათ.
@@ -1433,7 +1433,7 @@ ka|mobile_applied|ნაგულისხმევი ენა გამოყ
 ka|mobile_removed|პარამეტრი მოხსნილია მობილური ინტერფეისიდან.
 ka|mobile_already_applied|უკვე გამოყენებულია მობილურ ინტერფეისზე. ცვლილება არ შესულა.
 ka|mobile_not_applied|არ არის გამოყენებული მობილურ ინტერფეისზე.
-ka|mobile_missing|მობილური ინტერფეისი ამ ჰოსტზე დაყენებული არ არის.
+ka|mobile_missing|მობილური ინტერფეისი ამ ჰოსტზე დაყენებული არ არის. (Proxmox VE 9+)
 ka|mobile_failed|მობილური ინტერფეისის გვერდის შეცვლა ვერ მოხერხდა.
 ka|mobile_reload_hint|დახურეთ და ხელახლა გახსენით მობილური ინტერფეისი შედეგის სანახავად.
 ka|label_mobile_language|მობილური ინტერფეისის ნაგულისხმევი
@@ -1513,7 +1513,7 @@ kr|status_ok|OK
 kr|status_missing|누락
 kr|menu_mobile_apply|기본 언어를 모바일 인터페이스에 적용
 kr|menu_mobile_remove|이 설정을 모바일 인터페이스에서 제거
-kr|mobile_title|모바일 인터페이스
+kr|mobile_title|모바일 인터페이스 (Proxmox VE 9+)
 kr|mobile_body_1|Proxmox VE 모바일 인터페이스는 별도의 애플리케이션입니다. datacenter.cfg의 언어를 무시하며, 자체 설정에서 언어를 선택하기 전까지 영어로 시작합니다.
 kr|mobile_body_2|이 옵션은 해당 페이지에 몇 줄을 추가하여, 언어를 선택한 적이 없는 브라우저가 datacenter.cfg의 언어로 시작하도록 합니다. 모바일 설정에서 선택한 언어가 여전히 우선합니다.
 kr|mobile_body_3|이 파일은 Proxmox VE의 것입니다. 모바일 인터페이스 패키지를 업데이트하면 이 줄이 사라지며, 이 옵션으로 다시 넣을 수 있습니다.
@@ -1521,7 +1521,7 @@ kr|mobile_applied|기본 언어를 모바일 인터페이스에 적용했습니�
 kr|mobile_removed|설정을 모바일 인터페이스에서 제거했습니다.
 kr|mobile_already_applied|이미 모바일 인터페이스에 적용되어 있습니다. 변경 사항 없음.
 kr|mobile_not_applied|모바일 인터페이스에 적용되지 않았습니다.
-kr|mobile_missing|이 호스트에는 모바일 인터페이스가 설치되어 있지 않습니다.
+kr|mobile_missing|이 호스트에는 모바일 인터페이스가 설치되어 있지 않습니다. (Proxmox VE 9+)
 kr|mobile_failed|모바일 인터페이스 페이지를 변경하지 못했습니다.
 kr|mobile_reload_hint|결과를 보려면 모바일 인터페이스를 닫았다가 다시 여세요.
 kr|label_mobile_language|모바일 인터페이스 기본값
@@ -1601,7 +1601,7 @@ nb|status_ok|OK
 nb|status_missing|MANGLER
 nb|menu_mobile_apply|Bruk standardspråket på det mobile grensesnittet
 nb|menu_mobile_remove|Fjern denne innstillingen fra det mobile grensesnittet
-nb|mobile_title|MOBILT GRENSESNITT
+nb|mobile_title|MOBILT GRENSESNITT (Proxmox VE 9+)
 nb|mobile_body_1|Det mobile grensesnittet i Proxmox VE er et eget program. Det ignorerer språket i datacenter.cfg og starter på engelsk til noen velger et språk i dets egne innstillinger.
 nb|mobile_body_2|Dette legger til noen linjer på siden, slik at en nettleser som aldri har valgt språk starter med det fra datacenter.cfg. Et valg gjort i de mobile innstillingene gjelder fortsatt.
 nb|mobile_body_3|Filen tilhører Proxmox VE: en oppdatering av pakken for det mobile grensesnittet fjerner linjene, og dette valget setter dem tilbake.
@@ -1609,7 +1609,7 @@ nb|mobile_applied|Standardspråket brukt på det mobile grensesnittet.
 nb|mobile_removed|Innstillingen fjernet fra det mobile grensesnittet.
 nb|mobile_already_applied|Allerede brukt på det mobile grensesnittet. Ingenting endret.
 nb|mobile_not_applied|Ikke brukt på det mobile grensesnittet.
-nb|mobile_missing|Det mobile grensesnittet er ikke installert på denne verten.
+nb|mobile_missing|Det mobile grensesnittet er ikke installert på denne verten. (Proxmox VE 9+)
 nb|mobile_failed|Siden for det mobile grensesnittet kunne ikke endres.
 nb|mobile_reload_hint|Lukk og åpne det mobile grensesnittet på nytt for å se resultatet.
 nb|label_mobile_language|Standard for mobilt grensesnitt
@@ -1689,7 +1689,7 @@ nl|status_ok|OK
 nl|status_missing|ONTBREEKT
 nl|menu_mobile_apply|Standaardtaal toepassen op de mobiele interface
 nl|menu_mobile_remove|Deze instelling van de mobiele interface verwijderen
-nl|mobile_title|MOBIELE INTERFACE
+nl|mobile_title|MOBIELE INTERFACE (Proxmox VE 9+)
 nl|mobile_body_1|De mobiele interface van Proxmox VE is een aparte applicatie. Ze negeert de taal uit datacenter.cfg en start in het Engels totdat iemand een taal kiest in haar eigen instellingen.
 nl|mobile_body_2|Dit voegt een paar regels toe aan haar pagina, zodat een browser die nooit een taal heeft gekozen start met die uit datacenter.cfg. Een keuze in de mobiele instellingen blijft voorgaan.
 nl|mobile_body_3|Het bestand hoort bij Proxmox VE: een update van het pakket van de mobiele interface wist deze regels, en deze optie zet ze terug.
@@ -1697,7 +1697,7 @@ nl|mobile_applied|Standaardtaal toegepast op de mobiele interface.
 nl|mobile_removed|Instelling verwijderd van de mobiele interface.
 nl|mobile_already_applied|Al toegepast op de mobiele interface. Niets gewijzigd.
 nl|mobile_not_applied|Niet toegepast op de mobiele interface.
-nl|mobile_missing|De mobiele interface is niet geïnstalleerd op deze host.
+nl|mobile_missing|De mobiele interface is niet geïnstalleerd op deze host. (Proxmox VE 9+)
 nl|mobile_failed|De pagina van de mobiele interface kon niet worden gewijzigd.
 nl|mobile_reload_hint|Sluit de mobiele interface en open ze opnieuw om het resultaat te zien.
 nl|label_mobile_language|Standaard van de mobiele interface
@@ -1777,7 +1777,7 @@ nn|status_ok|OK
 nn|status_missing|MANGLAR
 nn|menu_mobile_apply|Bruk standardspråket på det mobile grensesnittet
 nn|menu_mobile_remove|Fjern denne innstillinga frå det mobile grensesnittet
-nn|mobile_title|MOBILT GRENSESNITT
+nn|mobile_title|MOBILT GRENSESNITT (Proxmox VE 9+)
 nn|mobile_body_1|Det mobile grensesnittet i Proxmox VE er eit eige program. Det ignorerer språket i datacenter.cfg og startar på engelsk til nokon vel eit språk i innstillingane til programmet.
 nn|mobile_body_2|Dette legg til nokre linjer på sida, slik at ein nettlesar som aldri har valt språk startar med det frå datacenter.cfg. Eit val gjort i dei mobile innstillingane gjeld framleis.
 nn|mobile_body_3|Fila høyrer til Proxmox VE: ei oppdatering av pakken for det mobile grensesnittet fjernar linjene, og dette valet set dei tilbake.
@@ -1785,7 +1785,7 @@ nn|mobile_applied|Standardspråket teke i bruk på det mobile grensesnittet.
 nn|mobile_removed|Innstillinga fjerna frå det mobile grensesnittet.
 nn|mobile_already_applied|Allereie i bruk på det mobile grensesnittet. Ingenting endra.
 nn|mobile_not_applied|Ikkje i bruk på det mobile grensesnittet.
-nn|mobile_missing|Det mobile grensesnittet er ikkje installert på denne verten.
+nn|mobile_missing|Det mobile grensesnittet er ikkje installert på denne verten. (Proxmox VE 9+)
 nn|mobile_failed|Sida for det mobile grensesnittet kunne ikkje endrast.
 nn|mobile_reload_hint|Lukk og opne det mobile grensesnittet på nytt for å sjå resultatet.
 nn|label_mobile_language|Standard for mobilt grensesnitt
@@ -1865,7 +1865,7 @@ pl|status_ok|OK
 pl|status_missing|BRAK
 pl|menu_mobile_apply|Zastosuj domyślny język do interfejsu mobilnego
 pl|menu_mobile_remove|Usuń to ustawienie z interfejsu mobilnego
-pl|mobile_title|INTERFEJS MOBILNY
+pl|mobile_title|INTERFEJS MOBILNY (Proxmox VE 9+)
 pl|mobile_body_1|Interfejs mobilny Proxmox VE to osobna aplikacja. Ignoruje język z datacenter.cfg i uruchamia się po angielsku, dopóki ktoś nie wybierze języka w jego własnych ustawieniach.
 pl|mobile_body_2|To dodaje kilka linii do jego strony, aby przeglądarka, która nigdy nie wybrała języka, startowała z tym z datacenter.cfg. Wybór dokonany w ustawieniach mobilnych nadal ma pierwszeństwo.
 pl|mobile_body_3|Plik należy do Proxmox VE: aktualizacja pakietu interfejsu mobilnego usuwa te linie, a ta opcja przywraca je.
@@ -1873,7 +1873,7 @@ pl|mobile_applied|Domyślny język zastosowany do interfejsu mobilnego.
 pl|mobile_removed|Ustawienie usunięte z interfejsu mobilnego.
 pl|mobile_already_applied|Już zastosowane w interfejsie mobilnym. Bez zmian.
 pl|mobile_not_applied|Niezastosowane w interfejsie mobilnym.
-pl|mobile_missing|Interfejs mobilny nie jest zainstalowany na tym hoście.
+pl|mobile_missing|Interfejs mobilny nie jest zainstalowany na tym hoście. (Proxmox VE 9+)
 pl|mobile_failed|Nie udało się zmienić strony interfejsu mobilnego.
 pl|mobile_reload_hint|Zamknij i otwórz ponownie interfejs mobilny, aby zobaczyć wynik.
 pl|label_mobile_language|Domyślny dla interfejsu mobilnego
@@ -1953,7 +1953,7 @@ pt_BR|status_ok|OK
 pt_BR|status_missing|AUSENTE
 pt_BR|menu_mobile_apply|Aplicar o idioma padrão à interface móvel
 pt_BR|menu_mobile_remove|Remover esse ajuste da interface móvel
-pt_BR|mobile_title|INTERFACE MÓVEL
+pt_BR|mobile_title|INTERFACE MÓVEL (Proxmox VE 9+)
 pt_BR|mobile_body_1|A interface móvel do Proxmox VE é um aplicativo separado. Ela ignora o idioma do datacenter.cfg e inicia em inglês até alguém escolher um idioma nos ajustes dela.
 pt_BR|mobile_body_2|Isto acrescenta algumas linhas à página dela, para que um navegador que nunca escolheu idioma comece com o do datacenter.cfg. Uma escolha feita nos ajustes móveis continua tendo prioridade.
 pt_BR|mobile_body_3|O arquivo pertence ao Proxmox VE: uma atualização do pacote da interface móvel apaga essas linhas, e esta opção as recoloca.
@@ -1961,7 +1961,7 @@ pt_BR|mobile_applied|Idioma padrão aplicado à interface móvel.
 pt_BR|mobile_removed|Ajuste removido da interface móvel.
 pt_BR|mobile_already_applied|Já aplicado à interface móvel. Nada alterado.
 pt_BR|mobile_not_applied|Não aplicado à interface móvel.
-pt_BR|mobile_missing|A interface móvel não está instalada neste host.
+pt_BR|mobile_missing|A interface móvel não está instalada neste host. (Proxmox VE 9+)
 pt_BR|mobile_failed|Não foi possível alterar a página da interface móvel.
 pt_BR|mobile_reload_hint|Feche e reabra a interface móvel para ver o resultado.
 pt_BR|label_mobile_language|Padrão da interface móvel
@@ -2041,7 +2041,7 @@ ru|status_ok|OK
 ru|status_missing|ОТСУТСТВУЕТ
 ru|menu_mobile_apply|Применить язык по умолчанию к мобильному интерфейсу
 ru|menu_mobile_remove|Убрать эту настройку из мобильного интерфейса
-ru|mobile_title|МОБИЛЬНЫЙ ИНТЕРФЕЙС
+ru|mobile_title|МОБИЛЬНЫЙ ИНТЕРФЕЙС (Proxmox VE 9+)
 ru|mobile_body_1|Мобильный интерфейс Proxmox VE это отдельное приложение. Он игнорирует язык из datacenter.cfg и запускается на английском, пока кто-нибудь не выберет язык в его собственных настройках.
 ru|mobile_body_2|Это добавляет несколько строк на его страницу, чтобы браузер, который никогда не выбирал язык, запускался с языком из datacenter.cfg. Выбор, сделанный в настройках мобильного интерфейса, всё равно имеет приоритет.
 ru|mobile_body_3|Файл принадлежит Proxmox VE: обновление пакета мобильного интерфейса удаляет эти строки, а эта опция возвращает их.
@@ -2049,7 +2049,7 @@ ru|mobile_applied|Язык по умолчанию применён к моби�
 ru|mobile_removed|Настройка убрана из мобильного интерфейса.
 ru|mobile_already_applied|Уже применено к мобильному интерфейсу. Изменений нет.
 ru|mobile_not_applied|Не применено к мобильному интерфейсу.
-ru|mobile_missing|Мобильный интерфейс не установлен на этом хосте.
+ru|mobile_missing|Мобильный интерфейс не установлен на этом хосте. (Proxmox VE 9+)
 ru|mobile_failed|Не удалось изменить страницу мобильного интерфейса.
 ru|mobile_reload_hint|Закройте и снова откройте мобильный интерфейс, чтобы увидеть результат.
 ru|label_mobile_language|По умолчанию для мобильного интерфейса
@@ -2129,7 +2129,7 @@ sl|status_ok|OK
 sl|status_missing|MANJKA
 sl|menu_mobile_apply|Uporabi privzeti jezik za mobilni vmesnik
 sl|menu_mobile_remove|Odstrani to nastavitev z mobilnega vmesnika
-sl|mobile_title|MOBILNI VMESNIK
+sl|mobile_title|MOBILNI VMESNIK (Proxmox VE 9+)
 sl|mobile_body_1|Mobilni vmesnik Proxmox VE je ločena aplikacija. Jezik iz datacenter.cfg prezre in se zažene v angleščini, dokler nekdo ne izbere jezika v njegovih lastnih nastavitvah.
 sl|mobile_body_2|To doda nekaj vrstic na njegovo stran, da se brskalnik, ki jezika še ni izbral, zažene s tistim iz datacenter.cfg. Izbira v mobilnih nastavitvah ima še vedno prednost.
 sl|mobile_body_3|Datoteka pripada Proxmox VE: posodobitev paketa mobilnega vmesnika te vrstice odstrani, ta možnost pa jih vrne.
@@ -2137,7 +2137,7 @@ sl|mobile_applied|Privzeti jezik uporabljen za mobilni vmesnik.
 sl|mobile_removed|Nastavitev odstranjena z mobilnega vmesnika.
 sl|mobile_already_applied|Že uporabljeno za mobilni vmesnik. Nič spremenjeno.
 sl|mobile_not_applied|Ni uporabljeno za mobilni vmesnik.
-sl|mobile_missing|Mobilni vmesnik ni nameščen na tem gostitelju.
+sl|mobile_missing|Mobilni vmesnik ni nameščen na tem gostitelju. (Proxmox VE 9+)
 sl|mobile_failed|Strani mobilnega vmesnika ni bilo mogoče spremeniti.
 sl|mobile_reload_hint|Zaprite in znova odprite mobilni vmesnik, da vidite rezultat.
 sl|label_mobile_language|Privzeto za mobilni vmesnik
@@ -2217,7 +2217,7 @@ sv|status_ok|OK
 sv|status_missing|SAKNAS
 sv|menu_mobile_apply|Tillämpa standardspråket på det mobila gränssnittet
 sv|menu_mobile_remove|Ta bort den inställningen från det mobila gränssnittet
-sv|mobile_title|MOBILT GRÄNSSNITT
+sv|mobile_title|MOBILT GRÄNSSNITT (Proxmox VE 9+)
 sv|mobile_body_1|Proxmox VE:s mobila gränssnitt är ett separat program. Det struntar i språket i datacenter.cfg och startar på engelska tills någon väljer ett språk i dess egna inställningar.
 sv|mobile_body_2|Detta lägger till några rader på dess sida, så att en webbläsare som aldrig har valt språk startar med det från datacenter.cfg. Ett val gjort i de mobila inställningarna gäller fortfarande.
 sv|mobile_body_3|Filen tillhör Proxmox VE: en uppdatering av paketet för det mobila gränssnittet tar bort raderna, och det här alternativet lägger tillbaka dem.
@@ -2225,7 +2225,7 @@ sv|mobile_applied|Standardspråket tillämpat på det mobila gränssnittet.
 sv|mobile_removed|Inställningen borttagen från det mobila gränssnittet.
 sv|mobile_already_applied|Redan tillämpat på det mobila gränssnittet. Inget ändrat.
 sv|mobile_not_applied|Inte tillämpat på det mobila gränssnittet.
-sv|mobile_missing|Det mobila gränssnittet är inte installerat på den här värden.
+sv|mobile_missing|Det mobila gränssnittet är inte installerat på den här värden. (Proxmox VE 9+)
 sv|mobile_failed|Sidan för det mobila gränssnittet kunde inte ändras.
 sv|mobile_reload_hint|Stäng och öppna det mobila gränssnittet igen för att se resultatet.
 sv|label_mobile_language|Standard för mobilt gränssnitt
@@ -2305,7 +2305,7 @@ tr|status_ok|OK
 tr|status_missing|EKSİK
 tr|menu_mobile_apply|Varsayılan dili mobil arayüze uygula
 tr|menu_mobile_remove|Bu ayarı mobil arayüzden kaldır
-tr|mobile_title|MOBİL ARAYÜZ
+tr|mobile_title|MOBİL ARAYÜZ (Proxmox VE 9+)
 tr|mobile_body_1|Proxmox VE mobil arayüzü ayrı bir uygulamadır. datacenter.cfg dosyasındaki dili yok sayar ve biri kendi ayarlarında bir dil seçene kadar İngilizce başlar.
 tr|mobile_body_2|Bu, sayfasına birkaç satır ekler; böylece hiç dil seçmemiş bir tarayıcı datacenter.cfg dosyasındaki dille başlar. Mobil ayarlarda yapılan seçim yine de önceliklidir.
 tr|mobile_body_3|Dosya Proxmox VE'ye aittir: mobil arayüz paketinin güncellenmesi bu satırları siler, bu seçenek ise geri koyar.
@@ -2313,7 +2313,7 @@ tr|mobile_applied|Varsayılan dil mobil arayüze uygulandı.
 tr|mobile_removed|Ayar mobil arayüzden kaldırıldı.
 tr|mobile_already_applied|Mobil arayüze zaten uygulanmış. Değişiklik yok.
 tr|mobile_not_applied|Mobil arayüze uygulanmadı.
-tr|mobile_missing|Mobil arayüz bu sunucuda kurulu değil.
+tr|mobile_missing|Mobil arayüz bu sunucuda kurulu değil. (Proxmox VE 9+)
 tr|mobile_failed|Mobil arayüz sayfası değiştirilemedi.
 tr|mobile_reload_hint|Sonucu görmek için mobil arayüzü kapatıp yeniden açın.
 tr|label_mobile_language|Mobil arayüz varsayılanı
@@ -2393,7 +2393,7 @@ ukr|status_ok|OK
 ukr|status_missing|ВІДСУТНЄ
 ukr|menu_mobile_apply|Застосувати мову за замовчуванням до мобільного інтерфейсу
 ukr|menu_mobile_remove|Прибрати це налаштування з мобільного інтерфейсу
-ukr|mobile_title|МОБІЛЬНИЙ ІНТЕРФЕЙС
+ukr|mobile_title|МОБІЛЬНИЙ ІНТЕРФЕЙС (Proxmox VE 9+)
 ukr|mobile_body_1|Мобільний інтерфейс Proxmox VE це окремий застосунок. Він ігнорує мову з datacenter.cfg і запускається англійською, доки хтось не вибере мову в його власних налаштуваннях.
 ukr|mobile_body_2|Це додає кілька рядків на його сторінку, щоб браузер, який ніколи не вибирав мову, запускався з мовою з datacenter.cfg. Вибір, зроблений у налаштуваннях мобільного інтерфейсу, все одно має пріоритет.
 ukr|mobile_body_3|Файл належить Proxmox VE: оновлення пакета мобільного інтерфейсу видаляє ці рядки, а ця опція повертає їх.
@@ -2401,7 +2401,7 @@ ukr|mobile_applied|Мову за замовчуванням застосован
 ukr|mobile_removed|Налаштування прибрано з мобільного інтерфейсу.
 ukr|mobile_already_applied|Уже застосовано до мобільного інтерфейсу. Без змін.
 ukr|mobile_not_applied|Не застосовано до мобільного інтерфейсу.
-ukr|mobile_missing|Мобільний інтерфейс не встановлено на цьому хості.
+ukr|mobile_missing|Мобільний інтерфейс не встановлено на цьому хості. (Proxmox VE 9+)
 ukr|mobile_failed|Не вдалося змінити сторінку мобільного інтерфейсу.
 ukr|mobile_reload_hint|Закрийте і знову відкрийте мобільний інтерфейс, щоб побачити результат.
 ukr|label_mobile_language|За замовчуванням для мобільного інтерфейсу
@@ -2481,7 +2481,7 @@ zh_CN|status_ok|OK
 zh_CN|status_missing|缺失
 zh_CN|menu_mobile_apply|将默认语言应用到移动界面
 zh_CN|menu_mobile_remove|从移动界面移除该设置
-zh_CN|mobile_title|移动界面
+zh_CN|mobile_title|移动界面 (Proxmox VE 9+)
 zh_CN|mobile_body_1|Proxmox VE 的移动界面是一个独立的应用。它不读取 datacenter.cfg 中的语言，在有人于它自己的设置里选择语言之前一直以英文启动。
 zh_CN|mobile_body_2|这会在它的页面上添加几行，让从未选择过语言的浏览器以 datacenter.cfg 中的语言启动。在移动设置中做出的选择仍然优先。
 zh_CN|mobile_body_3|该文件属于 Proxmox VE：更新移动界面的软件包会删除这几行，此选项可以把它们放回去。
@@ -2489,7 +2489,7 @@ zh_CN|mobile_applied|默认语言已应用到移动界面。
 zh_CN|mobile_removed|已从移动界面移除该设置。
 zh_CN|mobile_already_applied|移动界面已应用，未做更改。
 zh_CN|mobile_not_applied|未应用到移动界面。
-zh_CN|mobile_missing|此主机未安装移动界面。
+zh_CN|mobile_missing|此主机未安装移动界面。 (Proxmox VE 9+)
 zh_CN|mobile_failed|无法修改移动界面的页面。
 zh_CN|mobile_reload_hint|关闭并重新打开移动界面即可看到效果。
 zh_CN|label_mobile_language|移动界面默认
@@ -2569,7 +2569,7 @@ zh_TW|status_ok|OK
 zh_TW|status_missing|缺少
 zh_TW|menu_mobile_apply|將預設語言套用到行動介面
 zh_TW|menu_mobile_remove|從行動介面移除此設定
-zh_TW|mobile_title|行動介面
+zh_TW|mobile_title|行動介面 (Proxmox VE 9+)
 zh_TW|mobile_body_1|Proxmox VE 的行動介面是獨立的應用程式。它不會讀取 datacenter.cfg 中的語言，在有人於它自己的設定中選擇語言之前一律以英文啟動。
 zh_TW|mobile_body_2|這會在它的頁面上加入幾行，讓從未選過語言的瀏覽器以 datacenter.cfg 的語言啟動。在行動設定中所做的選擇仍然優先。
 zh_TW|mobile_body_3|該檔案屬於 Proxmox VE：更新行動介面的套件會移除這幾行，此選項可以把它們放回去。
@@ -2577,7 +2577,7 @@ zh_TW|mobile_applied|預設語言已套用到行動介面。
 zh_TW|mobile_removed|已從行動介面移除此設定。
 zh_TW|mobile_already_applied|行動介面已套用，未做變更。
 zh_TW|mobile_not_applied|未套用到行動介面。
-zh_TW|mobile_missing|此主機未安裝行動介面。
+zh_TW|mobile_missing|此主機未安裝行動介面。 (Proxmox VE 9+)
 zh_TW|mobile_failed|無法修改行動介面的頁面。
 zh_TW|mobile_reload_hint|關閉並重新開啟行動介面即可看到結果。
 zh_TW|label_mobile_language|行動介面預設
@@ -3446,7 +3446,7 @@ show_status() {
     elif mobile_tpl_exists; then
         mobile_status="$(tr_msg status_not_applied)"
     else
-        mobile_status="$(tr_msg mobile_missing)"
+        mobile_status="$(tr_msg status_not_applied) (Proxmox VE 9+)"
     fi
 
     if [[ -n "$locale_value" && "$locale_value" != "$(tr_msg not_set)" ]] && locale -a 2>/dev/null | grep -qi "^${locale_value%.UTF-8}\(\.utf8\|\.UTF-8\)$"; then

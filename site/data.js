@@ -70,20 +70,20 @@ const SCRIPTS = [
         },
         compat: 'PVE 8.x / 9.x',
         updated: {
-            en: 'Optional: the mobile interface follows the default language too, instead of always starting in English.',
-            fr: 'Optionnel : l’interface mobile suit aussi la langue par défaut, au lieu de démarrer toujours en anglais.',
+            en: 'Optional, Proxmox VE 9 only: its mobile interface follows the default language too, instead of always starting in English.',
+            fr: 'Optionnel, Proxmox VE 9 uniquement : son interface mobile suit aussi la langue par défaut, au lieu de démarrer toujours en anglais.',
         },
         points: {
             en: [
                 'Sets the system locale and the web interface language together',
-                'Optional: the mobile interface follows that default too, on every new device',
+                'Optional, Proxmox VE 9 only: its mobile interface follows that default too, on every new device',
                 '29 languages, the script interface speaks them too',
                 'Optional timezone and NTP setup',
                 'Warns instead of writing a language Proxmox would silently drop',
             ],
             fr: [
                 'Règle la locale système et la langue de l’interface web ensemble',
-                'Optionnel : l’interface mobile suit aussi ce défaut, sur chaque nouvel appareil',
+                'Optionnel, Proxmox VE 9 uniquement : son interface mobile suit aussi ce défaut, sur chaque nouvel appareil',
                 '29 langues, l’interface du script les parle aussi',
                 'Configuration optionnelle du fuseau horaire et du NTP',
                 'Prévient au lieu d’écrire une langue que Proxmox ignorerait',
@@ -96,7 +96,7 @@ const SCRIPTS = [
                 { path: '/etc/locale.gen', role: { en: 'locales to generate', fr: 'locales à générer' } },
                 { path: '/etc/profile.d/proxmox-tools-locale.sh', role: { en: 'created, applies the locale to each shell', fr: 'créé, applique la locale à chaque shell' } },
                 { path: '/etc/timezone', role: { en: 'only if you choose a timezone', fr: 'seulement si vous choisissez un fuseau horaire' } },
-                { path: '/usr/share/pve-yew-mobile-gui/index.html.tpl', role: { en: 'a few lines added, only if you apply the default to the mobile interface', fr: 'quelques lignes ajoutées, seulement si vous appliquez le défaut à l’interface mobile' } },
+                { path: '/usr/share/pve-yew-mobile-gui/index.html.tpl', role: { en: 'a few lines added, only if you apply the default to the mobile interface of Proxmox VE 9', fr: 'quelques lignes ajoutées, seulement si vous appliquez le défaut à l’interface mobile de Proxmox VE 9' } },
             ],
             backup: '/root/pve-default-language-<date>/',
             restarts: 'pveproxy',
