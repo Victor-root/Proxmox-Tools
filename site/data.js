@@ -227,19 +227,21 @@ const SCRIPTS = [
         },
         compat: 'PVE 8.4.2 → 9.2',
         updated: {
-            en: 'Each patched file is now checked on its own, so a partial Proxmox update can simply be re-patched.',
-            fr: 'Chaque fichier patché est vérifié séparément : après une mise à jour partielle de Proxmox, il suffit de relancer le patch.',
+            en: 'New option: middle click on a VM or container of the left tree opens its console in a new tab.',
+            fr: 'Nouvelle option : le clic molette sur une VM ou un conteneur de l’arborescence de gauche ouvre sa console dans un nouvel onglet.',
         },
         points: {
             en: [
                 'Middle click on Console, noVNC or xterm.js opens a real browser tab',
                 'Middle click on SPICE behaves like a normal click, no useless empty tab',
+                'Separate option: middle click on a guest of the left tree opens its console in a tab',
                 'Automatic backup before patching, restore from the menu',
                 'Stops and touches nothing if your Proxmox version is not supported',
             ],
             fr: [
                 'Clic molette sur Console, noVNC ou xterm.js ouvre un vrai onglet',
                 'Clic molette sur SPICE se comporte comme un clic normal, sans onglet vide inutile',
+                'Option séparée : clic molette sur une VM ou un LXC de l’arborescence ouvre sa console dans un onglet',
                 'Backup automatique avant le patch, restauration depuis le menu',
                 'S’arrête sans rien toucher si votre version de Proxmox n’est pas prise en charge',
             ],
@@ -267,9 +269,10 @@ const SCRIPTS = [
                 'Restore from selected backup',
                 'Show patch status',
                 'List backups',
+                'Add the middle click on the VM/LXC of the resource tree',
                 'Quit',
             ],
-            prompt: 'Choose an option [1-6]:',
+            prompt: 'Choose an option [1-7]:',
         },
     },
     {

@@ -73,6 +73,7 @@ Adds a more convenient browser workflow for the Proxmox VE web interface:
 * 🖱️ **Middle click** on **noVNC** opens it in a **new tab**
 * 🖱️ **Middle click** on **xterm.js** opens it in a **new tab**
 * 🖱️ **Middle click** on **SPICE** behaves like a normal click, without opening a useless browser tab
+* 🌳 separate option: **middle click** on a **VM or container of the left tree** opens its console in a **new tab**, where that click did nothing before
 * 💾 automatic **backup** before patching
 * ♻️ built-in **restore** options
 * 📋 interactive menu
@@ -92,6 +93,12 @@ Proxmox re-formatted its JavaScript sources in June 2025, so the code blocks thi
 On an unsupported release the script stops with a clear message, creates no backup and leaves both files untouched, so nothing can break.
 
 Each of the two patched files is also checked and patched on its own: a Proxmox update that refreshes only one of the two packages can simply be re-patched.
+
+#### About the resource tree
+
+Option 6 is a second, separate patch. It reuses the console Proxmox VE already opens when you double click a guest in the left tree, with the same viewer choice, and asks for it in a new tab instead of a window. The middle click has no function there in stock Proxmox VE, and the current selection is left untouched, so nothing that worked before changes.
+
+It needs the main patch first, since that is what teaches the console how to open in a tab, and the script says so instead of touching a file for nothing. Templates, nodes and storages stay without effect, exactly like on a double click. The two code blocks it needs are identical in Proxmox VE 8 and 9.
 
 #### Run it directly
 

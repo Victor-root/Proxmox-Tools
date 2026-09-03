@@ -40,6 +40,9 @@ tr_msg() {
         fr:menu_backups) echo "Lister les backups" ;;
         en:menu_backups) echo "List backups" ;;
 
+        fr:menu_tree) echo "Ajouter le clic molette sur les VM/LXC de l'arborescence" ;;
+        en:menu_tree) echo "Add the middle click on the VM/LXC of the resource tree" ;;
+
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
 
@@ -123,6 +126,27 @@ tr_msg() {
 
         fr:patch_failed) echo "Le patch a échoué." ;;
         en:patch_failed) echo "The patch failed." ;;
+
+        fr:tree_title) echo "CLIC MOLETTE DANS L'ARBORESCENCE" ;;
+        en:tree_title) echo "MIDDLE CLICK IN THE RESOURCE TREE" ;;
+
+        fr:tree_body_1) echo "Ajoute le clic molette sur une VM ou un conteneur de la liste de gauche : la console s'ouvre dans un nouvel onglet." ;;
+        en:tree_body_1) echo "Adds the middle click on a VM or a container of the left list: its console opens in a new tab." ;;
+
+        fr:tree_body_2) echo "C'est la console que Proxmox VE ouvre déjà sur un double clic, avec le même choix de visualiseur, mais dans un onglet plutôt que dans une fenêtre." ;;
+        en:tree_body_2) echo "This is the console Proxmox VE already opens on a double click, with the same viewer choice, but in a tab instead of a window." ;;
+
+        fr:tree_body_3) echo "Le clic molette ne fait rien aujourd'hui dans cette liste, et la sélection en cours n'est pas modifiée. Les modèles, les nœuds et les stockages restent sans effet." ;;
+        en:tree_body_3) echo "The middle click does nothing in that list today, and the current selection is left alone. Templates, nodes and storages stay without effect." ;;
+
+        fr:tree_needs_console) echo "Ce patch a besoin du patch principal, qui apporte l'ouverture en onglet. Utilisez l'option 1 d'abord." ;;
+        en:tree_needs_console) echo "This patch needs the main patch, which brings the opening in a tab. Use option 1 first." ;;
+
+        fr:tree_already_patched) echo "Le clic molette dans l'arborescence est déjà en place. Aucune modification appliquée." ;;
+        en:tree_already_patched) echo "The middle click in the resource tree is already in place. No changes applied." ;;
+
+        fr:tree_applied) echo "Clic molette ajouté dans l'arborescence." ;;
+        en:tree_applied) echo "Middle click added in the resource tree." ;;
 
         fr:detected_version) echo "Version détectée" ;;
         en:detected_version) echo "Detected version" ;;
@@ -365,15 +389,18 @@ installed_pkg_version() {
 # patch itself. Modes: status (report only), check (dry run), apply (write).
 # Each file is inspected and patched on its own, so a Proxmox update that only
 # refreshes one of the two packages can still be re-patched.
-# Exit codes: 0 work to do or done, 10 nothing to do, 1 unsupported layout.
+# Exit codes: 0 work to do or done, 10 nothing to do, 11 needs the main patch
+# first, 1 unsupported layout.
 run_patch_tool() {
     local mode="$1"
-    PM_FILE="$PM_FILE" PX_FILE="$PX_FILE" PATCH_MODE="$mode" python3 <<'PY'
+    local target="${2:-console}"
+    PM_FILE="$PM_FILE" PX_FILE="$PX_FILE" PATCH_MODE="$mode" PATCH_TARGET="$target" python3 <<'PY'
 from pathlib import Path
 import os
 import sys
 
 MODE = os.environ["PATCH_MODE"]
+TARGET = os.environ.get("PATCH_TARGET", "console")
 
 pm_path = Path(os.environ["PM_FILE"])
 px_path = Path(os.environ["PX_FILE"])
@@ -386,6 +413,8 @@ PM_SIG_DEFAULT = "openDefaultConsoleWindow: function (consoles, consoleType, vmi
 PM_SIG_CONSOLE = "openConsoleWindow: function (viewer, consoleType, vmid, nodename, vmname, cmd, opts)"
 PM_SIG_VNC = "openVNCViewer: function (vmtype, vmid, nodename, vmname, cmd, opts)"
 PX_SIG_XTERM = "openXtermJsViewer: function (vmtype, vmid, nodename, vmname, cmd, opts)"
+PM_SIG_TREE = "openTreeConsole: function (tree, record, item, index, e, consoleOpts)"
+TREE_CALL = "PVE.Utils.openTreeConsole(tree, record, td, rowIndex, ev, { newTab: true });"
 
 
 def pm_markers(text):
@@ -408,6 +437,13 @@ def px_markers(text):
     ]
 
 
+def tree_markers(text):
+    return [
+        ("PVE.Utils.openTreeConsole(consoleOpts)", PM_SIG_TREE in text),
+        ("resource tree middle click", TREE_CALL in text),
+    ]
+
+
 def is_patched(markers):
     return all(ok for _, ok in markers)
 
@@ -418,6 +454,12 @@ if MODE == "status":
         for label, ok in markers:
             print(f"   - {label}: {'OK' if ok else 'MISSING'}")
         print()
+
+    markers = tree_markers(pm)
+    print(f" resource tree: {'PATCHED' if is_patched(markers) else 'STOCK_OR_PARTIAL'}")
+    for label, ok in markers:
+        print(f"   - {label}: {'OK' if ok else 'MISSING'}")
+    print()
     sys.exit(0)
 
 
@@ -884,6 +926,120 @@ def patch_px(text):
     )
 
 
+def patch_tree(text):
+    text = replace_once(
+        text,
+"""        openTreeConsole: function (tree, record, item, index, e) {
+            e.stopEvent();
+            let nodename = record.data.node;
+            let vmid = record.data.vmid;
+            let vmname = record.data.name;
+            if (record.data.type === 'qemu' && !record.data.template) {
+                Proxmox.Utils.API2Request({
+                    url: `/nodes/${nodename}/qemu/${vmid}/status/current`,
+                    failure: (response) => Ext.Msg.alert('Error', response.htmlStatus),
+                    success: function (response, opts) {
+                        let conf = response.result.data;
+                        let consoles = {
+                            spice: !!conf.spice,
+                            xtermjs: !!conf.serial,
+                        };
+                        PVE.Utils.openDefaultConsoleWindow(consoles, 'kvm', vmid, nodename, vmname);
+                    },
+                });
+            } else if (record.data.type === 'lxc' && !record.data.template) {
+                PVE.Utils.openDefaultConsoleWindow(true, 'lxc', vmid, nodename, vmname);
+            }
+        },
+""",
+"""        openTreeConsole: function (tree, record, item, index, e, consoleOpts) {
+            e.stopEvent();
+            let nodename = record.data.node;
+            let vmid = record.data.vmid;
+            let vmname = record.data.name;
+            if (record.data.type === 'qemu' && !record.data.template) {
+                Proxmox.Utils.API2Request({
+                    url: `/nodes/${nodename}/qemu/${vmid}/status/current`,
+                    failure: (response) => Ext.Msg.alert('Error', response.htmlStatus),
+                    success: function (response, opts) {
+                        let conf = response.result.data;
+                        let consoles = {
+                            spice: !!conf.spice,
+                            xtermjs: !!conf.serial,
+                        };
+                        PVE.Utils.openDefaultConsoleWindow(
+                            consoles,
+                            'kvm',
+                            vmid,
+                            nodename,
+                            vmname,
+                            undefined,
+                            consoleOpts,
+                        );
+                    },
+                });
+            } else if (record.data.type === 'lxc' && !record.data.template) {
+                PVE.Utils.openDefaultConsoleWindow(
+                    true,
+                    'lxc',
+                    vmid,
+                    nodename,
+                    vmname,
+                    undefined,
+                    consoleOpts,
+                );
+            }
+        },
+""",
+        "openTreeConsole",
+        pm_path.name,
+    )
+
+    return replace_once(
+        text,
+"""                beforecellmousedown: function (tree, td, cellIndex, record, tr, rowIndex, ev) {
+                    let sm = me.getSelectionModel();
+                    // disable selection when right clicking except if the record is already selected
+                    me.allowSelection = ev.button !== 2 || sm.isSelected(record);
+                },
+""",
+"""                beforecellmousedown: function (tree, td, cellIndex, record, tr, rowIndex, ev) {
+                    let sm = me.getSelectionModel();
+                    // disable selection when right clicking except if the record is already selected
+                    me.allowSelection = ev.button !== 2 || sm.isSelected(record);
+
+                    // middle click opens the console of a guest in a new tab, the
+                    // same way a double click opens it in a window, and leaves the
+                    // current selection alone
+                    if (ev.button === 1 && record) {
+                        PVE.Utils.openTreeConsole(tree, record, td, rowIndex, ev, { newTab: true });
+                        return false;
+                    }
+                },
+""",
+        "resource tree middle click",
+        pm_path.name,
+    )
+
+
+if TARGET == "tree":
+    if is_patched(tree_markers(pm)):
+        sys.exit(10)
+
+    # The new tab itself comes from the console patch, which adds the option to
+    # openDefaultConsoleWindow and to everything it calls.
+    if not is_patched(pm_markers(pm)) or not is_patched(px_markers(px)):
+        sys.exit(11)
+
+    pm = patch_tree(pm)
+
+    if MODE == "apply":
+        pm_path.write_text(pm, encoding="utf-8")
+        print(f"[OK] patched: {pm_path}")
+
+    sys.exit(0)
+
+
 pm_done = is_patched(pm_markers(pm))
 px_done = is_patched(px_markers(px))
 
@@ -947,6 +1103,57 @@ apply_patch() {
     restart_pveproxy
     echo
     say_ok "$(tr_msg patch_applied)"
+    say_info "$(tr_msg hard_refresh)"
+    say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
+}
+
+apply_tree_patch() {
+    local backup_dir rc=0
+
+    run_patch_tool check tree || rc=$?
+
+    if [[ "$rc" -eq 10 ]]; then
+        say_ok "$(tr_msg tree_already_patched)"
+        return 0
+    fi
+
+    if [[ "$rc" -eq 11 ]]; then
+        say_err "$(tr_msg tree_needs_console)"
+        say_info "$(tr_msg no_file_modified)"
+        return 1
+    fi
+
+    if [[ "$rc" -ne 0 ]]; then
+        say_err "$(tr_msg patch_incompatible)"
+        say_info "$(tr_msg no_file_modified)"
+        return 1
+    fi
+
+    panel "$PMX_BLUE" "$(tr_msg tree_title)" \
+        "$(tr_msg tree_body_1)" \
+        "$(tr_msg tree_body_2)" \
+        "$(tr_msg tree_body_3)"
+
+    if ! confirm_yes; then
+        say_info "$(tr_msg cancelled)"
+        return 0
+    fi
+
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
+
+    rc=0
+    run_patch_tool apply tree || rc=$?
+
+    if [[ "$rc" -ne 0 ]]; then
+        say_err "$(tr_msg patch_failed)"
+        say_info "$(tr_msg no_file_modified)"
+        return 1
+    fi
+
+    restart_pveproxy
+    echo
+    say_ok "$(tr_msg tree_applied)"
     say_info "$(tr_msg hard_refresh)"
     say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
 }
@@ -1067,10 +1274,11 @@ main_menu() {
         printf " %b3)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_restore_select)"
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
-        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_tree)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-6]: " choice
+        read -r -p "$(tr_msg choose_option) [1-7]: " choice
         echo
 
         case "$choice" in
@@ -1093,6 +1301,10 @@ main_menu() {
                 menu_action show_backups
                 ;;
             6)
+                menu_action apply_tree_patch
+                pause
+                ;;
+            7)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;
