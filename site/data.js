@@ -134,12 +134,12 @@ const SCRIPTS = [
         file: 'pve-expand-node-tree.sh',
         target: 'pve',
         name: {
-            en: 'Auto-expand the resource tree',
-            fr: 'Déplier l’arborescence automatiquement',
+            en: 'Default panel layout',
+            fr: 'Disposition des panneaux par défaut',
         },
         tagline: {
-            en: 'Expands each PVE node in the left tree by default, no more chevron to click at every login.',
-            fr: 'Déplie chaque nœud PVE de l’arborescence de gauche par défaut, plus de chevron à cliquer à chaque connexion.',
+            en: 'Expands the resource tree and collapses the Logs panel by default, no more chevrons to click at every login.',
+            fr: 'Déplie l’arborescence et replie le panneau Logs par défaut, plus de chevrons à cliquer à chaque connexion.',
         },
         runsOn: {
             en: 'Proxmox VE host, as root',
@@ -147,26 +147,28 @@ const SCRIPTS = [
         },
         compat: 'PVE 8.x / 9.x',
         updated: {
-            en: 'New script. One targeted line, only node groups are affected.',
-            fr: 'Nouveau script. Une ligne ciblée, seuls les groupes de nœuds sont concernés.',
+            en: 'Separate option to collapse the bottom Logs panel by default too.',
+            fr: 'Option séparée pour replier aussi le panneau Logs du bas par défaut.',
         },
         points: {
             en: [
                 'Each node opens automatically on the default Server View',
                 'Pools, storages, VMs and containers stay exactly as they are',
+                'Separate option collapses the Logs panel (Tasks tab) by default',
                 'Same effect as clicking every chevron by hand, done once for good',
                 'Automatic backup before patching, restore from the menu',
             ],
             fr: [
                 'Chaque nœud s’ouvre automatiquement sur la vue Serveur par défaut',
                 'Pools, stockages, VM et conteneurs restent exactement comme ils sont',
+                'Option séparée pour replier le panneau Logs (onglet Tâches) par défaut',
                 'Même effet que cliquer chaque chevron à la main, fait une bonne fois pour toutes',
                 'Backup automatique avant le patch, restauration depuis le menu',
             ],
         },
         touches: {
             files: [
-                { path: '/usr/share/pve-manager/js/pvemanagerlib.js', role: { en: 'a few lines added, the ones that build each node of the tree', fr: 'quelques lignes ajoutées, celles qui construisent chaque nœud de l’arborescence' } },
+                { path: '/usr/share/pve-manager/js/pvemanagerlib.js', role: { en: 'a few lines added: the ones that build each node of the tree, and the ones for the Logs panel if that option is used', fr: 'quelques lignes ajoutées : celles qui construisent chaque nœud de l’arborescence, et celles du panneau Logs si cette option est utilisée' } },
             ],
             backup: '/root/pve-expand-node-tree-patch-<date>/',
             restarts: 'pveproxy',
@@ -175,12 +177,13 @@ const SCRIPTS = [
             banner: 'proxmox',
             theme: 'orange',
             host: 'root@pve01',
-            subtitle: 'Node Tree Auto-Expand',
+            subtitle: 'Default Panel Layout',
             panel: {
                 title: 'Patch status',
                 lines: [
                     'Detected version: pve-manager 9.0.18',
                     'Nodes expanded by default: active',
+                    'Logs panel collapsed by default: active',
                 ],
             },
             menu: [
@@ -189,9 +192,11 @@ const SCRIPTS = [
                 'Restore from selected backup',
                 'Show patch status',
                 'List backups',
+                'Collapse the Logs panel by default',
+                'Keep the Logs panel expanded by default',
                 'Quit',
             ],
-            prompt: 'Choose an option [1-6]:',
+            prompt: 'Choose an option [1-8]:',
         },
     },
     {
