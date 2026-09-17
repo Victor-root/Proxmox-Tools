@@ -129,6 +129,72 @@ const SCRIPTS = [
         },
     },
     {
+        id: 'expand-node-tree',
+        icon: 'list-tree',
+        file: 'pve-expand-node-tree.sh',
+        target: 'pve',
+        name: {
+            en: 'Auto-expand the resource tree',
+            fr: 'Déplier l’arborescence automatiquement',
+        },
+        tagline: {
+            en: 'Expands each PVE node in the left tree by default, no more chevron to click at every login.',
+            fr: 'Déplie chaque nœud PVE de l’arborescence de gauche par défaut, plus de chevron à cliquer à chaque connexion.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 8.x / 9.x',
+        updated: {
+            en: 'New script. One targeted line, only node groups are affected.',
+            fr: 'Nouveau script. Une ligne ciblée, seuls les groupes de nœuds sont concernés.',
+        },
+        points: {
+            en: [
+                'Each node opens automatically on the default Server View',
+                'Pools, storages, VMs and containers stay exactly as they are',
+                'Same effect as clicking every chevron by hand, done once for good',
+                'Automatic backup before patching, restore from the menu',
+            ],
+            fr: [
+                'Chaque nœud s’ouvre automatiquement sur la vue Serveur par défaut',
+                'Pools, stockages, VM et conteneurs restent exactement comme ils sont',
+                'Même effet que cliquer chaque chevron à la main, fait une bonne fois pour toutes',
+                'Backup automatique avant le patch, restauration depuis le menu',
+            ],
+        },
+        touches: {
+            files: [
+                { path: '/usr/share/pve-manager/js/pvemanagerlib.js', role: { en: 'a few lines added, the ones that build each node of the tree', fr: 'quelques lignes ajoutées, celles qui construisent chaque nœud de l’arborescence' } },
+            ],
+            backup: '/root/pve-expand-node-tree-patch-<date>/',
+            restarts: 'pveproxy',
+        },
+        terminal: {
+            banner: 'proxmox',
+            theme: 'orange',
+            host: 'root@pve01',
+            subtitle: 'Node Tree Auto-Expand',
+            panel: {
+                title: 'Patch status',
+                lines: [
+                    'Detected version: pve-manager 9.0.18',
+                    'Nodes expanded by default: active',
+                ],
+            },
+            menu: [
+                'Apply patch (automatic backup included)',
+                'Restore latest backup',
+                'Restore from selected backup',
+                'Show patch status',
+                'List backups',
+                'Quit',
+            ],
+            prompt: 'Choose an option [1-6]:',
+        },
+    },
+    {
         id: 'subscription-notice',
         icon: 'bell-off',
         file: 'pve-remove-subscription-notice.sh',
