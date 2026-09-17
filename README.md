@@ -180,6 +180,33 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 </details>
 
 <details>
+<summary><b>🌳 Auto-expand nodes in the resource tree</b></summary>
+
+**Script:** `pve-expand-node-tree.sh`
+
+Expands every **PVE node** in the left resource tree by default, so its VMs and containers show up without clicking the chevron on every login:
+
+* 🌳 each node **opens automatically** on the default Server View, exactly like clicking its chevron by hand
+* 🎯 targeted: **pools, storages, VMs and containers stay as they are**, only the node groups themselves are affected
+* 💾 automatic **backup** before patching
+* ♻️ built-in **restore** options
+* 📋 interactive menu
+
+#### Version compatibility
+
+Checked against the official Proxmox VE sources: the patched line is identical in Proxmox VE 8 and 9, so this script behaves the same on both.
+
+On an unsupported release it stops with a clear message, creates no backup and leaves the file untouched.
+
+#### Run it directly
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-expand-node-tree.sh)
+```
+
+</details>
+
+<details>
 <summary><b>🔐 WireGuard VPN server installer & client manager (LXC)</b></summary>
 
 **Script:** `lxc-wireguard-server-install.sh`
