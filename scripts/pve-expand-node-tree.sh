@@ -13,6 +13,14 @@ PM_FILE="/usr/share/pve-manager/js/pvemanagerlib.js"
 STOCK_ANCHOR="        let child = Ext.create('PVETree', info);"
 PATCH_MARKER="info.expanded = true;"
 
+# Workspace.js's south region, the "Logs" panel that holds the Tasks tab and
+# the cluster log, has no initial collapsed state either, so it always opens
+# expanded and covers the bottom of the screen until folded back by hand.
+# "collapsible: true," is unique to that one panel in the whole file, so
+# "collapsed: true," inserted right after it only ever affects this panel.
+LOGS_STOCK_ANCHOR="collapsible: true,"
+LOGS_PATCH_MARKER="collapsed: true,"
+
 # ------------------------------------------------------------
 # Language detection (EN default, FR if system locale starts with fr)
 # ------------------------------------------------------------
@@ -47,6 +55,12 @@ tr_msg() {
 
         fr:menu_backups) echo "Lister les backups" ;;
         en:menu_backups) echo "List backups" ;;
+
+        fr:menu_logs_apply) echo "Replier le panneau Logs par défaut" ;;
+        en:menu_logs_apply) echo "Collapse the Logs panel by default" ;;
+
+        fr:menu_logs_remove) echo "Garder le panneau Logs déplié par défaut" ;;
+        en:menu_logs_remove) echo "Keep the Logs panel expanded by default" ;;
 
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
@@ -123,6 +137,30 @@ tr_msg() {
         fr:status_inactive) echo "inactif" ;;
         en:status_inactive) echo "inactive" ;;
 
+        fr:status_logs) echo "Panneau Logs replié par défaut" ;;
+        en:status_logs) echo "Logs panel collapsed by default" ;;
+
+        fr:logs_title) echo "PANNEAU LOGS" ;;
+        en:logs_title) echo "LOGS PANEL" ;;
+
+        fr:logs_body_1) echo "Replie par défaut le panneau du bas (onglet Tâches et journal de la grappe), à chaque chargement de la page, exactement comme cliquer le chevron soi-même." ;;
+        en:logs_body_1) echo "Collapses the bottom panel (Tasks tab and cluster log) by default, on every page load, exactly like clicking its chevron by hand." ;;
+
+        fr:logs_body_2) echo "Seul l'état de départ change : vous pouvez toujours le déplier en cliquant dessus, il se replie simplement à nouveau au prochain chargement." ;;
+        en:logs_body_2) echo "Only the starting state changes: you can still expand it by clicking it, it just folds back on the next page load." ;;
+
+        fr:logs_applied) echo "Panneau Logs replié par défaut." ;;
+        en:logs_applied) echo "Logs panel collapsed by default." ;;
+
+        fr:logs_removed) echo "Panneau Logs à nouveau déplié par défaut." ;;
+        en:logs_removed) echo "Logs panel expanded by default again." ;;
+
+        fr:logs_already_applied) echo "Déjà appliqué. Aucune modification." ;;
+        en:logs_already_applied) echo "Already applied. No changes made." ;;
+
+        fr:logs_not_applied) echo "Pas appliqué." ;;
+        en:logs_not_applied) echo "Not applied." ;;
+
         fr:available_backups) echo "Backups disponibles" ;;
         en:available_backups) echo "Available backups" ;;
 
@@ -177,11 +215,11 @@ tr_msg() {
         fr:version_installed) echo "Installé" ;;
         en:version_installed) echo "Installed" ;;
 
-        fr:banner_subtitle) echo "Node Tree Auto-Expand" ;;
-        en:banner_subtitle) echo "Node Tree Auto-Expand" ;;
+        fr:banner_subtitle) echo "Default Panel Layout" ;;
+        en:banner_subtitle) echo "Default Panel Layout" ;;
 
-        fr:repo_hint) echo "Déplie automatiquement chaque nœud dans l'arborescence de l'interface web Proxmox VE" ;;
-        en:repo_hint) echo "Automatically expands each node in the Proxmox VE web interface resource tree" ;;
+        fr:repo_hint) echo "Déplie l'arborescence et replie le panneau Logs par défaut dans l'interface web Proxmox VE" ;;
+        en:repo_hint) echo "Expands the resource tree and collapses the Logs panel by default in the Proxmox VE web interface" ;;
 
         * ) echo "$key" ;;
     esac
@@ -372,6 +410,52 @@ pm_path.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
 PY
 }
 
+logs_is_patched() {
+    grep -qF "$LOGS_PATCH_MARKER" "$PM_FILE"
+}
+
+logs_is_patchable() {
+    grep -qF "$LOGS_STOCK_ANCHOR" "$PM_FILE"
+}
+
+apply_logs_python_patch() {
+    PM_FILE="$PM_FILE" python3 <<'PY'
+from pathlib import Path
+import os
+import sys
+
+pm_path = Path(os.environ["PM_FILE"])
+text = pm_path.read_text(encoding="utf-8")
+
+anchor = "                    collapsible: true,\n"
+if text.count(anchor) != 1:
+    sys.exit(1)
+
+replacement = anchor + "                    collapsed: true,\n"
+
+pm_path.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
+PY
+}
+
+revert_logs_python_patch() {
+    PM_FILE="$PM_FILE" python3 <<'PY'
+from pathlib import Path
+import os
+import sys
+
+pm_path = Path(os.environ["PM_FILE"])
+text = pm_path.read_text(encoding="utf-8")
+
+anchor = "                    collapsible: true,\n                    collapsed: true,\n"
+if text.count(anchor) != 1:
+    sys.exit(1)
+
+replacement = "                    collapsible: true,\n"
+
+pm_path.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
+PY
+}
+
 # ------------------------------------------------------------
 # Backups
 # ------------------------------------------------------------
@@ -420,7 +504,7 @@ installed_pkg_version() {
 # ------------------------------------------------------------
 
 show_status() {
-    local pm_version tree_state
+    local pm_version tree_state logs_state
 
     pm_version="$(installed_pkg_version pve-manager)"
 
@@ -430,9 +514,16 @@ show_status() {
         tree_state="${PMX_GREY}$(tr_msg status_inactive)${RESET}"
     fi
 
+    if logs_is_patched; then
+        logs_state="${PMX_GREEN}$(tr_msg status_active)${RESET}"
+    else
+        logs_state="${PMX_GREY}$(tr_msg status_inactive)${RESET}"
+    fi
+
     panel "$PMX_ORANGE" "$(tr_msg status_title)" \
         "$(tr_msg detected_version): pve-manager ${BOLD}${pm_version:-?}${RESET}" \
-        "$(tr_msg status_tree): ${BOLD}${tree_state}"
+        "$(tr_msg status_tree): ${BOLD}${tree_state}" \
+        "$(tr_msg status_logs): ${BOLD}${logs_state}"
 }
 
 apply_patch() {
@@ -462,6 +553,67 @@ apply_patch() {
     restart_pveproxy
     echo
     say_ok "$(tr_msg patch_applied)"
+    say_info "$(tr_msg hard_refresh)"
+    say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
+}
+
+apply_logs_patch() {
+    local backup_dir
+
+    if logs_is_patched; then
+        say_ok "$(tr_msg logs_already_applied)"
+        return 0
+    fi
+
+    if ! logs_is_patchable; then
+        say_err "$(tr_msg patch_incompatible)"
+        say_info "$(tr_msg no_file_modified)"
+        return 1
+    fi
+
+    panel "$PMX_BLUE" "$(tr_msg logs_title)" \
+        "$(tr_msg logs_body_1)" \
+        "$(tr_msg logs_body_2)"
+
+    if ! confirm_yes; then
+        say_info "$(tr_msg cancelled)"
+        return 0
+    fi
+
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
+
+    if ! apply_logs_python_patch || ! logs_is_patched; then
+        say_err "$(tr_msg patch_failed)"
+        return 1
+    fi
+
+    restart_pveproxy
+    echo
+    say_ok "$(tr_msg logs_applied)"
+    say_info "$(tr_msg hard_refresh)"
+    say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
+}
+
+remove_logs_patch() {
+    local backup_dir
+
+    if ! logs_is_patched; then
+        say_info "$(tr_msg logs_not_applied)"
+        return 0
+    fi
+
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
+
+    if ! revert_logs_python_patch || logs_is_patched; then
+        say_err "$(tr_msg patch_failed)"
+        return 1
+    fi
+
+    restart_pveproxy
+    echo
+    say_ok "$(tr_msg logs_removed)"
     say_info "$(tr_msg hard_refresh)"
     say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
 }
@@ -575,10 +727,12 @@ main_menu() {
         printf " %b3)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_restore_select)"
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
-        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_logs_apply)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_logs_remove)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-6]: " choice
+        read -r -p "$(tr_msg choose_option) [1-8]: " choice
         echo
 
         case "$choice" in
@@ -601,6 +755,14 @@ main_menu() {
                 menu_action show_backups
                 ;;
             6)
+                menu_action apply_logs_patch
+                pause
+                ;;
+            7)
+                menu_action remove_logs_patch
+                pause
+                ;;
+            8)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;

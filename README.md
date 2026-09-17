@@ -180,21 +180,22 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 </details>
 
 <details>
-<summary><b>🌳 Auto-expand nodes in the resource tree</b></summary>
+<summary><b>🌳 Default panel layout (tree and Logs panel)</b></summary>
 
 **Script:** `pve-expand-node-tree.sh`
 
-Expands every **PVE node** in the left resource tree by default, so its VMs and containers show up without clicking the chevron on every login:
+Fixes two Proxmox VE panels that always start in the wrong state and need a manual click on their chevron after every login:
 
-* 🌳 each node **opens automatically** on the default Server View, exactly like clicking its chevron by hand
+* 🌳 each **PVE node** in the left resource tree **opens automatically** on the default Server View, exactly like clicking its chevron by hand
 * 🎯 targeted: **pools, storages, VMs and containers stay as they are**, only the node groups themselves are affected
+* 📉 separate option: the bottom **Logs panel** (Tasks tab and cluster log) **collapses by default** instead of covering part of the screen at every login
 * 💾 automatic **backup** before patching
-* ♻️ built-in **restore** options
+* ♻️ built-in **restore** options, plus a direct on/off toggle for the Logs panel
 * 📋 interactive menu
 
 #### Version compatibility
 
-Checked against the official Proxmox VE sources: the patched line is identical in Proxmox VE 8 and 9, so this script behaves the same on both.
+Checked against the official Proxmox VE sources: both patched lines are identical in Proxmox VE 8 and 9, so this script behaves the same on both.
 
 On an unsupported release it stops with a clear message, creates no backup and leaves the file untouched.
 
