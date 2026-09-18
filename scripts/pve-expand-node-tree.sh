@@ -16,8 +16,10 @@ PATCH_MARKER="info.expanded = true;"
 # Workspace.js's south region, the "Logs" panel that holds the Tasks tab and
 # the cluster log, has no initial collapsed state either, so it always opens
 # expanded and covers the bottom of the screen until folded back by hand.
-# "collapsible: true," is unique to that one panel in the whole file, so
-# "collapsed: true," inserted right after it only ever affects this panel.
+# "collapsible: true," on its own is NOT unique once every manager6 file is
+# assembled into pvemanagerlib.js (a datacenter panel and an unrelated
+# fieldset also have it at the same indentation), so the patch anchors on
+# the full block down to its "stateId: 'pvesouth'", which only exists once.
 LOGS_STOCK_ANCHOR="collapsible: true,"
 LOGS_PATCH_MARKER="collapsed: true,"
 
@@ -427,7 +429,14 @@ import sys
 pm_path = Path(os.environ["PM_FILE"])
 text = pm_path.read_text(encoding="utf-8")
 
-anchor = "                    collapsible: true,\n"
+anchor = (
+    "                    stateId: 'pvesouth',\n"
+    "                    itemId: 'south',\n"
+    "                    region: 'south',\n"
+    "                    margin: '0 5 5 5',\n"
+    "                    title: gettext('Logs'),\n"
+    "                    collapsible: true,\n"
+)
 if text.count(anchor) != 1:
     sys.exit(1)
 
@@ -446,11 +455,26 @@ import sys
 pm_path = Path(os.environ["PM_FILE"])
 text = pm_path.read_text(encoding="utf-8")
 
-anchor = "                    collapsible: true,\n                    collapsed: true,\n"
+anchor = (
+    "                    stateId: 'pvesouth',\n"
+    "                    itemId: 'south',\n"
+    "                    region: 'south',\n"
+    "                    margin: '0 5 5 5',\n"
+    "                    title: gettext('Logs'),\n"
+    "                    collapsible: true,\n"
+    "                    collapsed: true,\n"
+)
 if text.count(anchor) != 1:
     sys.exit(1)
 
-replacement = "                    collapsible: true,\n"
+replacement = (
+    "                    stateId: 'pvesouth',\n"
+    "                    itemId: 'south',\n"
+    "                    region: 'south',\n"
+    "                    margin: '0 5 5 5',\n"
+    "                    title: gettext('Logs'),\n"
+    "                    collapsible: true,\n"
+)
 
 pm_path.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
 PY
