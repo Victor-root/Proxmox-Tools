@@ -18,10 +18,10 @@ PATCH_MARKER="info.expanded = true;"
 # expanded and covers the bottom of the screen until folded back by hand.
 # "collapsible: true," on its own is NOT unique once every manager6 file is
 # assembled into pvemanagerlib.js (a datacenter panel and an unrelated
-# fieldset also have it at the same indentation), so the patch anchors on
-# the full block down to its "stateId: 'pvesouth'", which only exists once.
+# fieldset also have it at the same indentation), so both applying the patch
+# and detecting it anchor on the full block down to its "stateId: 'pvesouth'",
+# which only exists once.
 LOGS_STOCK_ANCHOR="collapsible: true,"
-LOGS_PATCH_MARKER="collapsed: true,"
 
 # ------------------------------------------------------------
 # Language detection (EN default, FR if system locale starts with fr)
@@ -412,8 +412,29 @@ pm_path.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
 PY
 }
 
+# A plain grep for "collapsed: true," would also match two unrelated
+# collapsible fieldsets Proxmox ships stock, reporting the patch as already
+# applied when it never touched the file. Checking the whole block anchored
+# on "stateId: 'pvesouth'" only matches the actual Logs panel.
 logs_is_patched() {
-    grep -qF "$LOGS_PATCH_MARKER" "$PM_FILE"
+    PM_FILE="$PM_FILE" python3 <<'PY'
+from pathlib import Path
+import os
+import sys
+
+text = Path(os.environ["PM_FILE"]).read_text(encoding="utf-8")
+
+marker = (
+    "                    stateId: 'pvesouth',\n"
+    "                    itemId: 'south',\n"
+    "                    region: 'south',\n"
+    "                    margin: '0 5 5 5',\n"
+    "                    title: gettext('Logs'),\n"
+    "                    collapsible: true,\n"
+    "                    collapsed: true,\n"
+)
+sys.exit(0 if marker in text else 1)
+PY
 }
 
 logs_is_patchable() {
