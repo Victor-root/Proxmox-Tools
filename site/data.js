@@ -129,77 +129,6 @@ const SCRIPTS = [
         },
     },
     {
-        id: 'expand-node-tree',
-        icon: 'list-tree',
-        file: 'pve-expand-node-tree.sh',
-        target: 'pve',
-        name: {
-            en: 'Default panel layout',
-            fr: 'Disposition des panneaux par défaut',
-        },
-        tagline: {
-            en: 'Expands the resource tree and collapses the Logs panel by default, no more chevrons to click at every login.',
-            fr: 'Déplie l’arborescence et replie le panneau Logs par défaut, plus de chevrons à cliquer à chaque connexion.',
-        },
-        runsOn: {
-            en: 'Proxmox VE host, as root',
-            fr: 'Sur l’hôte Proxmox VE, en root',
-        },
-        compat: 'PVE 8.x / 9.x',
-        updated: {
-            en: 'Separate option to collapse the bottom Logs panel by default too.',
-            fr: 'Option séparée pour replier aussi le panneau Logs du bas par défaut.',
-        },
-        points: {
-            en: [
-                'Each node opens automatically on the default Server View',
-                'Pools, storages, VMs and containers stay exactly as they are',
-                'Separate option collapses the Logs panel (Tasks tab) by default',
-                'Same effect as clicking every chevron by hand, done once for good',
-                'Automatic backup before patching, restore from the menu',
-            ],
-            fr: [
-                'Chaque nœud s’ouvre automatiquement sur la vue Serveur par défaut',
-                'Pools, stockages, VM et conteneurs restent exactement comme ils sont',
-                'Option séparée pour replier le panneau Logs (onglet Tâches) par défaut',
-                'Même effet que cliquer chaque chevron à la main, fait une bonne fois pour toutes',
-                'Backup automatique avant le patch, restauration depuis le menu',
-            ],
-        },
-        touches: {
-            files: [
-                { path: '/usr/share/pve-manager/js/pvemanagerlib.js', role: { en: 'a few lines added: the ones that build each node of the tree, and the ones for the Logs panel if that option is used', fr: 'quelques lignes ajoutées : celles qui construisent chaque nœud de l’arborescence, et celles du panneau Logs si cette option est utilisée' } },
-            ],
-            backup: '/root/pve-expand-node-tree-patch-<date>/',
-            restarts: 'pveproxy',
-        },
-        terminal: {
-            banner: 'proxmox',
-            theme: 'orange',
-            host: 'root@pve01',
-            subtitle: 'Default Panel Layout',
-            panel: {
-                title: 'Patch status',
-                lines: [
-                    'Detected version: pve-manager 9.0.18',
-                    'Nodes expanded by default: active',
-                    'Logs panel collapsed by default: active',
-                ],
-            },
-            menu: [
-                'Apply patch (automatic backup included)',
-                'Restore latest backup',
-                'Restore from selected backup',
-                'Show patch status',
-                'List backups',
-                'Collapse the Logs panel by default',
-                'Keep the Logs panel expanded by default',
-                'Quit',
-            ],
-            prompt: 'Choose an option [1-8]:',
-        },
-    },
-    {
         id: 'subscription-notice',
         icon: 'bell-off',
         file: 'pve-remove-subscription-notice.sh',
@@ -495,6 +424,77 @@ const SCRIPTS = [
                 'Show status',
                 'Disable the display on every shell session (keep Fastfetch)',
                 'Remove everything (display, configuration and Fastfetch)',
+                'Quit',
+            ],
+            prompt: 'Choose an option [1-8]:',
+        },
+    },
+    {
+        id: 'expand-node-tree',
+        icon: 'list-tree',
+        file: 'pve-expand-node-tree.sh',
+        target: 'pve',
+        name: {
+            en: 'Default panel layout',
+            fr: 'Disposition des panneaux par défaut',
+        },
+        tagline: {
+            en: 'Expands the resource tree and collapses the Logs panel by default, no more chevrons to click at every login.',
+            fr: 'Déplie l’arborescence et replie le panneau Logs par défaut, plus de chevrons à cliquer à chaque connexion.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 8.x / 9.x',
+        updated: {
+            en: 'New script. Every node of the resource tree opens at login, and the Logs panel can start collapsed.',
+            fr: 'Nouveau script. Chaque nœud de l’arborescence s’ouvre à la connexion, et le panneau Logs peut démarrer replié.',
+        },
+        points: {
+            en: [
+                'Each node opens automatically on the default Server View',
+                'Pools, storages, VMs and containers stay exactly as they are',
+                'Separate option collapses the Logs panel (Tasks tab) by default',
+                'Same effect as clicking every chevron by hand, done once for good',
+                'Automatic backup before patching, restore from the menu',
+            ],
+            fr: [
+                'Chaque nœud s’ouvre automatiquement sur la vue Serveur par défaut',
+                'Pools, stockages, VM et conteneurs restent exactement comme ils sont',
+                'Option séparée pour replier le panneau Logs (onglet Tâches) par défaut',
+                'Même effet que cliquer chaque chevron à la main, fait une bonne fois pour toutes',
+                'Backup automatique avant le patch, restauration depuis le menu',
+            ],
+        },
+        touches: {
+            files: [
+                { path: '/usr/share/pve-manager/js/pvemanagerlib.js', role: { en: 'a few lines added: the ones that build each node of the tree, and the ones for the Logs panel if that option is used', fr: 'quelques lignes ajoutées : celles qui construisent chaque nœud de l’arborescence, et celles du panneau Logs si cette option est utilisée' } },
+            ],
+            backup: '/root/pve-expand-node-tree-patch-<date>/',
+            restarts: 'pveproxy',
+        },
+        terminal: {
+            banner: 'proxmox',
+            theme: 'orange',
+            host: 'root@pve01',
+            subtitle: 'Default Panel Layout',
+            panel: {
+                title: 'Patch status',
+                lines: [
+                    'Detected version: pve-manager 9.0.18',
+                    'Nodes expanded by default: active',
+                    'Logs panel collapsed by default: active',
+                ],
+            },
+            menu: [
+                'Apply patch (automatic backup included)',
+                'Restore latest backup',
+                'Restore from selected backup',
+                'Show patch status',
+                'List backups',
+                'Collapse the Logs panel by default',
+                'Keep the Logs panel expanded by default',
                 'Quit',
             ],
             prompt: 'Choose an option [1-8]:',
