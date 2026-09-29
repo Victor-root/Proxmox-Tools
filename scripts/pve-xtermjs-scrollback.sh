@@ -4,22 +4,22 @@ set -euo pipefail
 PATCH_PREFIX="/root/pve-xtermjs-scrollback-patch"
 UTIL_FILE="/usr/share/pve-xtermjs/util.js"
 SCROLLBACK_LINES=100000
-TEST_LINES=$((SCROLLBACK_LINES + 500))
+SCROLLBACK_RECOMMENDED=100000
+SCROLLBACK_MIN=1000
+SCROLLBACK_MAX=1000000
+SCROLLBACK_PRESETS=(10000 25000 50000 100000 250000)
 
 # getTerminalSettings() in util.js builds the options given to every xterm.js
 # console (host shell, containers, VMs). It starts from an empty object, so
 # xterm.js falls back to its own default of 1000 lines. Starting from
-# { scrollback: 100000 } sets the default for all consoles, while a
+# { scrollback: N } instead sets the default for all consoles, while a
 # pve-xterm-scrollback value saved in the browser, read further down by
 # recent versions, still wins.
-# Both the patch and the state detection match this whole two line block, so
-# a file that no longer looks like this is reported instead of patched blindly.
-STOCK_BLOCK="function getTerminalSettings() {
-    var res = {};
-"
-PATCHED_BLOCK="function getTerminalSettings() {
-    var res = { scrollback: ${SCROLLBACK_LINES} };
-"
+# The patch and the state detection both match this whole two line block, with
+# either the stock {} or an already patched { scrollback: N }, so a file that
+# no longer looks like this is reported instead of patched blindly.
+BLOCK_HEAD="function getTerminalSettings() {
+    var res = "
 
 # ------------------------------------------------------------
 # Language detection (EN default, FR if system locale starts with fr)
@@ -41,8 +41,8 @@ detect_lang
 tr_msg() {
     local key="$1"
     case "$APP_LANG:$key" in
-        fr:menu_apply) echo "Appliquer le patch (backup automatique inclus)" ;;
-        en:menu_apply) echo "Apply patch (automatic backup included)" ;;
+        fr:menu_apply) echo "Appliquer le patch ou changer le nombre de lignes (backup automatique inclus)" ;;
+        en:menu_apply) echo "Apply patch or change the number of lines (automatic backup included)" ;;
 
         fr:menu_restore_latest) echo "Restaurer le dernier backup" ;;
         en:menu_restore_latest) echo "Restore latest backup" ;;
@@ -131,6 +131,36 @@ tr_msg() {
         fr:state_unknown) echo "structure du fichier inattendue" ;;
         en:state_unknown) echo "unexpected file structure" ;;
 
+        fr:lines_title) echo "NOMBRE DE LIGNES" ;;
+        en:lines_title) echo "NUMBER OF LINES" ;;
+
+        fr:lines_word) echo "lignes" ;;
+        en:lines_word) echo "lines" ;;
+
+        fr:lines_memory) echo "environ $(mem_mb "$2" 80) Mo par onglet en 80 colonnes" ;;
+        en:lines_memory) echo "about $(mem_mb "$2" 80) MB per tab at 80 columns" ;;
+
+        fr:lines_recommended) echo "recommandé" ;;
+        en:lines_recommended) echo "recommended" ;;
+
+        fr:lines_current) echo "valeur actuelle" ;;
+        en:lines_current) echo "current value" ;;
+
+        fr:lines_custom) echo "Personnalisé" ;;
+        en:lines_custom) echo "Custom" ;;
+
+        fr:lines_custom_prompt) echo "Nombre de lignes (entre ${SCROLLBACK_MIN} et ${SCROLLBACK_MAX})" ;;
+        en:lines_custom_prompt) echo "Number of lines (between ${SCROLLBACK_MIN} and ${SCROLLBACK_MAX})" ;;
+
+        fr:lines_invalid) echo "Nombre invalide : entrez un entier entre ${SCROLLBACK_MIN} et ${SCROLLBACK_MAX}." ;;
+        en:lines_invalid) echo "Invalid number: enter a whole number between ${SCROLLBACK_MIN} and ${SCROLLBACK_MAX}." ;;
+
+        fr:lines_choose) echo "Choisissez le nombre de lignes" ;;
+        en:lines_choose) echo "Choose the number of lines" ;;
+
+        fr:test_needs_patch) echo "Appliquez d'abord le patch (option 1)." ;;
+        en:test_needs_patch) echo "Apply the patch first (option 1)." ;;
+
         fr:test_title) echo "TEST DE L'HISTORIQUE" ;;
         en:test_title) echo "SCROLLBACK TEST" ;;
 
@@ -197,8 +227,8 @@ tr_msg() {
         fr:warning_body_2) echo "Ceci est hors support et sera écrasé par les mises à jour du paquet pve-xtermjs, il faudra alors relancer le script." ;;
         en:warning_body_2) echo "This is unsupported and will be overwritten by pve-xtermjs package updates, in which case you need to run the script again." ;;
 
-        fr:warning_body_3) echo "Une console pleine à ${SCROLLBACK_LINES} lignes occupe jusqu'à environ 100 Mo dans le navigateur en 80 colonnes, 240 Mo en 200 colonnes (contre 1 à 2,5 Mo par défaut), par onglet ouvert." ;;
-        en:warning_body_3) echo "A console filled to ${SCROLLBACK_LINES} lines uses up to about 100 MB in the browser at 80 columns, 240 MB at 200 columns (against 1 to 2.5 MB by default), per open tab." ;;
+        fr:warning_body_3) echo "Une console pleine à ${SCROLLBACK_LINES} lignes occupe jusqu'à environ $(mem_mb "$SCROLLBACK_LINES" 80) Mo dans le navigateur en 80 colonnes, $(mem_mb "$SCROLLBACK_LINES" 200) Mo en 200 colonnes (contre 1 à 2,5 Mo par défaut), par onglet ouvert." ;;
+        en:warning_body_3) echo "A console filled to ${SCROLLBACK_LINES} lines uses up to about $(mem_mb "$SCROLLBACK_LINES" 80) MB in the browser at 80 columns, $(mem_mb "$SCROLLBACK_LINES" 200) MB at 200 columns (against 1 to 2.5 MB by default), per open tab." ;;
 
         fr:type_yes) echo "Tapez 'yes' pour continuer" ;;
         en:type_yes) echo "Type 'yes' to continue" ;;
@@ -368,41 +398,52 @@ show_warning_and_confirm() {
 # Patch state
 # ------------------------------------------------------------
 
-# Prints patched, stock or unknown. Only a file holding exactly one copy of
-# one of the two known blocks is recognised, anything else is unknown.
+# Prints stock, patched:N or unknown. Only a file holding exactly one copy of
+# the block, in one of its two known forms, is recognised.
 get_state() {
-    UTIL_FILE="$UTIL_FILE" STOCK_BLOCK="$STOCK_BLOCK" PATCHED_BLOCK="$PATCHED_BLOCK" python3 <<'PY'
+    UTIL_FILE="$UTIL_FILE" BLOCK_HEAD="$BLOCK_HEAD" python3 <<'PY'
 from pathlib import Path
 import os
+import re
 
 text = Path(os.environ["UTIL_FILE"]).read_text(encoding="utf-8")
-stock = text.count(os.environ["STOCK_BLOCK"])
-patched = text.count(os.environ["PATCHED_BLOCK"])
+head = os.environ["BLOCK_HEAD"]
 
-if patched == 1 and stock == 0:
-    print("patched")
-elif stock == 1 and patched == 0:
+stock = text.count(head + "{};\n")
+patched = re.findall(re.escape(head) + r"\{ scrollback: (\d+) \};\n", text)
+
+if stock == 1 and not patched:
     print("stock")
+elif stock == 0 and len(patched) == 1:
+    print("patched:" + patched[0])
 else:
     print("unknown")
 PY
 }
 
 apply_python_patch() {
-    UTIL_FILE="$UTIL_FILE" STOCK_BLOCK="$STOCK_BLOCK" PATCHED_BLOCK="$PATCHED_BLOCK" python3 <<'PY'
+    UTIL_FILE="$UTIL_FILE" BLOCK_HEAD="$BLOCK_HEAD" SCROLLBACK_LINES="$SCROLLBACK_LINES" python3 <<'PY'
 from pathlib import Path
 import os
+import re
 import sys
 
 util_path = Path(os.environ["UTIL_FILE"])
 text = util_path.read_text(encoding="utf-8")
+head = os.environ["BLOCK_HEAD"]
 
-stock = os.environ["STOCK_BLOCK"]
-if text.count(stock) != 1:
+block = re.compile(re.escape(head) + r"(?:\{\}|\{ scrollback: \d+ \});\n")
+if len(block.findall(text)) != 1:
     sys.exit(1)
 
-util_path.write_text(text.replace(stock, os.environ["PATCHED_BLOCK"], 1), encoding="utf-8")
+new_block = head + "{ scrollback: " + os.environ["SCROLLBACK_LINES"] + " };\n"
+util_path.write_text(block.sub(lambda _: new_block, text, count=1), encoding="utf-8")
 PY
+}
+
+# Upper bound of the browser memory used by one full console, 12 bytes a cell.
+mem_mb() {
+    echo $(( $1 * $2 * 12 / 1000000 ))
 }
 
 # ------------------------------------------------------------
@@ -460,7 +501,10 @@ show_status() {
     state="$(get_state)"
 
     case "$state" in
-        patched) state_label="${PMX_GREEN}$(tr_msg state_patched)${RESET}" ;;
+        patched:*)
+            SCROLLBACK_LINES="${state#patched:}"
+            state_label="${PMX_GREEN}$(tr_msg state_patched)${RESET}"
+            ;;
         stock) state_label="${PMX_GREY}$(tr_msg state_stock)${RESET}" ;;
         *) state_label="${PMX_AMBER}$(tr_msg state_unknown)${RESET}" ;;
     esac
@@ -470,15 +514,57 @@ show_status() {
         "$(tr_msg status_scrollback): ${BOLD}${state_label}"
 }
 
-apply_patch() {
-    local backup_dir
+# Sets SCROLLBACK_LINES from a preset or a custom number. Returns 1 when the
+# user cancels or enters something invalid, after saying why.
+choose_lines() {
+    local current="$1"
+    local rows=() i=1 preset row choice custom
 
-    case "$(get_state)" in
-        patched)
-            say_ok "$(tr_msg already_patched)"
+    for preset in "${SCROLLBACK_PRESETS[@]}"; do
+        row="${PMX_ORANGE_SOFT}${i})${RESET} ${preset} $(tr_msg lines_word) ${PMX_GREY}($(tr_msg lines_memory "$preset"))${RESET}"
+        [[ "$preset" -eq "$SCROLLBACK_RECOMMENDED" ]] && row+=" ${PMX_GREEN}$(tr_msg lines_recommended)${RESET}"
+        [[ "$preset" == "$current" ]] && row+=" ${PMX_AMBER}$(tr_msg lines_current)${RESET}"
+        rows+=("$row")
+        ((i++))
+    done
+    rows+=("${PMX_ORANGE_SOFT}${i})${RESET} $(tr_msg lines_custom)")
+    rows+=("${PMX_GREY}q) $(tr_msg cancelled)${RESET}")
+
+    panel "$PMX_BLUE" "$(tr_msg lines_title)" "${rows[@]}"
+    echo
+    read -r -p "$(tr_msg lines_choose): " choice
+
+    if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
+        say_info "$(tr_msg cancelled)"
+        return 1
+    fi
+
+    if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#SCROLLBACK_PRESETS[@]} )); then
+        SCROLLBACK_LINES="${SCROLLBACK_PRESETS[$((choice-1))]}"
+        return 0
+    fi
+
+    if [[ "$choice" == "$i" ]]; then
+        read -r -p "$(tr_msg lines_custom_prompt): " custom
+        if [[ "$custom" =~ ^[0-9]{1,7}$ ]] && (( 10#$custom >= SCROLLBACK_MIN && 10#$custom <= SCROLLBACK_MAX )); then
+            SCROLLBACK_LINES=$((10#$custom))
             return 0
-            ;;
+        fi
+        say_err "$(tr_msg lines_invalid)"
+        return 1
+    fi
+
+    say_err "$(tr_msg invalid_choice)"
+    return 1
+}
+
+apply_patch() {
+    local backup_dir state current=""
+
+    state="$(get_state)"
+    case "$state" in
         stock) ;;
+        patched:*) current="${state#patched:}" ;;
         *)
             say_err "$(tr_msg patch_incompatible)"
             say_info "$(tr_msg no_file_modified)"
@@ -486,12 +572,19 @@ apply_patch() {
             ;;
     esac
 
+    choose_lines "$current" || return 0
+
+    if [[ "$SCROLLBACK_LINES" == "$current" ]]; then
+        say_ok "$(tr_msg already_patched)"
+        return 0
+    fi
+
     show_warning_and_confirm || return 0
 
     backup_dir="$(create_backup)"
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
-    if ! apply_python_patch || [[ "$(get_state)" != "patched" ]]; then
+    if ! apply_python_patch || [[ "$(get_state)" != "patched:${SCROLLBACK_LINES}" ]]; then
         say_err "$(tr_msg patch_failed)"
         return 1
     fi
@@ -597,6 +690,16 @@ show_backups() {
 }
 
 generate_test_lines() {
+    local state
+    state="$(get_state)"
+
+    if [[ "$state" != patched:* ]]; then
+        say_err "$(tr_msg test_needs_patch)"
+        return 1
+    fi
+
+    TEST_LINES=$(( ${state#patched:} + 500 ))
+
     panel "$PMX_BLUE" "$(tr_msg test_title)" \
         "$(tr_msg test_body_1)" \
         "$(tr_msg test_body_2)" \

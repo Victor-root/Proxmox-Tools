@@ -513,8 +513,8 @@ const SCRIPTS = [
             fr: 'Historique des consoles',
         },
         tagline: {
-            en: 'Raises the history of every web console from 1000 to 100000 lines, for all your browsers at once.',
-            fr: 'Passe l’historique de toutes les consoles web de 1000 à 100000 lignes, pour tous vos navigateurs à la fois.',
+            en: 'Raises the history of every web console from 1000 lines to the size you choose, for all your browsers at once.',
+            fr: 'Passe l’historique de toutes les consoles web de 1000 lignes à la taille de votre choix, pour tous vos navigateurs à la fois.',
         },
         runsOn: {
             en: 'Proxmox VE host, as root',
@@ -522,21 +522,21 @@ const SCRIPTS = [
         },
         compat: 'PVE 8.x / 9.x',
         updated: {
-            en: 'New script. The xterm.js consoles keep 100000 lines of history instead of 1000.',
-            fr: 'Nouveau script. Les consoles xterm.js gardent 100000 lignes d’historique au lieu de 1000.',
+            en: 'New script. The xterm.js consoles keep the history size you pick instead of 1000 lines.',
+            fr: 'Nouveau script. Les consoles xterm.js gardent la taille d’historique de votre choix au lieu de 1000 lignes.',
         },
         points: {
             en: [
+                'Five ready-made sizes up to 250000 lines, or type your own number, changeable later',
                 'Applies to the host shell, containers and VM serial consoles',
                 'Set once on the server: no browser setting to redo on every computer',
-                'A value saved in a browser still wins over the new default',
                 'One line changed, matched exactly: a changed file is reported, never patched blindly',
                 'No restart needed, automatic backup before patching, restore from the menu',
             ],
             fr: [
+                'Cinq tailles prêtes jusqu’à 250000 lignes, ou votre propre nombre, modifiable ensuite',
                 'S’applique au shell de l’hôte, aux conteneurs et aux consoles série des VM',
                 'Réglé une fois sur le serveur : plus de réglage à refaire dans chaque navigateur',
-                'Une valeur enregistrée dans un navigateur reste prioritaire sur le nouveau défaut',
                 'Une seule ligne modifiée, cherchée à l’identique : un fichier différent est signalé, jamais patché à l’aveugle',
                 'Aucun redémarrage, backup automatique avant le patch, restauration depuis le menu',
             ],
@@ -548,8 +548,8 @@ const SCRIPTS = [
             backup: '/root/pve-xtermjs-scrollback-patch-<date>/',
         },
         note: {
-            en: 'A console filled to 100000 lines uses up to about 100 MB in the browser at 80 columns and 240 MB at 200 columns, per open tab. Updates of the pve-xtermjs package overwrite the patch, run the script again afterwards.',
-            fr: 'Une console remplie à 100000 lignes occupe jusqu’à environ 100 Mo dans le navigateur en 80 colonnes et 240 Mo en 200 colonnes, par onglet ouvert. Les mises à jour du paquet pve-xtermjs écrasent le patch, relancez le script ensuite.',
+            en: 'A full console takes about 1 MB per 1000 lines in the browser at 80 columns (100000 lines: about 100 MB), per open tab. A value saved in a browser still wins over the one you pick. Updates of the pve-xtermjs package overwrite the patch, run the script again afterwards.',
+            fr: 'Une console pleine occupe environ 1 Mo par 1000 lignes dans le navigateur en 80 colonnes (100000 lignes : environ 100 Mo), par onglet ouvert. Une valeur enregistrée dans un navigateur reste prioritaire sur celle que vous choisissez. Les mises à jour du paquet pve-xtermjs écrasent le patch, relancez le script ensuite.',
         },
         terminal: {
             banner: 'proxmox',
@@ -564,7 +564,7 @@ const SCRIPTS = [
                 ],
             },
             menu: [
-                'Apply patch (automatic backup included)',
+                'Apply patch or change the number of lines (automatic backup included)',
                 'Restore latest backup',
                 'Restore from selected backup',
                 'Show patch status',

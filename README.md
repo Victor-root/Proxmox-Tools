@@ -285,8 +285,9 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 
 **Script:** `pve-xtermjs-scrollback.sh`
 
-Raises the history of the Proxmox VE web consoles from **1000 to 100000 lines**:
+Raises the history of the Proxmox VE web consoles from the default **1000 lines** to the size you choose:
 
+* 🔢 pick one of **five ready-made sizes** (10000 to 250000 lines, 100000 recommended) or type **your own number** (1000 to 1000000), and change it again later from the same menu entry
 * 🖥️ applies to every **xterm.js** console: the host shell, containers and the serial console of VMs
 * 🌐 set **once on the server**, so there is nothing to redo in each browser on each computer
 * 🎯 changes **a single line** of `/usr/share/pve-xtermjs/util.js`: the default options handed to every console
@@ -294,12 +295,12 @@ Raises the history of the Proxmox VE web consoles from **1000 to 100000 lines**:
 * 🔁 safe to run twice: an already patched file is detected and left alone
 * 💾 automatic **backup** before patching
 * ♻️ built-in **restore** options
-* 🧪 a test option prints 100500 numbered lines, so you can scroll up and check the new limit right away
+* 🧪 a test option prints 500 more numbered lines than the limit you chose, so you can scroll up and check it right away
 * 📋 interactive menu
 
 #### Good to know
 
-* **Memory:** the history is stored by the browser. A console filled to 100000 lines uses up to about 100 MB at 80 columns and 240 MB at 200 columns, per open tab. Lines are only stored as text is displayed, an empty console stays light.
+* **Memory:** the history is stored by the browser. A full console takes about 1 MB per 1000 lines at 80 columns and 2.5 MB at 200 columns, per open tab: 100000 lines is about 100 MB and 240 MB. The script shows the figure for your choice before asking to confirm. Lines are only stored as text is displayed, an empty console stays light.
 * **A value saved in a browser wins.** Recent versions of `pve-xtermjs` read a `pve-xterm-scrollback` key from the browser storage, there is no field for it in the Proxmox settings yet, and it takes priority over the default set by this script.
 * **No restart needed**: `pveproxy` reads the file on every request. Reopen the console, and hard refresh the browser (Ctrl+Shift+R) if the old value persists.
 * Updates of the `pve-xtermjs` package overwrite the file, run the script again afterwards.
