@@ -302,7 +302,8 @@ Raises the history of the Proxmox VE web consoles from the default **1000 lines*
 
 * **Memory:** the history is stored by the browser. A full console takes about 1 MB per 1000 lines at 80 columns and 2.5 MB at 200 columns, per open tab: 100000 lines is about 100 MB and 240 MB. The script shows the figure for your choice before asking to confirm. Lines are only stored as text is displayed, an empty console stays light.
 * **A value saved in a browser wins.** Recent versions of `pve-xtermjs` read a `pve-xterm-scrollback` key from the browser storage, there is no field for it in the Proxmox settings yet, and it takes priority over the default set by this script.
-* **No restart needed**: `pveproxy` reads the file on every request. Reopen the console, and hard refresh the browser (Ctrl+Shift+R) if the old value persists.
+* **No restart needed**: `pveproxy` reads the file on every request. Open a new console.
+* **The browser cache can hide the change.** Proxmox sends no expiry for this file, so a browser may keep the old copy for days, and a plain or even hard refresh is not always enough. Check in a private window, then clear the site data in each browser you use.
 * Updates of the `pve-xtermjs` package overwrite the file, run the script again afterwards.
 
 #### Version compatibility

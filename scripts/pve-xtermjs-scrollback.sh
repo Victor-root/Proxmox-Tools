@@ -83,8 +83,11 @@ tr_msg() {
         fr:patch_applied) echo "Patch appliqué avec succès." ;;
         en:patch_applied) echo "Patch applied successfully." ;;
 
-        fr:reopen_console) echo "Aucun redémarrage n'est nécessaire : rouvrez la console. Si l'ancienne valeur persiste, faites un hard refresh du navigateur (Ctrl+Shift+R)." ;;
-        en:reopen_console) echo "No restart is needed: reopen the console. If the old value persists, hard refresh your browser (Ctrl+Shift+R)." ;;
+        fr:reopen_console) echo "Aucun redémarrage n'est nécessaire : ouvrez une nouvelle console." ;;
+        en:reopen_console) echo "No restart is needed: open a new console." ;;
+
+        fr:cache_hint) echo "Un navigateur peut garder l'ancien fichier en cache plusieurs jours, un simple rafraîchissement ne suffit pas toujours. Vérifiez dans une fenêtre de navigation privée, puis videz les données du site dans chaque navigateur utilisé." ;;
+        en:cache_hint) echo "A browser can keep the old file in its cache for days, a plain refresh is not always enough. Check in a private window, then clear the site data in each browser you use." ;;
 
         fr:backup_used) echo "Backup utilisé" ;;
         en:backup_used) echo "Backup used" ;;
@@ -179,17 +182,20 @@ tr_msg() {
         fr:test_line) echo "Ligne de test" ;;
         en:test_line) echo "Test line" ;;
 
-        fr:test_result_title) echo "RÉSULTAT" ;;
-        en:test_result_title) echo "RESULT" ;;
+        fr:test_result_title) echo "COMMENT LIRE LE TEST" ;;
+        en:test_result_title) echo "HOW TO READ THE TEST" ;;
 
-        fr:test_result_1) echo "Remontez tout en haut de la console avec la molette ou Maj+PgHaut." ;;
-        en:test_result_1) echo "Scroll all the way up in the console with the mouse wheel or Shift+PageUp." ;;
+        fr:test_result_1) echo "Ceci n'est qu'une explication : le script ne voit pas ce que garde votre navigateur, c'est à vous de regarder." ;;
+        en:test_result_1) echo "This is only an explanation: the script cannot see what your browser keeps, it is up to you to look." ;;
 
-        fr:test_result_2) echo "Patch actif : la plus ancienne ligne visible est proche de 500." ;;
-        en:test_result_2) echo "Patch active: the oldest visible line is close to 500." ;;
+        fr:test_result_2) echo "Remontez tout en haut de la console (molette ou Maj+PgHaut) et lisez le numéro de la plus ancienne ligne." ;;
+        en:test_result_2) echo "Scroll all the way up in the console (mouse wheel or Shift+PageUp) and read the number of the oldest line." ;;
 
-        fr:test_result_3) echo "Limite par défaut : elle est proche de $((TEST_LINES - 1000)), vous ne pouvez remonter que d'environ 1000 lignes." ;;
-        en:test_result_3) echo "Default limit: it is close to $((TEST_LINES - 1000)), you can only go back about 1000 lines." ;;
+        fr:test_result_3) echo "Proche de 500 : la nouvelle limite est bien prise en compte." ;;
+        en:test_result_3) echo "Close to 500: the new limit is in effect." ;;
+
+        fr:test_result_4) echo "Proche de $((TEST_LINES - 1000)) : la console utilise encore l'ancienne limite (console ouverte avant le patch, ou ancien fichier gardé en cache par le navigateur)." ;;
+        en:test_result_4) echo "Close to $((TEST_LINES - 1000)): the console still uses the old limit (console opened before the patch, or old file kept in the browser cache)." ;;
 
         fr:available_backups) echo "Backups disponibles" ;;
         en:available_backups) echo "Available backups" ;;
@@ -592,6 +598,7 @@ apply_patch() {
     echo
     say_ok "$(tr_msg patch_applied)"
     say_info "$(tr_msg reopen_console)"
+    say_info "$(tr_msg cache_hint)"
     say_info "$(tr_msg backup_used): ${PMX_CYAN}${backup_dir}${RESET}"
 }
 
@@ -710,10 +717,11 @@ generate_test_lines() {
 
     seq -f "$(tr_msg test_line) %g" 1 "$TEST_LINES"
 
-    panel "$PMX_GREEN" "$(tr_msg test_result_title)" \
+    panel "$PMX_BLUE" "$(tr_msg test_result_title)" \
         "$(tr_msg test_result_1)" \
         "$(tr_msg test_result_2)" \
-        "$(tr_msg test_result_3)"
+        "$(tr_msg test_result_3)" \
+        "$(tr_msg test_result_4)"
     exit 0
 }
 
