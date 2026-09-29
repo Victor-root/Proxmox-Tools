@@ -55,7 +55,6 @@ If you could not test something, say so plainly, it is much better than a silent
 
 * Work on a branch named after what you do, in kebab case (for example `xterm-scrollback`), never on `main`.
 * Commit messages: English, imperative, a short first line, a body that explains why.
-* You do not need to sign your commits, I re-sign when merging.
 * Contributions are published under the [GNU AGPL v3](LICENSE), like the rest of the repository.
 
 Thank you for helping make Proxmox a bit less annoying. 🙌
