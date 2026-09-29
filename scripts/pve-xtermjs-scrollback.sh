@@ -185,17 +185,14 @@ tr_msg() {
         fr:test_result_title) echo "COMMENT LIRE LE TEST" ;;
         en:test_result_title) echo "HOW TO READ THE TEST" ;;
 
-        fr:test_result_1) echo "Ceci n'est qu'une explication : le script ne voit pas ce que garde votre navigateur, c'est à vous de regarder." ;;
-        en:test_result_1) echo "This is only an explanation: the script cannot see what your browser keeps, it is up to you to look." ;;
+        fr:test_result_1) echo "Remontez tout en haut de la console (molette ou Maj+PgHaut) et lisez le numéro de la plus ancienne ligne." ;;
+        en:test_result_1) echo "Scroll all the way up in the console (mouse wheel or Shift+PageUp) and read the number of the oldest line." ;;
 
-        fr:test_result_2) echo "Remontez tout en haut de la console (molette ou Maj+PgHaut) et lisez le numéro de la plus ancienne ligne." ;;
-        en:test_result_2) echo "Scroll all the way up in the console (mouse wheel or Shift+PageUp) and read the number of the oldest line." ;;
+        fr:test_result_2) echo "Proche de 500 : la nouvelle limite est bien prise en compte." ;;
+        en:test_result_2) echo "Close to 500: the new limit is in effect." ;;
 
-        fr:test_result_3) echo "Proche de 500 : la nouvelle limite est bien prise en compte." ;;
-        en:test_result_3) echo "Close to 500: the new limit is in effect." ;;
-
-        fr:test_result_4) echo "Proche de $((TEST_LINES - 1000)) : la console utilise encore l'ancienne limite (console ouverte avant le patch, ou ancien fichier gardé en cache par le navigateur)." ;;
-        en:test_result_4) echo "Close to $((TEST_LINES - 1000)): the console still uses the old limit (console opened before the patch, or old file kept in the browser cache)." ;;
+        fr:test_result_3) echo "Proche de $((TEST_LINES - 1000)) : la console utilise encore l'ancienne limite (console ouverte avant le patch, ou ancien fichier gardé en cache par le navigateur)." ;;
+        en:test_result_3) echo "Close to $((TEST_LINES - 1000)): the console still uses the old limit (console opened before the patch, or old file kept in the browser cache)." ;;
 
         fr:available_backups) echo "Backups disponibles" ;;
         en:available_backups) echo "Available backups" ;;
@@ -720,8 +717,7 @@ generate_test_lines() {
     panel "$PMX_BLUE" "$(tr_msg test_result_title)" \
         "$(tr_msg test_result_1)" \
         "$(tr_msg test_result_2)" \
-        "$(tr_msg test_result_3)" \
-        "$(tr_msg test_result_4)"
+        "$(tr_msg test_result_3)"
     exit 0
 }
 
