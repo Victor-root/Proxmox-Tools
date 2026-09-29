@@ -31,8 +31,7 @@ Using AI tools (Claude, ChatGPT, Copilot, etc.) to contribute is totally welcome
 
 That does not mean "one prompt, one pull request" though. No vibe coding, where you fire off a prompt and open a pull request with whatever comes out without understanding or checking it. Stay in the driver's seat: understand the problem, guide the AI, review and iterate on what it produces. It is not perfect, and a script that looks right may not be, so everything has to be tested in detail before you submit it: "it runs" is not a test.
 
-* 📖 Ask your assistant to read [AGENTS.md](AGENTS.md) first, so it follows the method of the project instead of inventing its own.
-* 🔍 Make it research the real Proxmox sources instead of guessing how Proxmox works, and check what it found.
+* 📖 **Your assistant must read [AGENTS.md](AGENTS.md) before doing anything else, and follow it.** This is not optional: it holds the whole method of the project (research, script conventions, testing, README and website), and pull requests are reviewed against it. A pull request that clearly ignores it will be sent back.
 * 🎯 Ask for a surgical, targeted change: no unsolicited refactors or cleanup. A small, clean diff is easier to get with a good prompt, and easier to review.
 * 🧠 You should be able to explain every line you submit.
 
