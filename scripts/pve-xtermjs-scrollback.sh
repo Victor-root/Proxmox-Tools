@@ -4,6 +4,7 @@ set -euo pipefail
 PATCH_PREFIX="/root/pve-xtermjs-scrollback-patch"
 UTIL_FILE="/usr/share/pve-xtermjs/util.js"
 SCROLLBACK_LINES=100000
+TEST_LINES=$((SCROLLBACK_LINES + 500))
 
 # getTerminalSettings() in util.js builds the options given to every xterm.js
 # console (host shell, containers, VMs). It starts from an empty object, so
@@ -54,6 +55,9 @@ tr_msg() {
 
         fr:menu_backups) echo "Lister les backups" ;;
         en:menu_backups) echo "List backups" ;;
+
+        fr:menu_test) echo "Générer des lignes de test (vérifier l'historique de la console)" ;;
+        en:menu_test) echo "Generate test lines (check the console history)" ;;
 
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
@@ -126,6 +130,36 @@ tr_msg() {
 
         fr:state_unknown) echo "structure du fichier inattendue" ;;
         en:state_unknown) echo "unexpected file structure" ;;
+
+        fr:test_title) echo "TEST DE L'HISTORIQUE" ;;
+        en:test_title) echo "SCROLLBACK TEST" ;;
+
+        fr:test_body_1) echo "Affiche ${TEST_LINES} lignes numérotées, soit 500 de plus que la limite du patch, pour voir jusqu'où on peut remonter." ;;
+        en:test_body_1) echo "Prints ${TEST_LINES} numbered lines, 500 more than the patch limit, to see how far up you can scroll." ;;
+
+        fr:test_body_2) echo "À lancer dans la console web de Proxmox, ouverte APRÈS le patch (une console déjà ouverte garde l'ancienne limite). Dans un terminal SSH, c'est celui de votre logiciel qui décide." ;;
+        en:test_body_2) echo "Run it in the Proxmox web console, opened AFTER the patch (a console already open keeps the old limit). In an SSH terminal, your terminal software decides." ;;
+
+        fr:test_body_3) echo "Le script se ferme ensuite, car son menu effacerait l'historique que vous voulez examiner." ;;
+        en:test_body_3) echo "The script then exits, because its menu would clear the history you want to inspect." ;;
+
+        fr:test_start) echo "Appuyez sur Entrée pour lancer le test..." ;;
+        en:test_start) echo "Press Enter to start the test..." ;;
+
+        fr:test_line) echo "Ligne de test" ;;
+        en:test_line) echo "Test line" ;;
+
+        fr:test_result_title) echo "RÉSULTAT" ;;
+        en:test_result_title) echo "RESULT" ;;
+
+        fr:test_result_1) echo "Remontez tout en haut de la console avec la molette ou Maj+PgHaut." ;;
+        en:test_result_1) echo "Scroll all the way up in the console with the mouse wheel or Shift+PageUp." ;;
+
+        fr:test_result_2) echo "Patch actif : la plus ancienne ligne visible est proche de 500." ;;
+        en:test_result_2) echo "Patch active: the oldest visible line is close to 500." ;;
+
+        fr:test_result_3) echo "Limite par défaut : elle est proche de $((TEST_LINES - 1000)), vous ne pouvez remonter que d'environ 1000 lignes." ;;
+        en:test_result_3) echo "Default limit: it is close to $((TEST_LINES - 1000)), you can only go back about 1000 lines." ;;
 
         fr:available_backups) echo "Backups disponibles" ;;
         en:available_backups) echo "Available backups" ;;
@@ -562,6 +596,24 @@ show_backups() {
     pause
 }
 
+generate_test_lines() {
+    panel "$PMX_BLUE" "$(tr_msg test_title)" \
+        "$(tr_msg test_body_1)" \
+        "$(tr_msg test_body_2)" \
+        "$(tr_msg test_body_3)"
+
+    echo
+    read -r -p "$(tr_msg test_start)" _ || true
+
+    seq -f "$(tr_msg test_line) %g" 1 "$TEST_LINES"
+
+    panel "$PMX_GREEN" "$(tr_msg test_result_title)" \
+        "$(tr_msg test_result_1)" \
+        "$(tr_msg test_result_2)" \
+        "$(tr_msg test_result_3)"
+    exit 0
+}
+
 # Menu entries report their own errors on screen; a failed action must bring
 # the user back to the menu instead of ending the session through set -e.
 menu_action() {
@@ -576,10 +628,11 @@ main_menu() {
         printf " %b3)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_restore_select)"
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
-        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_test)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-6]: " choice
+        read -r -p "$(tr_msg choose_option) [1-7]: " choice
         echo
 
         case "$choice" in
@@ -602,6 +655,9 @@ main_menu() {
                 menu_action show_backups
                 ;;
             6)
+                generate_test_lines
+                ;;
+            7)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;

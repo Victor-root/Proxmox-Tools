@@ -294,6 +294,7 @@ Raises the history of the Proxmox VE web consoles from **1000 to 100000 lines**:
 * 🔁 safe to run twice: an already patched file is detected and left alone
 * 💾 automatic **backup** before patching
 * ♻️ built-in **restore** options
+* 🧪 a test option prints 100500 numbered lines, so you can scroll up and check the new limit right away
 * 📋 interactive menu
 
 #### Good to know

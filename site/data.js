@@ -569,9 +569,10 @@ const SCRIPTS = [
                 'Restore from selected backup',
                 'Show patch status',
                 'List backups',
+                'Generate test lines (check the console history)',
                 'Quit',
             ],
-            prompt: 'Choose an option [1-6]:',
+            prompt: 'Choose an option [1-7]:',
         },
     },
 ];
