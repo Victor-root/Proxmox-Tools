@@ -503,6 +503,77 @@ const SCRIPTS = [
             prompt: 'Choose an option [1-8]:',
         },
     },
+    {
+        id: 'xterm-scrollback',
+        icon: 'history',
+        file: 'pve-xtermjs-scrollback.sh',
+        target: 'pve',
+        name: {
+            en: 'Console scrollback',
+            fr: 'Historique des consoles',
+        },
+        tagline: {
+            en: 'Raises the history of every web console from 1000 to 100000 lines, for all your browsers at once.',
+            fr: 'Passe l’historique de toutes les consoles web de 1000 à 100000 lignes, pour tous vos navigateurs à la fois.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 8.x / 9.x',
+        updated: {
+            en: 'New script. The xterm.js consoles keep 100000 lines of history instead of 1000.',
+            fr: 'Nouveau script. Les consoles xterm.js gardent 100000 lignes d’historique au lieu de 1000.',
+        },
+        points: {
+            en: [
+                'Applies to the host shell, containers and VM serial consoles',
+                'Set once on the server: no browser setting to redo on every computer',
+                'A value saved in a browser still wins over the new default',
+                'One line changed, matched exactly: a changed file is reported, never patched blindly',
+                'No restart needed, automatic backup before patching, restore from the menu',
+            ],
+            fr: [
+                'S’applique au shell de l’hôte, aux conteneurs et aux consoles série des VM',
+                'Réglé une fois sur le serveur : plus de réglage à refaire dans chaque navigateur',
+                'Une valeur enregistrée dans un navigateur reste prioritaire sur le nouveau défaut',
+                'Une seule ligne modifiée, cherchée à l’identique : un fichier différent est signalé, jamais patché à l’aveugle',
+                'Aucun redémarrage, backup automatique avant le patch, restauration depuis le menu',
+            ],
+        },
+        touches: {
+            files: [
+                { path: '/usr/share/pve-xtermjs/util.js', role: { en: 'one line changed: the default options given to every console', fr: 'une ligne modifiée : les options par défaut données à chaque console' } },
+            ],
+            backup: '/root/pve-xtermjs-scrollback-patch-<date>/',
+        },
+        note: {
+            en: 'A console filled to 100000 lines uses up to about 100 MB in the browser at 80 columns and 240 MB at 200 columns, per open tab. Updates of the pve-xtermjs package overwrite the patch, run the script again afterwards.',
+            fr: 'Une console remplie à 100000 lignes occupe jusqu’à environ 100 Mo dans le navigateur en 80 colonnes et 240 Mo en 200 colonnes, par onglet ouvert. Les mises à jour du paquet pve-xtermjs écrasent le patch, relancez le script ensuite.',
+        },
+        terminal: {
+            banner: 'proxmox',
+            theme: 'orange',
+            host: 'root@pve01',
+            subtitle: 'Console Scrollback',
+            panel: {
+                title: 'Patch status',
+                lines: [
+                    'Detected version: pve-xtermjs 6.0.0-2',
+                    'Console scrollback: 100000 lines (patch active)',
+                ],
+            },
+            menu: [
+                'Apply patch (automatic backup included)',
+                'Restore latest backup',
+                'Restore from selected backup',
+                'Show patch status',
+                'List backups',
+                'Quit',
+            ],
+            prompt: 'Choose an option [1-6]:',
+        },
+    },
 ];
 
 /* ASCII logos drawn at the top of each script. Add one here only if a new
