@@ -364,9 +364,9 @@ When relevant, scripts in this repository should:
 
 ### ⏳ About the pveproxy restart
 
-Every script that changes the web interface restarts `pveproxy` at the end. That restart can take up to a minute: on start Proxmox refreshes the cluster certificates (`pvecm updatecerts`), and on a first run it may also refresh the appliance template list.
+Most scripts that change the web interface restart `pveproxy` at the end, and a script that does not need it says so. That restart can take up to a minute: on start Proxmox refreshes the cluster certificates (`pvecm updatecerts`), and on a first run it may also refresh the appliance template list.
 
-The web interface stays unreachable during that time, and the script looks frozen while it waits. This is expected. Let it finish rather than interrupting it, and reload the page with **Ctrl+Shift+R** once it is done.
+The web interface stays unreachable during that time, and the script looks frozen while it waits. This is expected. Let it finish rather than interrupting it, and reload the page with **Ctrl+Shift+R** once it is done. If the old behaviour is still there, check in a private window: a browser can keep an old copy of a file for days.
 
 ---
 
@@ -403,6 +403,8 @@ Good contributions are usually:
 * easy to understand
 * safe to test
 * easy to remove or rollback
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request: what a good one looks like, and what is expected when AI is involved (welcome, as long as it is not one prompt and one pull request).
 
 Working with an AI assistant? Ask it to read [AGENTS.md](AGENTS.md) first: it describes the whole method and quality bar for adding a script, on the script side and on the website side.
 
