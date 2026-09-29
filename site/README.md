@@ -22,9 +22,9 @@ Both have a switch in the header and the choice is remembered afterwards.
 
 ## Add a script
 
-1. Push the script into `scripts/` on the `main` branch.
-2. Open `site/data.js` and copy one block of `SCRIPTS`, paste it, change the values.
-3. Commit on the `website` branch. The workflow redeploys, the card appears.
+1. Add the script to `scripts/`.
+2. Open `site/data.js` and copy one block of `SCRIPTS`, paste it at the end of the list, change the values.
+3. Commit both together. Once the change is on `main`, the workflow redeploys and the card appears.
 
 The run command, the "read the source" link and the history link are built from
 `file`, so there is no URL to write by hand.
@@ -129,5 +129,5 @@ and compress them so each file stays around 150 kB.
 ## First deploy
 
 On GitHub: **Settings > Pages > Source: GitHub Actions**. The workflow runs on
-every push to `website` that touches `site/`, and can also be started by hand
+every push to `main` that touches `site/`, and can also be started by hand
 from the Actions tab.
