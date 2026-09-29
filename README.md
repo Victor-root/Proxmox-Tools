@@ -404,6 +404,8 @@ Good contributions are usually:
 * safe to test
 * easy to remove or rollback
 
+Working with an AI assistant? Ask it to read [AGENTS.md](AGENTS.md) first: it describes the whole method and quality bar for adding a script, on the script side and on the website side.
+
 ---
 
 ## 📄 License
