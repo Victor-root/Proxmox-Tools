@@ -389,7 +389,7 @@ Before you report, go through this list and fix what fails. Every box must be ti
 * Create a branch named after the script in kebab case (for example `xterm-scrollback`). **Never commit to or push `main`.**
 * Commit messages: English, imperative, first line short, a body that explains the why. Keep coherent commits (script, then README and site, or all together for a small script). Do not amend commits that were already pushed.
 * Push only your branch. Do not open a pull request unless the human asks you to. When they do, follow `CONTRIBUTING.md`: one focused change, a description a human can read (problem, what the change does, no code level detail), a mention that it was AI assisted, and a **Testing** section saying what was really run and where.
-* Commits on `main` are signed by the maintainer, who re-signs and merges the branch with a fast forward. Do not try to merge it yourself. A contributor without write access works from a fork and opens a pull request, the maintainer takes it from there.
+* The maintainer merges the branch into `main`. Do not try to merge it yourself. A contributor without write access works from a fork and opens a pull request, the maintainer takes it from there.
 * Before the merge, the script can be tried from its branch: `bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/<branch>/scripts/<file>)`. The definitive command on the site and in the README uses `main`.
 
 ## 13. What to tell the human
