@@ -332,7 +332,9 @@ show_warning_and_confirm() {
 # ------------------------------------------------------------
 
 # Prints stock, patched or unknown. The anchor must occur exactly once, and the
-# added lines must be exactly one copy right after it.
+# added lines must be exactly one copy right after it. A file that already sets
+# the title but not with these lines (an earlier version of this script) is
+# unknown: a second title line would silently override the first.
 get_state() {
     MAIN_FILE="$MAIN_FILE" ANCHOR="$ANCHOR" ADDED="$ADDED" python3 <<'PY'
 from pathlib import Path
@@ -347,6 +349,8 @@ if text.count(anchor) != 1 or patched > 1:
     print("unknown")
 elif patched == 1:
     print("patched")
+elif "document.title" in text:
+    print("unknown")
 else:
     print("stock")
 PY
