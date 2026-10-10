@@ -327,8 +327,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 
 Makes the browser tab of an **xterm.js** console show which guest it belongs to, instead of only the node name:
 
-* 🏷️ the tab reads **`ID (Name) . Node . PVE`**, for example `101 (web01) . pve02 . PVE`
-* 🖥️ applies to containers and VMs opened in xterm.js, and to the node shell, whose tab reads `Node . PVE`
+* 🏷️ the tab reads **`ID (Name) · Node · PVE`**, for example `101 (web01) · pve02 · PVE`
+* 🖥️ applies to containers and VMs opened in xterm.js, and to the node shell, whose tab reads `Node · PVE`
 * 🎯 adds **two lines** (a comment and the title) to `/usr/share/pve-xtermjs/main.js`, right after a line the script matches exactly
 * 🔎 refuses to touch a file that does not look exactly as expected
 * 🔁 safe to run twice: an already patched file is detected and left alone
