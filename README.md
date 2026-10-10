@@ -319,6 +319,47 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 ```
 
 </details>
+
+<details>
+<summary><b>🖥️ Console tab title (VM or container name)</b></summary>
+
+**Script:** `pve-xterm-tab-title.sh`
+
+Makes the browser tab of an **xterm.js** console show which guest it belongs to, instead of only the node name:
+
+* 🏷️ the tab reads **`ID (Name) . Node . PVE`**, for example `101 (web01) . pve02 . PVE`
+* 🖥️ applies to containers and VMs opened in xterm.js, and to the node shell, whose tab reads `Node . PVE`
+* 🎯 adds **two lines** (a comment and the title) to `/usr/share/pve-xtermjs/main.js`, right after a line the script matches exactly
+* 🔎 refuses to touch a file that does not look exactly as expected
+* 🔁 safe to run twice: an already patched file is detected and left alone
+* 💾 automatic **backup** before patching
+* ♻️ built-in **restore** options
+* 📋 interactive menu
+
+#### Good to know
+
+* **Only xterm.js consoles.** The noVNC and SPICE consoles are not changed by the script.
+* **Open a new console tab** after patching. A tab opened before keeps its title, and a guest renamed while its tab is open keeps the old name there.
+* **No restart needed**: `pveproxy` reads the file on every request.
+* **The browser cache can hide the change.** Proxmox sends no expiry for this file, so a browser may keep the old copy for days, and a plain or even hard refresh is not always enough. Check in a private window, then clear the site data in each browser you use.
+* Updates of the `pve-xtermjs` package overwrite the file, run the script again afterwards.
+
+#### Version compatibility
+
+Checked against the official Proxmox sources: the line the patch matches is identical in the `pve-xtermjs` branch for Proxmox VE 8 (`5.5.0-2`, bookworm) and in the one for Proxmox VE 9 (`6.0.0-2`, trixie), and it has not changed in the upstream history since 2020. Both versions were checked by running the patch, the syntax of the result, and a restore that gives back the original byte for byte. The title was read in headless Chromium on the real console files, served locally, for both versions.
+
+Not yet tested on a real Proxmox host.
+
+On an unexpected file it stops with a clear message, creates no backup and leaves the file untouched.
+
+#### Run it directly
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-xterm-tab-title.sh)
+```
+
+</details>
+
 ---
 
 ## 📂 Repository philosophy
