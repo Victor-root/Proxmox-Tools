@@ -575,6 +575,77 @@ const SCRIPTS = [
             prompt: 'Choose an option [1-7]:',
         },
     },
+    {
+        id: 'xterm-tab-title',
+        icon: 'browser',
+        file: 'pve-xterm-tab-title.sh',
+        target: 'pve',
+        name: {
+            en: 'Console tab title',
+            fr: 'Titre des onglets de console',
+        },
+        tagline: {
+            en: 'The tab of an xterm.js console shows the guest it belongs to, not only the node.',
+            fr: 'L’onglet d’une console xterm.js affiche la VM ou le conteneur, pas seulement le noeud.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 8.x / 9.x',
+        updated: {
+            en: 'New script. The xterm.js console tabs show ID (Name) . Node . PVE instead of the node name only.',
+            fr: 'Nouveau script. Les onglets des consoles xterm.js affichent ID (Nom) . Noeud . PVE au lieu du nom du noeud seul.',
+        },
+        points: {
+            en: [
+                'Tab reads ID (Name) . Node . PVE, for example 101 (web01) . pve02 . PVE',
+                'Containers and VMs in xterm.js, and the node shell (Node . PVE)',
+                'Two lines added, matched exactly: a different file is reported, never patched blindly',
+                'Automatic backup before patching, restore from the menu',
+                'Only xterm.js consoles: noVNC and SPICE are not changed',
+            ],
+            fr: [
+                'L’onglet affiche ID (Nom) . Noeud . PVE, par exemple 101 (web01) . pve02 . PVE',
+                'Conteneurs et VM en xterm.js, et le shell du noeud (Noeud . PVE)',
+                'Deux lignes ajoutées, cherchées à l’identique : un fichier différent est signalé, jamais patché à l’aveugle',
+                'Backup automatique avant le patch, restauration depuis le menu',
+                'Seules les consoles xterm.js : noVNC et SPICE ne sont pas modifiées',
+            ],
+        },
+        touches: {
+            files: [
+                { path: '/usr/share/pve-xtermjs/main.js', role: { en: 'two lines added: a comment and the title of the console tab', fr: 'deux lignes ajoutées : un commentaire et le titre de l’onglet de console' } },
+            ],
+            backup: '/root/pve-xterm-tab-title-patch-<date>/',
+        },
+        note: {
+            en: 'Open a new console tab after patching: a tab opened before keeps its title. Updates of the pve-xtermjs package overwrite the patch, run the script again afterwards.',
+            fr: 'Ouvrez un nouvel onglet de console après le patch : un onglet ouvert avant garde son titre. Les mises à jour du paquet pve-xtermjs écrasent le patch, relancez le script ensuite.',
+        },
+        terminal: {
+            banner: 'proxmox',
+            theme: 'orange',
+            host: 'root@pve01',
+            subtitle: 'Console Tab Title',
+            panel: {
+                title: 'Patch status',
+                lines: [
+                    'Detected version: pve-xtermjs 6.0.0-2',
+                    'xterm.js tab title: ID (Name) . Node . PVE (patch active)',
+                ],
+            },
+            menu: [
+                'Apply patch (automatic backup included)',
+                'Restore latest backup',
+                'Restore from selected backup',
+                'Show patch status',
+                'List backups',
+                'Quit',
+            ],
+            prompt: 'Choose an option [1-6]:',
+        },
+    },
 ];
 
 /* ASCII logos drawn at the top of each script. Add one here only if a new
