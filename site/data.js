@@ -594,20 +594,20 @@ const SCRIPTS = [
         },
         compat: 'PVE 8.x / 9.x',
         updated: {
-            en: 'New script. The xterm.js console tabs show ID (Name) . Node . PVE instead of the node name only.',
-            fr: 'Nouveau script. Les onglets des consoles xterm.js affichent ID (Nom) . Noeud . PVE au lieu du nom du noeud seul.',
+            en: 'New script. The xterm.js console tabs show ID (Name) · Node · PVE instead of the node name only.',
+            fr: 'Nouveau script. Les onglets des consoles xterm.js affichent ID (Nom) · Noeud · PVE au lieu du nom du noeud seul.',
         },
         points: {
             en: [
-                'Tab reads ID (Name) . Node . PVE, for example 101 (web01) . pve02 . PVE',
-                'Containers and VMs in xterm.js, and the node shell (Node . PVE)',
+                'Tab reads ID (Name) · Node · PVE, for example 101 (web01) · pve02 · PVE',
+                'Containers and VMs in xterm.js, and the node shell (Node · PVE)',
                 'Two lines added, matched exactly: a different file is reported, never patched blindly',
                 'Automatic backup before patching, restore from the menu',
                 'Only xterm.js consoles: noVNC and SPICE are not changed',
             ],
             fr: [
-                'L’onglet affiche ID (Nom) . Noeud . PVE, par exemple 101 (web01) . pve02 . PVE',
-                'Conteneurs et VM en xterm.js, et le shell du noeud (Noeud . PVE)',
+                'L’onglet affiche ID (Nom) · Noeud · PVE, par exemple 101 (web01) · pve02 · PVE',
+                'Conteneurs et VM en xterm.js, et le shell du noeud (Noeud · PVE)',
                 'Deux lignes ajoutées, cherchées à l’identique : un fichier différent est signalé, jamais patché à l’aveugle',
                 'Backup automatique avant le patch, restauration depuis le menu',
                 'Seules les consoles xterm.js : noVNC et SPICE ne sont pas modifiées',
@@ -632,7 +632,7 @@ const SCRIPTS = [
                 title: 'Patch status',
                 lines: [
                     'Detected version: pve-xtermjs 6.0.0-2',
-                    'xterm.js tab title: ID (Name) . Node . PVE (patch active)',
+                    'xterm.js tab title: ID (Name) · Node · PVE (patch active)',
                 ],
             },
             menu: [

@@ -12,7 +12,7 @@ MAIN_FILE="/usr/share/pve-xtermjs/main.js"
 ANCHOR="var cmdOpts = getQueryParameter('cmd-opts');
 "
 ADDED="// The name arrives percent-encoded in the URL, getQueryParameter does not decode it.
-document.title = [vmid && vmid + (vmname ? ' (' + decodeURIComponent(vmname) + ')' : ''), nodename, 'PVE'].filter(Boolean).join(' . ');
+document.title = [vmid && vmid + (vmname ? ' (' + decodeURIComponent(vmname) + ')' : ''), nodename, 'PVE'].filter(Boolean).join(' \u00b7 ');
 "
 
 # ------------------------------------------------------------
@@ -116,8 +116,8 @@ tr_msg() {
         fr:status_tab_title) echo "Titre des onglets xterm.js" ;;
         en:status_tab_title) echo "xterm.js tab title" ;;
 
-        fr:state_patched) echo "ID (Nom) . Noeud . PVE (patch actif)" ;;
-        en:state_patched) echo "ID (Name) . Node . PVE (patch active)" ;;
+        fr:state_patched) echo "ID (Nom) · Noeud · PVE (patch actif)" ;;
+        en:state_patched) echo "ID (Name) · Node · PVE (patch active)" ;;
 
         fr:state_stock) echo "nom du noeud seul (valeur par défaut de Proxmox)" ;;
         en:state_stock) echo "node name only (Proxmox default)" ;;
@@ -182,8 +182,8 @@ tr_msg() {
         fr:banner_subtitle) echo "Console Tab Title" ;;
         en:banner_subtitle) echo "Console Tab Title" ;;
 
-        fr:repo_hint) echo "Titre des onglets xterm.js : ID (Nom) . Noeud . PVE" ;;
-        en:repo_hint) echo "xterm.js console tab titles: ID (Name) . Node . PVE" ;;
+        fr:repo_hint) echo "Titre des onglets xterm.js : ID (Nom) · Noeud · PVE" ;;
+        en:repo_hint) echo "xterm.js console tab titles: ID (Name) · Node · PVE" ;;
 
         * ) echo "$key" ;;
     esac
