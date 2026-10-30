@@ -372,7 +372,7 @@ Adds modern themes to the Proxmox VE web interface, picked from the stock **Colo
 * 🖼️ about 75 icons redrawn with **Phosphor** icons (MIT license), and status dots (running, paused, error) instead of the small glyphs over the tree icons
 * 📈 chart curves in the accent color
 * ⬇️ a collapse button at the top right of the bottom **Logs** panel, instead of the small arrow on its splitter
-* 📐 the status panel of a VM or container grows with its content, so the IP list and its **More** button are never cut
+* 📐 the status panel of a VM or container grows with its content, so the IP list and its **More** button are never cut, with the same space under the last row as above the first one
 * 🖥️ a **default theme for the whole server**, chosen from the menu: every browser that has not picked a theme gets it, the **login page** included
 * 🧩 optional, from its own menu entry: the **Status** block of a storage counts sizes by 1024 like the rest of the interface and Windows (a formatted 4 TB disk shows 3.58 TiB, not 3.94 TB)
 * 🔎 every change to the Proxmox code is a whole block matched exactly: on an unexpected file the script refuses and touches nothing

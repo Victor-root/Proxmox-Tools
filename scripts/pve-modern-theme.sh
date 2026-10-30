@@ -143,6 +143,8 @@ tr_msg() {
 
         fr:status_summary) echo "Panneau de statut à la taille de son contenu" ;;
         en:status_summary) echo "Status panel sized to its content" ;;
+        fr:status_gap) echo "Marge sous le panneau de statut" ;;
+        en:status_gap) echo "Space at the bottom of the status panel" ;;
 
         fr:status_storage) echo "Option tailles en Tio" ;;
         en:status_storage) echo "TiB sizes option" ;;
@@ -596,6 +598,22 @@ SUMMARY_PATCHED = (
     "                    items: items,\n"
 )
 
+# Sized to its content, the status panel ends right under its last row, while
+# the stock layout only keeps a spacer at the top.
+GAP_STOCK = (
+    "        },\n"
+    "    ],\n"
+    "\n"
+    "    updateTitle: function () {\n"
+    "        var me = this;\n"
+    "        var uptime = me.getRecordValue('uptime');\n"
+)
+GAP_PATCHED = GAP_STOCK.replace(
+    "        },\n    ],\n",
+    "        },\n        {\n            xtype: 'box',\n            height: 20,\n        },\n    ],\n",
+    1,
+)
+
 # PVE.storage.StatusView is the only place that asks for SI units (TB).
 STORAGE_STOCK = (
     "            itemId: 'usage',\n"
@@ -616,6 +634,7 @@ PATCHES = {
     "charts": ("PX_FILE", CHARTS_STOCK, CHARTS_PATCHED),
     "logs": ("PVE_FILE", LOGS_STOCK, LOGS_PATCHED),
     "summary": ("PVE_FILE", SUMMARY_STOCK, SUMMARY_PATCHED),
+    "gap": ("PVE_FILE", GAP_STOCK, GAP_PATCHED),
     "storage": ("PVE_FILE", STORAGE_STOCK, STORAGE_PATCHED),
 }
 
@@ -864,7 +883,7 @@ default_state() {
 
 applied_patches() {
     local name default
-    for name in selector charts logs summary storage; do
+    for name in selector charts logs summary gap storage; do
         if [[ "$(patch_state "$name")" == "patched" ]]; then
             echo "$name"
         fi
@@ -945,6 +964,7 @@ patch_label() {
         charts) tr_msg status_charts ;;
         logs) tr_msg status_logs ;;
         summary) tr_msg status_summary ;;
+        gap) tr_msg status_gap ;;
         storage) tr_msg status_storage ;;
     esac
 }
@@ -1004,6 +1024,7 @@ show_status() {
         "$(tr_msg status_charts): ${BOLD}$(state_label "$(patch_state charts)")" \
         "$(tr_msg status_logs): ${BOLD}$(state_label "$(patch_state logs)")" \
         "$(tr_msg status_summary): ${BOLD}$(state_label "$(patch_state summary)")" \
+        "$(tr_msg status_gap): ${BOLD}$(state_label "$(patch_state gap)")" \
         "$(tr_msg status_storage): ${BOLD}$(state_label "$(patch_state storage)")" \
         "$(tr_msg status_default): ${BOLD}$(default_label "$(default_state)")" \
         "$(tr_msg status_auto_reapply): ${BOLD}${hook_state}"
@@ -1026,7 +1047,7 @@ show_warning_and_confirm() {
 install_themes() {
     local name state backup_dir all_patched=1
 
-    for name in selector charts logs summary; do
+    for name in selector charts logs summary gap; do
         state="$(patch_state "$name")"
         if [[ "$state" == "unknown" ]]; then
             say_err "$(tr_msg incompatible)"
@@ -1050,13 +1071,13 @@ install_themes() {
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
     engine themes-write "$THEME_DIR" "$(theme_parts_dir)"
-    for name in selector charts logs summary; do
+    for name in selector charts logs summary gap; do
         if [[ "$(patch_state "$name")" == "stock" ]]; then
             engine apply "$name"
         fi
     done
 
-    for name in selector charts logs summary; do
+    for name in selector charts logs summary gap; do
         if [[ "$(patch_state "$name")" != "patched" ]]; then
             say_err "$(tr_msg install_failed)"
             return 1
@@ -1232,7 +1253,7 @@ uninstall_all() {
         unknown+=("default")
     fi
     engine themes-remove "$THEME_DIR" "$(theme_parts_dir)"
-    for name in selector charts logs summary storage; do
+    for name in selector charts logs summary gap storage; do
         state="$(patch_state "$name")"
         if [[ "$state" == "patched" ]]; then
             engine revert "$name"
