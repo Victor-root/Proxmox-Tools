@@ -50,9 +50,6 @@ tr_msg() {
         fr:menu_backups) echo "Lister les backups" ;;
         en:menu_backups) echo "List backups" ;;
 
-        fr:menu_summary) echo "Option : panneau de statut des VM et conteneurs à la taille de son contenu (activer ou désactiver)" ;;
-        en:menu_summary) echo "Option: guest status panel sized to its content (enable or disable)" ;;
-
         fr:menu_storage) echo "Option : tailles des stockages en Tio comme Windows (activer ou désactiver)" ;;
         en:menu_storage) echo "Option: storage sizes in TiB like Windows (enable or disable)" ;;
 
@@ -140,8 +137,8 @@ tr_msg() {
         fr:status_logs) echo "Bouton de repli du journal" ;;
         en:status_logs) echo "Log panel collapse button" ;;
 
-        fr:status_summary) echo "Option panneau de statut" ;;
-        en:status_summary) echo "Status panel option" ;;
+        fr:status_summary) echo "Panneau de statut à la taille de son contenu" ;;
+        en:status_summary) echo "Status panel sized to its content" ;;
 
         fr:status_storage) echo "Option tailles en Tio" ;;
         en:status_storage) echo "TiB sizes option" ;;
@@ -209,8 +206,8 @@ tr_msg() {
         fr:warning_title) echo "AVERTISSEMENT" ;;
         en:warning_title) echo "WARNING" ;;
 
-        fr:warning_body_1) echo "Ce script ajoute 15 fichiers de thème dans ${THEME_DIR} et modifie deux fichiers JavaScript fournis par Proxmox VE : proxmoxlib.js (thèmes dans le menu, couleurs des graphiques) et pvemanagerlib.js (bouton de repli du journal)." ;;
-        en:warning_body_1) echo "This script adds 15 theme files to ${THEME_DIR} and modifies two JavaScript files provided by Proxmox VE: proxmoxlib.js (themes in the menu, chart colors) and pvemanagerlib.js (log panel collapse button)." ;;
+        fr:warning_body_1) echo "Ce script ajoute 15 fichiers de thème dans ${THEME_DIR} et modifie deux fichiers JavaScript fournis par Proxmox VE : proxmoxlib.js (thèmes dans le menu, couleurs des graphiques) et pvemanagerlib.js (bouton de repli du journal, panneau de statut des VM et conteneurs à la taille de son contenu)." ;;
+        en:warning_body_1) echo "This script adds 15 theme files to ${THEME_DIR} and modifies two JavaScript files provided by Proxmox VE: proxmoxlib.js (themes in the menu, chart colors) and pvemanagerlib.js (log panel collapse button, status panel of VMs and containers sized to its content)." ;;
 
         fr:warning_body_2) echo "Ceci est hors support. Les mises à jour des paquets proxmox-widget-toolkit et pve-manager écrasent ces modifications : les thèmes restent installés mais disparaissent du menu, sauf si la réapplication automatique est activée." ;;
         en:warning_body_2) echo "This is unsupported. Updates of the proxmox-widget-toolkit and pve-manager packages overwrite these changes: the themes stay installed but leave the menu, unless automatic re-apply is enabled." ;;
@@ -235,15 +232,6 @@ tr_msg() {
 
         fr:version_installed) echo "Installé" ;;
         en:version_installed) echo "Installed" ;;
-
-        fr:summary_title) echo "PANNEAU DE STATUT" ;;
-        en:summary_title) echo "STATUS PANEL" ;;
-
-        fr:summary_body_1) echo "Dans le résumé d'une VM ou d'un conteneur, Proxmox fixe la hauteur du panneau de statut et des notes à 300 pixels. Quand il y a plusieurs adresses IP ou une fenêtre étroite, le bas est coupé (le bouton « Plus », voire une adresse IP)." ;;
-        en:summary_body_1) echo "In the summary of a VM or container, Proxmox fixes the height of the status and notes panels to 300 pixels. With several IP addresses or a narrow window, the bottom gets cut (the \"More\" button, sometimes an IP address)." ;;
-
-        fr:summary_body_2) echo "Cette option en fait une hauteur minimale : les deux panneaux s'agrandissent ensemble pour tout afficher. Elle modifie une ligne de pvemanagerlib.js et fonctionne avec ou sans les thèmes." ;;
-        en:summary_body_2) echo "This option turns it into a minimum height: both panels grow together to show everything. It changes one line of pvemanagerlib.js and works with or without the themes." ;;
 
         fr:storage_title) echo "TAILLES DES STOCKAGES" ;;
         en:storage_title) echo "STORAGE SIZES" ;;
@@ -287,8 +275,8 @@ tr_msg() {
         fr:hook_nothing) echo "Rien n'est en place à réappliquer. Installez d'abord les thèmes ou une option." ;;
         en:hook_nothing) echo "Nothing is in place to re-apply. Install the themes or an option first." ;;
 
-        fr:hook_still_active) echo "La réapplication automatique est toujours active : les modifications reviendront à la prochaine mise à jour. Utilisez l'option 9 pour la désactiver." ;;
-        en:hook_still_active) echo "Automatic re-apply is still active: the changes will come back on the next update. Use option 9 to disable it." ;;
+        fr:hook_still_active) echo "La réapplication automatique est toujours active : les modifications reviendront à la prochaine mise à jour. Utilisez l'option 8 pour la désactiver." ;;
+        en:hook_still_active) echo "Automatic re-apply is still active: the changes will come back on the next update. Use option 8 to disable it." ;;
 
         fr:hook_file) echo "Fichier de hook APT" ;;
         en:hook_file) echo "APT hook file" ;;
@@ -906,7 +894,7 @@ show_warning_and_confirm() {
 install_themes() {
     local name state backup_dir all_patched=1
 
-    for name in selector charts logs; do
+    for name in selector charts logs summary; do
         state="$(patch_state "$name")"
         if [[ "$state" == "unknown" ]]; then
             say_err "$(tr_msg incompatible)"
@@ -930,13 +918,13 @@ install_themes() {
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
     engine themes-write "$THEME_DIR" "$(theme_parts_dir)"
-    for name in selector charts logs; do
+    for name in selector charts logs summary; do
         if [[ "$(patch_state "$name")" == "stock" ]]; then
             engine apply "$name"
         fi
     done
 
-    for name in selector charts logs; do
+    for name in selector charts logs summary; do
         if [[ "$(patch_state "$name")" != "patched" ]]; then
             say_err "$(tr_msg install_failed)"
             return 1
@@ -992,10 +980,6 @@ toggle_option() {
     say_ok "$done_msg"
     say_info "$(tr_msg reload_hint)"
     say_info "$(tr_msg browser_cache)"
-}
-
-toggle_summary() {
-    toggle_option summary "$(tr_msg summary_title)" "$(tr_msg summary_body_1)" "$(tr_msg summary_body_2)"
 }
 
 toggle_storage() {
@@ -1169,15 +1153,14 @@ main_menu() {
         printf " %b3)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_restore_select)"
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
-        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_summary)"
-        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_storage)"
-        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
-        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
-        printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_uninstall)"
-        printf " %b11)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_storage)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_uninstall)"
+        printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-11]: " choice
+        read -r -p "$(tr_msg choose_option) [1-10]: " choice
         echo
 
         case "$choice" in
@@ -1200,26 +1183,22 @@ main_menu() {
                 menu_action show_backups
                 ;;
             6)
-                menu_action toggle_summary
-                pause
-                ;;
-            7)
                 menu_action toggle_storage
                 pause
                 ;;
-            8)
+            7)
                 menu_action enable_hook
                 pause
                 ;;
-            9)
+            8)
                 menu_action disable_hook
                 pause
                 ;;
-            10)
+            9)
                 menu_action uninstall_all
                 pause
                 ;;
-            11)
+            10)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;

@@ -372,9 +372,8 @@ Adds modern themes to the Proxmox VE web interface, picked from the stock **Colo
 * 🖼️ about 75 icons redrawn with **Phosphor** icons (MIT license), and status dots (running, paused, error) instead of the small glyphs over the tree icons
 * 📈 chart curves in the accent color
 * ⬇️ a collapse button at the top right of the bottom **Logs** panel, instead of the small arrow on its splitter
-* 🧩 two optional fixes, each enabled or disabled from its own menu entry:
-  * the status panel of a VM or container grows with its content, so the IP list and its **More** button are never cut
-  * the **Status** block of a storage counts sizes by 1024 like the rest of the interface and Windows (a formatted 4 TB disk shows 3.58 TiB, not 3.94 TB)
+* 📐 the status panel of a VM or container grows with its content, so the IP list and its **More** button are never cut
+* 🧩 optional, from its own menu entry: the **Status** block of a storage counts sizes by 1024 like the rest of the interface and Windows (a formatted 4 TB disk shows 3.58 TiB, not 3.94 TB)
 * 🔎 every change to the Proxmox code is a whole block matched exactly: on an unexpected file the script refuses and touches nothing
 * 🤝 uninstalling takes out only its own changes, so the changes of other scripts in the same files (for example the subscription notice remover) stay in place
 * 🔁 optional **APT hook** that re-applies the changes in place after a package update
@@ -385,7 +384,7 @@ Adds modern themes to the Proxmox VE web interface, picked from the stock **Colo
 #### Good to know
 
 * **Choosing a theme:** click your user name at the top right of the web interface, then **Color Theme**. The choice is stored per browser, like the stock dark theme.
-* **What is changed:** 15 theme files are added to `/usr/share/javascript/proxmox-widget-toolkit/themes/`, `proxmoxlib.js` gets the theme entries of the menu and the chart colors, and `pvemanagerlib.js` gets the Logs panel button (and the optional fixes).
+* **What is changed:** 15 theme files are added to `/usr/share/javascript/proxmox-widget-toolkit/themes/`, `proxmoxlib.js` gets the theme entries of the menu and the chart colors, and `pvemanagerlib.js` gets the Logs panel button, the status panel fix (and the storage sizes option when enabled).
 * **No restart needed**: `pveproxy` reads these files on every request.
 * **The browser cache can hide the change.** Proxmox sends no expiry for these files, so a browser may keep the old copy of the menu. Check in a private window, then clear the site data in each browser you use.
 * **Package updates** of `proxmox-widget-toolkit` and `pve-manager` put their files back: the themes stay installed but leave the menu until the script runs again, unless the APT hook is enabled.
