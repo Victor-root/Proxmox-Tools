@@ -1,0 +1,534 @@
+:root {
+  --pwt-chart-primary: #{$border-color};
+  --pwt-gauge-default: #{$primary-color};
+  --pwt-chart-grid-stroke: #{$border-color-alt};
+  --pmt-chart-fill-opacity: #{if($mode == dark, 0.28, 0.22)};
+  --pmt-chart-series: #{$primary-color}, #{if($mode == dark, #94a3b8, #64748b)}, #{if($mode == dark, #475569, #cbd5e1)}, #{$highlighted-text};
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba($primary-color, 0.55) transparent;
+}
+
+// Top bar
+#versioninfo-body {
+  color: $text-color-inactive;
+}
+
+// Panels as cards
+.x-panel-default,
+.x-panel-default-framed {
+  border-color: $border-color-alt;
+}
+
+.x-panel-header-default {
+  background-color: $surface;
+  border-color: $border-color-alt;
+}
+
+.x-panel-header-title-default > .x-title-text-default {
+  color: $text-color;
+}
+
+.x-panel-body-default {
+  border-color: $border-color-alt;
+}
+
+.x-border-layout-ct > .x-panel-default,
+.x-border-layout-ct > .x-tab-panel,
+.x-border-layout-ct > .x-container-default,
+.x-border-layout-ct > .x-container > .x-panel-default {
+  border-radius: $radius;
+  overflow: hidden;
+  box-shadow: $card-shadow;
+}
+
+.pmx-rrd-chart,
+.x-panel-default.x-box-item[id^="proxmoxRRDChart"],
+.x-panel-default[id^="pveNodeStatus"],
+.x-panel-default[id^="pveGuestStatus"] {
+  border-radius: $radius;
+  overflow: hidden;
+  border: 1px solid $border-color-alt;
+}
+
+// Toolbars
+.x-toolbar-default {
+  background-color: $surface;
+  border-color: $border-color-alt;
+}
+
+.x-panel-header-text-default {
+  font-weight: 600;
+  color: $text-color;
+}
+
+// Buttons
+.x-btn {
+  border-radius: $radius-sm;
+}
+
+.x-btn-default-small {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 2px 6px rgba($primary-color, 0.25);
+}
+
+.x-btn-default-toolbar-small:not(.proxmox-inline-button) {
+  background-color: transparent;
+  border-color: $border-color;
+
+  &.x-btn-over {
+    background-color: $selection-background-color;
+    border-color: $border-color;
+  }
+}
+
+.proxmox-inline-button.x-btn-pressed {
+  background-color: $accent-soft;
+  border-color: $primary-color;
+
+  .x-btn-inner {
+    color: $highlighted-text-alt;
+  }
+}
+
+.x-btn-inner-default-small,
+.x-btn-inner-default-toolbar-small {
+  font-weight: 500;
+}
+
+// Form fields
+.x-form-trigger-wrap-default {
+  border-radius: $radius-sm;
+  border-color: $border-color;
+  overflow: hidden;
+}
+
+// focus rings are drawn inside the field: an outer ring gets clipped by headers and panel edges
+.x-form-trigger-wrap-focus,
+.x-form-trigger-wrap-default.x-form-trigger-wrap-focus {
+  border-color: $primary-color;
+  box-shadow: inset 0 0 0 1px $primary-color;
+}
+
+// Straight accent bar on the left of the selected row
+%selection-bar {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: 3px;
+  border-radius: 3px;
+  background-color: $primary-color;
+}
+
+// Resource tree
+.x-tree-panel .x-grid-item-selected,
+.x-tree-panel .x-grid-item-focused {
+  background-color: transparent;
+}
+
+.x-tree-panel .x-grid-item-over > table,
+.x-tree-panel .x-grid-item-over {
+  background-color: transparent;
+}
+
+// a row spans several cells in tree grids (snapshots): only its outer ends are rounded
+.x-tree-panel .x-grid-item .x-grid-cell {
+  &:first-child {
+    border-top-left-radius: $radius-sm;
+    border-bottom-left-radius: $radius-sm;
+  }
+
+  &:last-child {
+    border-top-right-radius: $radius-sm;
+    border-bottom-right-radius: $radius-sm;
+  }
+}
+
+.x-tree-panel .x-grid-item-over .x-grid-cell {
+  background-color: $accent-hover;
+}
+
+.x-tree-panel .x-grid-item-selected .x-grid-cell {
+  background-color: $accent-soft;
+
+  &:first-child {
+    position: relative;
+
+    &::before {
+      @extend %selection-bar;
+    }
+  }
+}
+
+.x-tree-panel .x-grid-item-selected .x-tree-node-text {
+  color: $highlighted-text-alt;
+  font-weight: 600;
+}
+
+// Navigation menu of the content panel
+.x-treelist-pve-nav,
+.x-treelist-pve-nav .x-treelist-item {
+  background-color: $surface;
+}
+
+.x-treelist-pve-nav .x-treelist-row {
+  margin-left: 8px;
+  margin-right: 8px;
+  border-radius: $radius-sm;
+}
+
+.x-treelist-pve-nav .x-treelist-item-selected > .x-treelist-row {
+  position: relative;
+  background-color: $accent-soft;
+
+  &::before {
+    @extend %selection-bar;
+  }
+}
+
+.x-treelist-pve-nav .x-treelist-item-selected > .x-treelist-row .x-treelist-item-text,
+.x-treelist-pve-nav .x-treelist-item-selected > .x-treelist-row .x-treelist-item-icon {
+  color: $highlighted-text-alt;
+  font-weight: 600;
+}
+
+// Grids
+.x-grid-header-ct,
+.x-column-header {
+  background-color: $surface;
+  border-color: $border-color-alt;
+}
+
+.x-column-header-text-inner {
+  color: $text-color-inactive;
+  font-weight: 600;
+}
+
+.x-grid-item {
+  background-color: $content-background-color;
+}
+
+.x-grid-item-alt {
+  background-color: $content-background-color;
+}
+
+// the dark base theme colours hovered, selected and keyboard focused rows from more specific selectors
+// cells can carry the focused class too, hence the explicit row class
+.x-grid-body .x-grid-item,
+.x-keyboard-mode .x-grid-body .x-grid-item.x-grid-item-focused {
+  &.x-grid-item-over {
+    background-color: $accent-hover;
+  }
+
+  &.x-grid-item-selected {
+    background-color: $accent-soft;
+  }
+}
+
+// the dark base theme also paints a single focused cell grey
+.x-keyboard-mode .x-grid-body .x-grid-cell.x-grid-item-focused {
+  background-color: transparent;
+}
+
+.x-keyboard-mode .x-tree-panel .x-grid-body .x-grid-item-selected .x-grid-cell.x-grid-item-focused {
+  background-color: $accent-soft;
+}
+
+.x-keyboard-mode .x-grid-body .x-grid-item.x-grid-item-focused {
+  background-color: transparent;
+  color: $text-color;
+}
+
+.x-tree-panel .x-grid-body .x-grid-item {
+  &.x-grid-item-over,
+  &.x-grid-item-selected {
+    background-color: transparent;
+  }
+}
+
+.x-grid-with-row-lines .x-grid-item {
+  border-color: $border-color-alt;
+}
+
+// Tabs
+.x-tab-bar-default {
+  background-color: $surface;
+}
+
+// symmetric padding and a fixed line box keep the label centred in the pill
+.x-tab-default-top {
+  border-radius: 999px;
+  padding: 3px 10px;
+
+  .x-tab-inner-default {
+    line-height: 16px;
+  }
+
+  &:not(.x-tab-active) {
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  &.x-tab-over:not(.x-tab-active) {
+    background-color: $accent-hover;
+  }
+}
+
+// Progress bars
+.x-progress-default {
+  border-radius: 999px;
+  border: none;
+  background-color: $background-dark;
+  overflow: hidden;
+}
+
+.x-progress-default .x-progress-bar-default {
+  border-radius: 999px;
+  background: linear-gradient(90deg, $primary-dark, $primary-light);
+}
+
+// Windows and menus
+.x-window-default,
+.x-menu-default,
+.x-boundlist {
+  border-radius: $radius;
+  box-shadow: if($mode == dark, 0 20px 50px rgba(0, 0, 0, 0.55), 0 20px 50px rgba(16, 24, 40, 0.18));
+  overflow: hidden;
+}
+
+.x-window-header-default {
+  background-color: $surface;
+}
+
+// Splitters
+.x-splitter {
+  background-color: transparent;
+}
+
+.x-window-header-title-default > .x-title-text-default {
+  color: $text-color;
+  font-weight: 600;
+}
+
+// ExtJS also flags mouse clicks as keyboard focus, so its blue focus frames appeared on every click.
+// Rows keep a discreet accent ring when focus and selection differ, the rest looks as when not focused.
+.x-keyboard-mode {
+  .x-grid-item-focused .x-grid-cell-inner::before,
+  .x-column-header.x-column-header-focus .x-column-header-inner::after,
+  .x-btn-default-small.x-arrow-focus .x-btn-arrow-el,
+  .x-btn-default-toolbar-small.x-arrow-focus .x-btn-arrow-el,
+  .x-nbr .x-segmented-button-item.x-btn-focus::after {
+    border-color: transparent;
+  }
+
+  .x-grid-item-focused:not(.x-grid-item-selected) .x-grid-cell {
+    box-shadow: inset 0 0 0 1px rgba($primary-color, 0.45);
+  }
+
+  .x-btn-focus.x-btn-default-small:not(.proxmox-inline-button) {
+    background-color: $primary-color;
+    border-color: $primary-color;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08) inset, 0 2px 6px rgba($primary-color, 0.25);
+
+    &.x-btn-over {
+      background-color: $primary-light;
+      border-color: $primary-light;
+    }
+
+    &.x-btn-pressed,
+    &.x-btn-menu-active {
+      background-color: $primary-dark;
+      border-color: $primary-dark;
+    }
+  }
+
+  .x-btn-focus.x-btn-default-toolbar-small {
+    &,
+    &.x-btn-over,
+    &.x-btn-pressed,
+    &.x-btn-menu-active {
+      box-shadow: none;
+    }
+
+    &:not(.proxmox-inline-button) {
+      background-color: transparent;
+      border-color: $border-color;
+    }
+
+    &.x-btn-over:not(.proxmox-inline-button) {
+      background-color: $selection-background-color;
+    }
+  }
+
+  // segmented and help buttons also carry the primary button class
+  .x-btn-focus.proxmox-inline-button {
+    background-image: none;
+    background-color: $neutral-button-color;
+    border-color: $border-color;
+    box-shadow: none;
+
+    &.x-btn-over {
+      background-color: $neutral-button-color-alt;
+    }
+
+    &.x-btn-pressed {
+      background-color: $accent-soft;
+      border-color: $primary-color;
+    }
+  }
+
+  .x-tab-focus.x-tab-default {
+    background-color: transparent;
+    border-color: transparent;
+
+    &,
+    &.x-tab-over,
+    &.x-tab-active {
+      box-shadow: none;
+    }
+
+    &.x-tab-over {
+      background-color: $accent-hover;
+      border-color: transparent;
+    }
+
+    &.x-tab-active {
+      background-color: $primary-color;
+      border-color: $primary-color;
+    }
+  }
+
+  // crisp repeats the tool focus outline per header type
+  .x-tool-focus,
+  .x-panel-header-default .x-tool-focus,
+  .x-panel-header-default-framed .x-tool-focus,
+  .x-window-header-default .x-tool-focus,
+  .x-accordion-hd .x-tool-focus {
+    outline: none;
+  }
+
+  .x-title-focus,
+  .x-fieldset-header-tool-default.x-focus,
+  .x-field-form-focus {
+    outline-color: rgba($primary-color, 0.5);
+  }
+
+  .x-view-item-focused {
+    outline-color: rgba($primary-color, 0.5) !important;
+  }
+}
+
+// Segmented toggles (Maximum / Average): the active choice is a filled accent gradient
+@mixin segmented-toggle {
+  .x-segmented-button-item.proxmox-inline-button {
+    background-image: none;
+    background-color: $neutral-button-color;
+    border-color: $border-color;
+    box-shadow: none;
+
+    .x-btn-inner {
+      color: $text-color-inactive;
+      font-weight: 600;
+    }
+
+    &.x-btn-over {
+      background-color: $neutral-button-color-alt;
+    }
+
+    &.x-btn-pressed {
+      background-color: $primary-color;
+      background-image: linear-gradient(135deg, $primary-light, $primary-dark);
+      border-color: $primary-dark;
+
+      .x-btn-inner {
+        color: #fff;
+      }
+    }
+  }
+}
+
+.x-segmented-button {
+  @include segmented-toggle;
+}
+
+.x-keyboard-mode .x-segmented-button {
+  @include segmented-toggle;
+}
+
+// Tooltips
+.x-tip-default {
+  background-color: $background-darker;
+  border-color: $border-color;
+  border-radius: $radius-sm;
+  box-shadow: $card-shadow;
+
+  .x-tip-body-default {
+    color: $text-color;
+  }
+}
+
+// Menus: accent highlight on hover and keyboard focus
+.x-menu-item-default.x-menu-item-focus,
+.x-menu-item-default.x-menu-item-active {
+  background-color: $accent-soft;
+
+  .x-menu-item-text,
+  .x-menu-item-icon-default {
+    color: $highlighted-text;
+  }
+}
+
+// Chart legends: pill shaped, no square backdrop
+.x-legend,
+.x-legend-container {
+  background-color: transparent;
+}
+
+.x-legend-horizontal .x-legend-item {
+  background-color: $neutral-button-color;
+  border-color: $border-color;
+
+  &:first-child {
+    border-left-color: $border-color;
+    border-top-left-radius: 999px;
+    border-bottom-left-radius: 999px;
+  }
+
+  &:last-child {
+    border-top-right-radius: 999px;
+    border-bottom-right-radius: 999px;
+  }
+}
+
+// Hover highlights share the accent everywhere: lists, combobox pickers, navigation
+.x-boundlist-item-over,
+.x-treelist-row-over,
+.x-treelist-pve-nav .x-treelist-row-over {
+  background-color: $accent-hover;
+  border-color: transparent;
+}
+
+.x-boundlist-selected,
+.x-boundlist-item-over.x-boundlist-selected {
+  background-color: $accent-soft;
+  border-color: transparent;
+  color: $highlighted-text;
+}
+
+// Window shadows follow the rounded corners
+.x-css-shadow {
+  border-radius: $radius;
+}
+
+// a highlighted row reads as one band: no column lines across it
+.x-grid-with-col-lines .x-grid-item {
+  &.x-grid-item-over,
+  &.x-grid-item-selected {
+    .x-grid-cell {
+      border-right-color: transparent;
+    }
+  }
+}

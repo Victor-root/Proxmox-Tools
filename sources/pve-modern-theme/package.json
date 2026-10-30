@@ -1,0 +1,10 @@
+{
+  "name": "pve-modern-theme-build",
+  "private": true,
+  "description": "Build tools of the Modern themes embedded in scripts/pve-modern-theme.sh",
+  "license": "AGPL-3.0-or-later",
+  "devDependencies": {
+    "@phosphor-icons/core": "2.1.1",
+    "sass": "1.80.6"
+  }
+}

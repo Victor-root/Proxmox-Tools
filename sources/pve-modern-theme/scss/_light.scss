@@ -1,0 +1,187 @@
+:root {
+  color-scheme: light;
+  --pwt-panel-background: #{$background-darker};
+  --pwt-text-color: #{$text-color};
+  --pwt-gauge-back: #{$background-dark};
+  --pwt-gauge-warn: #f5a524;
+  --pwt-gauge-crit: #e5484d;
+}
+
+.x-body {
+  color: $text-color;
+}
+
+.x-viewport > .x-body,
+body.x-border-layout-ct,
+div.x-border-layout-ct {
+  background-color: $background-darkest;
+}
+
+.x-panel-body-default,
+.x-window-body-default,
+.x-autocontainer-outerCt {
+  color: $text-color;
+}
+
+.x-panel-body-default,
+.x-window-body-default {
+  background-color: $content-background-color;
+}
+
+.x-plain-body-default,
+#versioninfo-body {
+  color: $text-color-inactive;
+}
+
+// Primary buttons
+.x-btn-default-small {
+  background-color: $primary-color;
+  border-color: $primary-color;
+
+  .x-btn-inner-default-small,
+  .x-btn-icon-el-default-small {
+    color: #fff;
+  }
+
+  &.x-btn-over {
+    background-color: $primary-light;
+    border-color: $primary-light;
+  }
+
+  &.x-btn.x-btn-pressed {
+    background-color: $primary-dark;
+    border-color: $primary-dark;
+  }
+
+  &.x-btn.x-btn-disabled {
+    background-color: $primary-color;
+    border-color: $primary-color;
+  }
+}
+
+// Toolbar and inline buttons
+.x-btn-default-toolbar-small {
+  .x-btn-inner-default-toolbar-small {
+    color: $text-color;
+  }
+
+  .x-btn-icon-el-default-toolbar-small {
+    color: $icon-color;
+  }
+}
+
+.x-btn.proxmox-inline-button {
+  background-color: $neutral-button-color;
+  border-color: $border-color;
+
+  .x-btn-inner {
+    color: $text-color;
+  }
+
+  .x-btn-icon-el {
+    color: $icon-color;
+  }
+
+  &.x-btn-over {
+    background-color: $neutral-button-color-alt;
+    border-color: $border-color;
+  }
+
+  &.x-btn-pressed {
+    background-color: $accent-soft;
+    border-color: $primary-color;
+
+    .x-btn-inner {
+      color: $highlighted-text;
+    }
+  }
+}
+
+// Headers and titles
+.x-window-header-default,
+.x-window-default {
+  background-color: $background-darker;
+  border-color: $border-color;
+}
+
+.x-window-header-default .x-tool-img {
+  color: $icon-color;
+}
+
+// Form fields
+.x-form-text-default,
+.x-form-trigger-wrap-default {
+  background-color: $content-background-color;
+  color: $text-color;
+}
+
+.x-form-trigger-default {
+  background-color: $content-background-color;
+}
+
+// Lists and menus
+.x-menu-item-active {
+  background-color: $selection-background-color;
+}
+
+// Trees and grids
+.x-grid-item-selected .x-grid-cell,
+.x-grid-item-selected .x-grid-cell-inner {
+  color: $text-color;
+}
+
+.x-grid-item-focused .x-grid-cell-inner::before {
+  border-color: $primary-color;
+}
+
+.x-tree-icon,
+.x-tree-elbow-img {
+  color: $icon-color;
+}
+
+.x-treelist-pve-nav .x-treelist-item-text,
+.x-treelist-pve-nav .x-treelist-item-icon,
+.x-treelist-pve-nav .x-treelist-item-expander {
+  color: $text-color;
+}
+
+// Tabs
+.x-tab-bar-default {
+  background-color: $background-darker;
+}
+
+.x-tab-default-top {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.x-tab-inner-default {
+  color: $text-color-inactive;
+}
+
+.x-tab-default {
+  &.x-tab.x-tab-active {
+    background-color: $primary-color;
+    border-color: $primary-color;
+
+    .x-tab-inner-default {
+      color: #fff;
+    }
+  }
+
+  &.x-tab.x-tab-disabled {
+    background-color: transparent;
+    border-color: transparent;
+  }
+}
+
+// Links and highlighted text
+a,
+.x-form-display-field a {
+  color: $highlighted-text;
+}
+
+.x-splitter-collapsed,
+.x-layout-split-bottom {
+  background-color: $background-darkest;
+}

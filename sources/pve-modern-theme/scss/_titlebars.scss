@@ -1,0 +1,157 @@
+// Accent title bars on windows, panels and the title toolbar of the content panel,
+// tinted like the selected navigation entry
+$on-title: $highlighted-text-alt;
+
+%title-bar {
+  background-color: $background-darker;
+  background-image: linear-gradient($accent-soft, $accent-soft);
+  border-color: rgba($primary-color, 0.25);
+}
+
+// Header tools (close, help, undo zoom...) get a rounded halo on hover
+.x-tool {
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    z-index: -1;
+    border-radius: 6px;
+    transition: background-color 0.15s;
+  }
+
+  &.x-tool-over::before {
+    background-color: $selection-background-color;
+  }
+}
+
+.x-tool-img,
+.x-tool-tool-el {
+  color: $icon-color;
+}
+
+// a disabled tool is covered by a white load mask in crisp
+.x-tool-disabled {
+  opacity: 0.45;
+
+  .x-mask {
+    background-color: transparent;
+  }
+}
+
+// Proxmox only uses two Font Awesome glyph tools: edit notes (panel header) and reset form (edit window header)
+.x-tool .x-tool-tool-el:not(.x-tool-img) {
+  font-size: 0;
+  background-color: currentColor;
+  -webkit-mask: var(--modern-icon) center / contain no-repeat;
+  mask: var(--modern-icon) center / contain no-repeat;
+}
+
+.x-panel-header .x-tool .x-tool-tool-el:not(.x-tool-img) {
+  --modern-icon: #{$icon-pencil-simple-line};
+}
+
+.x-window-header .x-tool .x-tool-tool-el:not(.x-tool-img) {
+  --modern-icon: #{$icon-arrow-counter-clockwise};
+}
+
+.x-window-header-default,
+.x-panel-header-default {
+  @extend %title-bar;
+
+  .x-title-text {
+    color: $on-title;
+  }
+
+  .x-tool-img,
+  .x-tool-tool-el,
+  .x-component,
+  .x-autocontainer-innerCt {
+    color: $on-title;
+  }
+
+  .x-tool.x-tool-over::before {
+    background-color: $accent-soft;
+  }
+}
+
+// panel titles keep the stock weight: bold text no longer fits next to the OS name and wraps
+.x-window-header-default .x-title-text {
+  font-weight: 600;
+}
+
+// Title bars carry their own rounded corners: ExtJS positions headers absolutely, and a statically
+// positioned panel does not clip them with overflow alone
+.x-panel-header-default {
+  border-radius: $radius $radius 0 0;
+}
+
+.x-window-header-default {
+  border-radius: ($radius - 1px) ($radius - 1px) 0 0;
+}
+
+.x-panel-default:has(> .x-panel-header-default) {
+  border-radius: $radius;
+  clip-path: inset(0 round $radius);
+}
+
+// The content panel title ("Container 100 (name) on node ...") is a toolbar, not a header
+.x-toolbar-default:has(> .x-box-inner .x-panel-header-text-default) {
+  @extend %title-bar;
+  border-radius: $radius $radius 0 0;
+
+  .x-panel-header-text-default {
+    color: $on-title;
+  }
+
+  // the guest and node actions stand out as soft pills, their icons tell what they do
+  .x-btn.x-btn-default-toolbar-small {
+    &,
+    &.x-btn-focus,
+    &.x-btn-pressed {
+      background-color: rgba($primary-color, 0.1);
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    &.x-btn-over,
+    &.x-btn-focus.x-btn-over,
+    &.x-btn-menu-active {
+      background-color: rgba($primary-color, 0.2);
+    }
+
+    .fa-play {
+      color: $status-ok;
+    }
+
+    .fa-power-off {
+      color: $status-error;
+    }
+
+    .fa-undo,
+    .fa-refresh {
+      color: $status-warn;
+    }
+
+    .fa-terminal {
+      color: $primary-color;
+    }
+  }
+}
+
+// The bottom log panel has no header: its tab bar takes the title bar look
+.x-border-layout-ct > .x-panel > .x-panel-bodyWrap > .x-tab-bar-default {
+  @extend %title-bar;
+  border-radius: $radius $radius 0 0;
+}
+
+// It collapses from the header tool added by the script, which then replaces the small arrow
+// on the splitter. Without that tool (patch not applied) the arrow stays.
+body:has(.pmt-logs-collapse) .x-splitter .x-collapse-el {
+  display: none;
+}
+
+.x-keyboard-mode .x-splitter-focus::after {
+  border-color: transparent;
+}

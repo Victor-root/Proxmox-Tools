@@ -646,6 +646,87 @@ const SCRIPTS = [
             prompt: 'Choose an option [1-6]:',
         },
     },
+    {
+        id: 'modern-theme',
+        icon: 'palette',
+        file: 'pve-modern-theme.sh',
+        target: 'pve',
+        name: {
+            en: 'Modern theme',
+            fr: 'Thème moderne',
+        },
+        tagline: {
+            en: 'Modern themes for the web interface, 5 colors in light, dark and auto, picked from the Color Theme menu.',
+            fr: 'Des thèmes modernes pour l’interface web, 5 couleurs en clair, sombre et auto, à choisir dans le menu Thème de couleur.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 9.x',
+        updated: {
+            en: 'New script. Modern themes in 5 colors, new icons, chart colors and two optional fixes of the interface.',
+            fr: 'Nouveau script. Des thèmes modernes en 5 couleurs, de nouvelles icônes, des graphiques colorés et deux corrections optionnelles de l’interface.',
+        },
+        points: {
+            en: [
+                'Orange, blue, violet, green and pink, each in Auto, Light and Dark',
+                'Rounded cards, tinted title bars, modern icons and status dots, colored charts',
+                'Optional: status panel sized to its content, storage sizes in TiB like Windows',
+                'Blocks matched exactly, automatic backup, full uninstall that keeps the changes of other scripts',
+                'Optional APT hook to re-apply after package updates',
+            ],
+            fr: [
+                'Orange, bleu, violet, vert et rose, chacun en Auto, Clair et Sombre',
+                'Cartes arrondies, barres de titre teintées, icônes modernes et pastilles d’état, graphiques colorés',
+                'En option : panneau de statut à la taille de son contenu, tailles des stockages en Tio comme Windows',
+                'Blocs cherchés à l’identique, backup automatique, désinstallation complète qui garde les modifications des autres scripts',
+                'Hook APT optionnel pour réappliquer après les mises à jour',
+            ],
+        },
+        touches: {
+            files: [
+                { path: '/usr/share/javascript/proxmox-widget-toolkit/themes/theme-modern-*.css', role: { en: '15 theme files added (5 colors, auto, light and dark)', fr: '15 fichiers de thème ajoutés (5 couleurs, auto, clair et sombre)' } },
+                { path: '/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js', role: { en: 'theme entries of the Color Theme menu, chart colors read from the theme', fr: 'entrées du menu Thème de couleur, couleurs des graphiques lues dans le thème' } },
+                { path: '/usr/share/pve-manager/js/pvemanagerlib.js', role: { en: 'collapse button of the Logs panel, and the two optional fixes when enabled', fr: 'bouton de repli du panneau Journaux, et les deux corrections optionnelles si activées' } },
+                { path: '/etc/apt/apt.conf.d/99-pve-modern-theme', role: { en: 'optional, re-applies the changes after an update', fr: 'optionnel, réapplique les modifications après une mise à jour' } },
+                { path: '/usr/local/lib/pve-modern-theme/engine.py', role: { en: 'optional, the program the APT hook runs', fr: 'optionnel, le programme lancé par le hook APT' } },
+            ],
+            backup: '/root/pve-modern-theme-patch-<date>/',
+        },
+        note: {
+            en: 'The theme is chosen per browser, in Color Theme. Browsers can keep the old copy of the files: check in a private window, then clear the site data. Updates of proxmox-widget-toolkit and pve-manager remove the themes from the menu until the script runs again, unless the APT hook is enabled.',
+            fr: 'Le thème se choisit par navigateur, dans Thème de couleur. Les navigateurs peuvent garder l’ancienne copie des fichiers : vérifiez dans une fenêtre privée, puis effacez les données du site. Les mises à jour de proxmox-widget-toolkit et pve-manager retirent les thèmes du menu jusqu’à ce que le script soit relancé, sauf si le hook APT est activé.',
+        },
+        terminal: {
+            banner: 'proxmox',
+            theme: 'orange',
+            host: 'root@pve01',
+            subtitle: 'Modern Theme',
+            panel: {
+                title: 'Status',
+                lines: [
+                    'Detected version: pve-manager 9.2.24 · proxmox-widget-toolkit 5.2.10',
+                    'Theme files: installed',
+                    'Themes in the "Color Theme" menu: in place',
+                ],
+            },
+            menu: [
+                'Install or update the themes (automatic backup included)',
+                'Restore latest backup',
+                'Restore from selected backup',
+                'Show status',
+                'List backups',
+                'Option: guest status panel sized to its content (enable or disable)',
+                'Option: storage sizes in TiB like Windows (enable or disable)',
+                'Re-apply automatically after an update',
+                'Stop re-applying automatically',
+                'Uninstall everything',
+                'Quit',
+            ],
+            prompt: 'Choose an option [1-11]:',
+        },
+    },
 ];
 
 /* ASCII logos drawn at the top of each script. Add one here only if a new

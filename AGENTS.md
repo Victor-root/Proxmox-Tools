@@ -26,6 +26,7 @@ License: GNU AGPL v3. Do not add code you cannot license under it.
 
 ```text
 scripts/            one file per script, named pve-<thing>.sh (Proxmox host) or lxc-<thing>.sh (inside a container)
+sources/            build sources of content generated into a script (the CSS of pve-modern-theme.sh), never run by users
 site/
   index.html        page shell and the SVG icon sprite (rarely changes, except to add an icon)
   data.js           every script card and every interface string: this is what you edit

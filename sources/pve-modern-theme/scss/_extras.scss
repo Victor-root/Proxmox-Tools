@@ -1,0 +1,185 @@
+$status-ok: #22c55e;
+$status-warn: #f59e0b;
+$status-error: #ef4444;
+$status-unknown: #94a3b8;
+
+// ExtJS centers navigation menu glyphs with a 24px line-height, a mask needs the same box
+.x-treelist-item-icon::before {
+  height: 24px;
+  margin: 0 -1px;
+  vertical-align: top;
+}
+
+// Gauge icons of the summary panels and resource grids, also set on table cells
+.pmx-itype-icon-memory {
+  @include icon-bg-memory($icon-color);
+}
+
+.pmx-itype-icon-processor {
+  @include icon-bg-cpu($icon-color);
+}
+
+.pmx-itype-icon-memory,
+.pmx-itype-icon-processor {
+  background-size: 16px;
+  filter: none;
+
+  // the dark theme paints this text black for its inverting filter, which is gone
+  .x-grid-cell-inner {
+    color: inherit;
+  }
+}
+
+// Status dots instead of the small glyphs over tree and grid icons
+.x-tree-icon-custom,
+.x-grid-icon-custom {
+  &.online,
+  &.running,
+  &.paused,
+  &.suspended,
+  &.unknown,
+  &.error,
+  &.offline,
+  &.ha-error {
+    &::after {
+      content: "";
+      position: absolute;
+      right: -6px;
+      bottom: 3px;
+      left: auto;
+      top: auto;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      text-shadow: none;
+      box-shadow: 0 0 0 2px $background-darker;
+    }
+  }
+
+  &.online::after,
+  &.running::after {
+    background-color: $status-ok;
+  }
+
+  &.paused::after,
+  &.suspended::after {
+    background-color: $status-warn;
+  }
+
+  &.unknown::after {
+    background-color: $status-unknown;
+  }
+
+  &.error::after,
+  &.offline::after,
+  &.ha-error::after {
+    background-color: $status-error;
+  }
+
+  &.stopped {
+    color: $icon-color-alt;
+    opacity: 0.6;
+  }
+}
+
+.x-tree-icon-custom,
+.x-grid-icon-custom {
+  position: relative;
+}
+
+// leaves room for the status dot before the type column text
+.x-grid-icon-custom {
+  margin-right: 9px;
+}
+
+// Pill shaped tags
+.proxmox-tags-full .proxmox-tag-light,
+.proxmox-tags-full .proxmox-tag-dark {
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+// Blurred backdrop behind modal windows (login, dialogs)
+body > .x-mask {
+  background-color: if($mode == dark, rgba(5, 7, 12, 0.55), rgba(16, 24, 40, 0.25));
+  backdrop-filter: blur(3px);
+}
+
+// Storage usage gauge next to storage icons in the tree
+.usage-wrapper {
+  margin-left: -3px;
+  width: 5px;
+  padding: 0;
+  border: none;
+  border-radius: 3px;
+  overflow: hidden;
+  background-color: $border-color;
+}
+
+.usage {
+  background-color: $primary-color;
+}
+
+// Font Awesome tree and grid icons are drawn at 1.25em, give the masks the same room
+.x-tree-icon-custom::before,
+.x-grid-icon-custom::before {
+  width: 18px;
+  height: 18px;
+  vertical-align: -4px;
+}
+
+// Checkboxes and radios drawn in CSS instead of the crisp sprites
+.x-form-checkbox-default,
+.x-form-radio-default,
+.x-grid-checkcolumn::after {
+  box-sizing: border-box;
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid $icon-color-alt;
+  background: $content-background-color none;
+  filter: none;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.x-form-checkbox-default,
+.x-grid-checkcolumn::after {
+  border-radius: 4px;
+}
+
+.x-form-radio-default {
+  border-radius: 50%;
+}
+
+// the keyboard-mode focus rules of crisp move the sprite and would push the mark out of the box
+.x-form-cb-checked .x-form-checkbox-default,
+.x-keyboard-mode .x-form-cb-checked .x-form-checkbox-focus.x-form-checkbox-default,
+.x-grid-checkcolumn-checked::after {
+  border-color: $primary-color;
+  background: $primary-color $check-mark-white center / 11px no-repeat;
+}
+
+.x-form-cb-checked .x-form-radio-default,
+.x-keyboard-mode .x-form-cb-checked .x-form-radio-focus.x-form-radio-default {
+  border-color: $primary-color;
+  background: radial-gradient(circle, $primary-color 0 3.5px, $content-background-color 4px);
+}
+
+.x-form-checkbox-focus.x-form-checkbox-default,
+.x-form-radio-focus.x-form-radio-default {
+  border-color: $primary-color;
+}
+
+// Menu and split arrows of toolbar buttons, without the split separator line
+.x-btn-wrap-default-toolbar-small.x-btn-arrow-right::after,
+.x-btn-wrap-default-toolbar-small.x-btn-split-right::after {
+  background-image: none;
+  background-color: $text-color-inactive;
+  filter: none;
+  -webkit-mask: $icon-caret-down center / 10px no-repeat;
+  mask: $icon-caret-down center / 10px no-repeat;
+}
+
+// Room between the tags and their edit pencil
+.pve-tag-inline-button .fa {
+  padding-left: 6px;
+}

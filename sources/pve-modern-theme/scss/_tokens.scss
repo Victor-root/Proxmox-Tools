@@ -1,0 +1,6 @@
+$radius: 10px;
+$radius-sm: 7px;
+$accent-soft: rgba($primary-color, if($mode == dark, 0.14, 0.10));
+$accent-hover: rgba($primary-color, if($mode == dark, 0.1, 0.06));
+$surface: $background-darker;
+$card-shadow: if($mode == dark, (0 1px 2px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.18)), (0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 16px rgba(16, 24, 40, 0.06)));
