@@ -269,10 +269,16 @@
             .join('\n');
     }
 
-    /* Each card is one link: clicking anywhere on it scrolls to the script. */
+    /* Each card is one link: clicking anywhere on it scrolls to the script.
+       New scripts are appended to SCRIPTS, so the latest ones come last: show
+       them first, one row of NEWS_COUNT cards. */
+    const NEWS_COUNT = 3;
+
     function renderNews() {
         document.getElementById('news-list').innerHTML = SCRIPTS
             .filter((s) => s.updated)
+            .reverse()
+            .slice(0, NEWS_COUNT)
             .map((s) => [
                 '<a class="news-card" href="#' + esc(s.id) + '">',
                 '  <div class="news-top">',

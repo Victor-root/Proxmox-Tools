@@ -556,7 +556,8 @@ code {
 
 /* ---------- news ---------- */
 
-.news { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 18px; }
+.news { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 900px) { .news { grid-template-columns: 1fr; } }
 
 /* the whole card is the link to its script */
 .news-card {
