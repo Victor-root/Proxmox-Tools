@@ -373,6 +373,7 @@ Adds modern themes to the Proxmox VE web interface, picked from the stock **Colo
 * 📈 chart curves in the accent color
 * ⬇️ a collapse button at the top right of the bottom **Logs** panel, instead of the small arrow on its splitter
 * 📐 the status panel of a VM or container grows with its content, so the IP list and its **More** button are never cut
+* 🖥️ a **default theme for the whole server**, chosen from the menu: every browser that has not picked a theme gets it, the **login page** included
 * 🧩 optional, from its own menu entry: the **Status** block of a storage counts sizes by 1024 like the rest of the interface and Windows (a formatted 4 TB disk shows 3.58 TiB, not 3.94 TB)
 * 🔎 every change to the Proxmox code is a whole block matched exactly: on an unexpected file the script refuses and touches nothing
 * 🤝 uninstalling takes out only its own changes, so the changes of other scripts in the same files (for example the subscription notice remover) stay in place
@@ -383,9 +384,9 @@ Adds modern themes to the Proxmox VE web interface, picked from the stock **Colo
 
 #### Good to know
 
-* **Choosing a theme:** click your user name at the top right of the web interface, then **Color Theme**. The choice is stored per browser, like the stock dark theme.
+* **Choosing a theme:** click your user name at the top right of the web interface, then **Color Theme**. The choice is stored per browser, like the stock dark theme. The default theme of the server applies to the browsers that made no choice, and to those that pick **Default** in that menu.
 * **What is changed:** 15 theme files are added to `/usr/share/javascript/proxmox-widget-toolkit/themes/`, `proxmoxlib.js` gets the theme entries of the menu and the chart colors, and `pvemanagerlib.js` gets the Logs panel button, the status panel fix (and the storage sizes option when enabled).
-* **No restart needed**: `pveproxy` reads these files on every request.
+* **No restart needed** for the themes: `pveproxy` reads these files on every request. Changing the **default theme of the server** edits one line of `/usr/share/perl5/PVE/Service/pveproxy.pm`, which is only read at startup: the script restarts `pveproxy` then, and the web interface is unreachable for a few seconds.
 * **The browser cache can hide the change.** Proxmox sends no expiry for these files, so a browser may keep the old copy of the menu. Check in a private window, then clear the site data in each browser you use.
 * **Package updates** of `proxmox-widget-toolkit` and `pve-manager` put their files back: the themes stay installed but leave the menu until the script runs again, unless the APT hook is enabled.
 * **After uninstalling**, a browser that used a Modern theme shows the stock light interface until another theme is picked in **Color Theme**.
@@ -394,7 +395,7 @@ Adds modern themes to the Proxmox VE web interface, picked from the stock **Colo
 
 #### Version compatibility
 
-Checked against the official Proxmox packages: the five blocks the script changes are identical in every version tested across Proxmox VE 9.0, 9.1 and 9.2 (`pve-manager` 9.0.3, 9.0.18, 9.1.1, 9.1.19, 9.2.2, 9.2.12 and 9.2.24, `proxmox-widget-toolkit` 5.0.2, 5.0.6, 5.1.0, 5.1.10, 5.2.1, 5.2.5 and 5.2.10). On each of them, every change applies once, gives valid JavaScript, and is taken back to a file identical byte for byte. The whole script was run against copies of the 9.2.24 files, and the result was checked in headless Chromium on the real web interface files with a mock API, for every accent in light, dark and auto. Proxmox VE 8 is not supported.
+Checked against the official Proxmox packages: the blocks the script changes are identical in every version tested across Proxmox VE 9.0, 9.1 and 9.2 (`pve-manager` 9.0.3, 9.0.18, 9.1.1, 9.1.19, 9.2.2, 9.2.12 and 9.2.24, `proxmox-widget-toolkit` 5.0.2, 5.0.6, 5.1.0, 5.1.10, 5.2.1, 5.2.5 and 5.2.10). On each of them, every change applies once, gives valid JavaScript, and is taken back to a file identical byte for byte. The whole script was run against copies of the 9.2.24 files, and the result was checked in headless Chromium on the real web interface files with a mock API, for every accent in light, dark and auto. Proxmox VE 8 is not supported.
 
 Not yet tested on a real Proxmox host.
 

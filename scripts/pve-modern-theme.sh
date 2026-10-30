@@ -5,6 +5,7 @@ PATCH_PREFIX="/root/pve-modern-theme-patch"
 THEME_DIR="/usr/share/javascript/proxmox-widget-toolkit/themes"
 PX_FILE="/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"
 PVE_FILE="/usr/share/pve-manager/js/pvemanagerlib.js"
+PROXY_FILE="/usr/share/perl5/PVE/Service/pveproxy.pm"
 HELPER_DIR="/usr/local/lib/pve-modern-theme"
 APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-modern-theme"
 
@@ -52,6 +53,9 @@ tr_msg() {
 
         fr:menu_storage) echo "Option : tailles des stockages en Tio comme Windows (activer ou désactiver)" ;;
         en:menu_storage) echo "Option: storage sizes in TiB like Windows (enable or disable)" ;;
+
+        fr:menu_default) echo "Thème par défaut du serveur (aussi sur la page de connexion)" ;;
+        en:menu_default) echo "Default theme of the server (login page included)" ;;
 
         fr:menu_hook_enable) echo "Réappliquer automatiquement après une mise à jour" ;;
         en:menu_hook_enable) echo "Re-apply automatically after an update" ;;
@@ -142,6 +146,9 @@ tr_msg() {
 
         fr:status_storage) echo "Option tailles en Tio" ;;
         en:status_storage) echo "TiB sizes option" ;;
+
+        fr:status_default) echo "Thème par défaut du serveur" ;;
+        en:status_default) echo "Default theme of the server" ;;
 
         fr:status_auto_reapply) echo "Réapplication automatique" ;;
         en:status_auto_reapply) echo "Automatic re-apply" ;;
@@ -260,6 +267,48 @@ tr_msg() {
         fr:reload_hint) echo "Rechargez la page de l'interface web pour voir le résultat." ;;
         en:reload_hint) echo "Reload the web interface page to see the result." ;;
 
+        fr:default_stock) echo "défaut d'origine de Proxmox" ;;
+        en:default_stock) echo "Proxmox stock default" ;;
+
+        fr:default_title) echo "THÈME PAR DÉFAUT DU SERVEUR" ;;
+        en:default_title) echo "DEFAULT THEME OF THE SERVER" ;;
+
+        fr:default_body_1) echo "Ce thème s'applique à tout navigateur qui n'a pas choisi de thème, page de connexion comprise." ;;
+        en:default_body_1) echo "This theme applies to every browser that has not picked a theme, the login page included." ;;
+
+        fr:default_body_2) echo "Un navigateur qui a déjà choisi un thème dans « Thème de couleur » garde son choix. Pour suivre le thème du serveur, choisissez-y « Défaut »." ;;
+        en:default_body_2) echo "A browser that already picked a theme in \"Color Theme\" keeps its choice. To follow the server theme, pick \"Default\" there." ;;
+
+        fr:default_current) echo "Actuellement" ;;
+        en:default_current) echo "Currently" ;;
+
+        fr:default_choose) echo "Choisissez le thème par défaut" ;;
+        en:default_choose) echo "Choose the default theme" ;;
+
+        fr:default_unchanged) echo "C'est déjà le thème par défaut. Aucune modification appliquée." ;;
+        en:default_unchanged) echo "This is already the default theme. No changes applied." ;;
+
+        fr:default_needs_themes) echo "Les thèmes ne sont pas installés ou pas à jour : utilisez d'abord l'option 1." ;;
+        en:default_needs_themes) echo "The themes are not installed or not up to date: use option 1 first." ;;
+
+        fr:default_warning_1) echo "Ceci modifie une ligne de ${PROXY_FILE}, fourni par le paquet pve-manager. Une mise à jour de ce paquet remet le défaut d'origine, sauf si la réapplication automatique est activée." ;;
+        en:default_warning_1) echo "This changes one line of ${PROXY_FILE}, provided by the pve-manager package. An update of that package puts the stock default back, unless automatic re-apply is enabled." ;;
+
+        fr:default_warning_2) echo "pveproxy doit être redémarré pour lire ce fichier : l'interface web sera injoignable quelques secondes." ;;
+        en:default_warning_2) echo "pveproxy has to be restarted to read this file: the web interface will be unreachable for a few seconds." ;;
+
+        fr:default_done) echo "Thème par défaut du serveur" ;;
+        en:default_done) echo "Default theme of the server" ;;
+
+        fr:default_cookie_hint) echo "Ouvrez la page de connexion dans une fenêtre privée pour vérifier. Dans un navigateur qui a déjà choisi un thème, choisissez « Défaut » dans « Thème de couleur » pour suivre celui du serveur." ;;
+        en:default_cookie_hint) echo "Open the login page in a private window to check. In a browser that already picked a theme, pick \"Default\" in \"Color Theme\" to follow the server one." ;;
+
+        fr:restart_proxy) echo "Redémarrage de pveproxy..." ;;
+        en:restart_proxy) echo "Restarting pveproxy..." ;;
+
+        fr:restart_proxy_wait) echo "Cela peut prendre jusqu'à une minute, l'interface web reste injoignable pendant ce temps. C'est normal, ne coupez pas le script." ;;
+        en:restart_proxy_wait) echo "This can take up to a minute, the web interface stays unreachable meanwhile. This is expected, do not interrupt the script." ;;
+
         fr:hook_enabled) echo "Les modifications en place seront réappliquées automatiquement après chaque mise à jour." ;;
         en:hook_enabled) echo "The changes in place will be re-applied automatically after every update." ;;
 
@@ -275,8 +324,8 @@ tr_msg() {
         fr:hook_nothing) echo "Rien n'est en place à réappliquer. Installez d'abord les thèmes ou une option." ;;
         en:hook_nothing) echo "Nothing is in place to re-apply. Install the themes or an option first." ;;
 
-        fr:hook_still_active) echo "La réapplication automatique est toujours active : les modifications reviendront à la prochaine mise à jour. Utilisez l'option 8 pour la désactiver." ;;
-        en:hook_still_active) echo "Automatic re-apply is still active: the changes will come back on the next update. Use option 8 to disable it." ;;
+        fr:hook_still_active) echo "La réapplication automatique est toujours active : les modifications reviendront à la prochaine mise à jour. Utilisez l'option 9 pour la désactiver." ;;
+        en:hook_still_active) echo "Automatic re-apply is still active: the changes will come back on the next update. Use option 9 to disable it." ;;
 
         fr:hook_file) echo "Fichier de hook APT" ;;
         en:hook_file) echo "APT hook file" ;;
@@ -284,8 +333,8 @@ tr_msg() {
         fr:uninstall_title) echo "DÉSINSTALLATION" ;;
         en:uninstall_title) echo "UNINSTALL" ;;
 
-        fr:uninstall_body_1) echo "Les 15 fichiers de thème sont supprimés, les modifications du code de Proxmox sont retirées une à une (celles des autres scripts restent en place) et la réapplication automatique est désactivée." ;;
-        en:uninstall_body_1) echo "The 15 theme files are removed, the changes to the Proxmox code are taken out one by one (those of other scripts stay in place) and automatic re-apply is disabled." ;;
+        fr:uninstall_body_1) echo "Les 15 fichiers de thème sont supprimés, les modifications du code de Proxmox sont retirées une à une (celles des autres scripts restent en place), le thème par défaut du serveur redevient celui d'origine et la réapplication automatique est désactivée." ;;
+        en:uninstall_body_1) echo "The 15 theme files are removed, the changes to the Proxmox code are taken out one by one (those of other scripts stay in place), the default theme of the server goes back to stock and automatic re-apply is disabled." ;;
 
         fr:uninstall_body_2) echo "Un navigateur qui utilisait un thème Modern affichera l'interface claire d'origine, même si l'ordinateur est en mode sombre, jusqu'à ce qu'un autre thème soit choisi dans « Thème de couleur »." ;;
         en:uninstall_body_2) echo "A browser that used a Modern theme shows the stock light interface, even if the computer is in dark mode, until another theme is picked in \"Color Theme\"." ;;
@@ -435,6 +484,7 @@ require_root() {
 require_files() {
     [[ -f "$PX_FILE" ]] || { say_err "$(tr_msg file_not_found): $PX_FILE"; exit 1; }
     [[ -f "$PVE_FILE" ]] || { say_err "$(tr_msg file_not_found): $PVE_FILE"; exit 1; }
+    [[ -f "$PROXY_FILE" ]] || { say_err "$(tr_msg file_not_found): $PROXY_FILE"; exit 1; }
     [[ -d "$THEME_DIR" ]] || { say_err "$(tr_msg file_not_found): $THEME_DIR"; exit 1; }
     command -v python3 >/dev/null 2>&1 || { say_err "$(tr_msg missing_python)"; exit 1; }
     command -v sha256sum >/dev/null 2>&1 || { say_err "$(tr_msg missing_sha256sum)"; exit 1; }
@@ -569,6 +619,16 @@ PATCHES = {
     "storage": ("PVE_FILE", STORAGE_STOCK, STORAGE_PATCHED),
 }
 
+# get_index() falls back to this theme when the browser sends no
+# PVEThemeCookie, the login page included; a cookie still wins.
+DEFAULT_STOCK = (
+    "    my $lang;\n"
+    "    my $username;\n"
+    "    my $token = 'null';\n"
+    "    my $theme = \"auto\";\n"
+)
+THEMES = [f"modern-{accent}{suffix}" for accent in ACCENTS for suffix, _ in MODES]
+
 COLOR = re.compile(r"#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)|hsla?\([^)]*\)")
 HEADER = "/* Modern theme for Proxmox VE, installed by pve-modern-theme.sh (Proxmox-Tools) */\n"
 
@@ -587,6 +647,29 @@ def patch_state(name):
     if applied == 0 and pristine == 1:
         return "stock"
     return "unknown"
+
+
+def default_block(theme):
+    return DEFAULT_STOCK.replace('"auto"', f'"{theme}"')
+
+
+def default_state():
+    path = Path(os.environ["PROXY_FILE"])
+    if not path.is_file():
+        return "unknown"
+    text = path.read_text(encoding="utf-8")
+    found = [t for t in ["auto"] + THEMES for _ in range(text.count(default_block(t)))]
+    return found[0] if len(found) == 1 else "unknown"
+
+
+def set_default(theme):
+    current = default_state()
+    if current == "unknown" or theme not in ["auto"] + THEMES:
+        return False
+    path = Path(os.environ["PROXY_FILE"])
+    text = path.read_text(encoding="utf-8")
+    write_atomic(path, text.replace(default_block(current), default_block(theme), 1))
+    return True
 
 
 def write_atomic(path, text):
@@ -653,9 +736,21 @@ def main(argv):
         else:
             swap(name, patched, stock)
     elif command == "reapply":
+        # exit status 3 tells the APT hook that pveproxy has to be restarted
+        restart = False
         for name in args:
-            if patch_state(name) == "stock":
+            if name.startswith("default="):
+                if default_state() == "auto" and set_default(name.split("=", 1)[1]):
+                    restart = True
+            elif patch_state(name) == "stock":
                 swap(name, PATCHES[name][1], PATCHES[name][2])
+        if restart:
+            return 3
+    elif command == "default-state":
+        print(default_state())
+    elif command == "default-set":
+        if not set_default(args[0]):
+            return 1
     elif command == "themes-state":
         print(themes_state(args[0], args[1]))
     elif command == "themes-write":
@@ -674,7 +769,7 @@ PY
 )"
 
 engine() {
-    PX_FILE="$PX_FILE" PVE_FILE="$PVE_FILE" python3 -c "$ENGINE_PY" "$@"
+    PX_FILE="$PX_FILE" PVE_FILE="$PVE_FILE" PROXY_FILE="$PROXY_FILE" python3 -c "$ENGINE_PY" "$@"
 }
 
 patch_state() {
@@ -727,18 +822,20 @@ create_backup() {
     dir="${PATCH_PREFIX}-${ts}"
     mkdir -p "$dir"
 
-    cp -a "$PX_FILE" "$PVE_FILE" "$dir/"
+    cp -a "$PX_FILE" "$PVE_FILE" "$PROXY_FILE" "$dir/"
 
     {
         echo "created_at=$(date --iso-8601=seconds)"
         echo "hostname=$(hostname)"
         echo "px_file=$PX_FILE"
         echo "pve_file=$PVE_FILE"
+        echo "proxy_file=$PROXY_FILE"
         echo
         pveversion -v 2>/dev/null || true
     } >"$dir/INFO.txt"
 
-    sha256sum "$dir/$(basename "$PX_FILE")" "$dir/$(basename "$PVE_FILE")" >"$dir/SHA256SUMS.txt"
+    sha256sum "$dir/$(basename "$PX_FILE")" "$dir/$(basename "$PVE_FILE")" "$dir/$(basename "$PROXY_FILE")" \
+        >"$dir/SHA256SUMS.txt"
     echo "$dir"
 }
 
@@ -761,13 +858,21 @@ hook_is_enabled() {
     [[ -f "$APT_HOOK_FILE" ]]
 }
 
+default_state() {
+    engine default-state
+}
+
 applied_patches() {
-    local name
+    local name default
     for name in selector charts logs summary storage; do
         if [[ "$(patch_state "$name")" == "patched" ]]; then
             echo "$name"
         fi
     done
+    default="$(default_state)"
+    if [[ "$default" == modern-* ]]; then
+        echo "default=${default}"
+    fi
 }
 
 # The hook only carries the changes in place when it is written, so an
@@ -783,7 +888,7 @@ write_hook_file() {
     cat >"$APT_HOOK_FILE" <<EOF_HOOK
 // Managed by Proxmox-Tools pve-modern-theme.sh
 // Re-applies the Modern theme changes when a package update restores the stock files.
-DPkg::Post-Invoke {"if [ -f ${HELPER_DIR}/engine.py ]; then PX_FILE=${PX_FILE} PVE_FILE=${PVE_FILE} python3 ${HELPER_DIR}/engine.py reapply ${patches}|| true; fi"; };
+DPkg::Post-Invoke {"if [ -f ${HELPER_DIR}/engine.py ]; then PX_FILE=${PX_FILE} PVE_FILE=${PVE_FILE} PROXY_FILE=${PROXY_FILE} python3 ${HELPER_DIR}/engine.py reapply ${patches}; if [ \$? -eq 3 ]; then systemctl restart pveproxy.service >/dev/null 2>&1 || true; fi; fi"; };
 EOF_HOOK
     chmod 0644 "$APT_HOOK_FILE"
 }
@@ -835,12 +940,38 @@ disable_hook() {
 
 patch_label() {
     case "$1" in
+        default) tr_msg status_default ;;
         selector) tr_msg status_selector ;;
         charts) tr_msg status_charts ;;
         logs) tr_msg status_logs ;;
         summary) tr_msg status_summary ;;
         storage) tr_msg status_storage ;;
     esac
+}
+
+# "modern-orange-dark" -> "Modern Orange (Dark)", as in the Color Theme menu
+theme_label() {
+    local name="${1#modern-}" accent mode="Auto"
+    accent="${name%%-*}"
+    case "$name" in
+        *-light) mode="Light" ;;
+        *-dark) mode="Dark" ;;
+    esac
+    echo "Modern ${accent^} (${mode})"
+}
+
+default_label() {
+    case "$1" in
+        auto) echo "${PMX_GREY}$(tr_msg default_stock)${RESET}" ;;
+        modern-*) echo "${PMX_GREEN}$(theme_label "$1")${RESET}" ;;
+        *) echo "${PMX_RED}$(tr_msg state_unknown)${RESET}" ;;
+    esac
+}
+
+restart_pveproxy() {
+    say_info "$(tr_msg restart_proxy)"
+    printf "  %b%s%b\n" "${PMX_GREY}" "$(tr_msg restart_proxy_wait)" "${RESET}"
+    systemctl restart pveproxy.service
 }
 
 state_label() {
@@ -874,6 +1005,7 @@ show_status() {
         "$(tr_msg status_logs): ${BOLD}$(state_label "$(patch_state logs)")" \
         "$(tr_msg status_summary): ${BOLD}$(state_label "$(patch_state summary)")" \
         "$(tr_msg status_storage): ${BOLD}$(state_label "$(patch_state storage)")" \
+        "$(tr_msg status_default): ${BOLD}$(default_label "$(default_state)")" \
         "$(tr_msg status_auto_reapply): ${BOLD}${hook_state}"
 }
 
@@ -986,8 +1118,93 @@ toggle_storage() {
     toggle_option storage "$(tr_msg storage_title)" "$(tr_msg storage_body_1)" "$(tr_msg storage_body_2)"
 }
 
+choose_default_theme() {
+    local current choices=() lines=() i choice target backup_dir accent
+
+    current="$(default_state)"
+    if [[ "$current" == "unknown" ]]; then
+        say_err "$(tr_msg incompatible)"
+        say_info "$(tr_msg no_file_modified)"
+        return 1
+    fi
+    if [[ "$(themes_state)" != "installed" ]]; then
+        say_err "$(tr_msg default_needs_themes)"
+        return 1
+    fi
+
+    for accent in orange blue violet green pink; do
+        choices+=("modern-${accent}" "modern-${accent}-light" "modern-${accent}-dark")
+    done
+    choices+=("auto")
+
+    i=1
+    for target in "${choices[@]}"; do
+        if [[ "$target" == "auto" ]]; then
+            lines+=("${PMX_ORANGE_SOFT}${i})${RESET} $(tr_msg default_stock)")
+        else
+            lines+=("${PMX_ORANGE_SOFT}${i})${RESET} $(theme_label "$target")")
+        fi
+        ((i++))
+    done
+    lines+=("${PMX_GREY}q) $(tr_msg cancelled)${RESET}")
+
+    panel "$PMX_ORANGE" "$(tr_msg default_title)" \
+        "$(tr_msg default_body_1)" \
+        "$(tr_msg default_body_2)" \
+        "$(tr_msg default_current): ${BOLD}$(default_label "$current")" \
+        "" \
+        "${lines[@]}"
+    echo
+
+    read -r -p "$(tr_msg default_choose) [1-${#choices[@]}]: " choice
+
+    if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
+        say_info "$(tr_msg cancelled)"
+        return 0
+    fi
+    if ! [[ "$choice" =~ ^[0-9]+$ ]]; then
+        say_err "$(tr_msg invalid_choice)"
+        return 1
+    fi
+    if (( 10#$choice < 1 || 10#$choice > ${#choices[@]} )); then
+        say_err "$(tr_msg selection_out_of_range)"
+        return 1
+    fi
+
+    target="${choices[$((10#$choice - 1))]}"
+    if [[ "$target" == "$current" ]]; then
+        say_ok "$(tr_msg default_unchanged)"
+        return 0
+    fi
+
+    panel "$PMX_AMBER" "$(tr_msg warning_title)" \
+        "$(tr_msg default_warning_1)" \
+        "$(tr_msg default_warning_2)"
+
+    if ! confirm_yes; then
+        say_info "$(tr_msg cancelled)"
+        return 0
+    fi
+
+    backup_dir="$(create_backup)"
+    say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
+
+    engine default-set "$target"
+
+    if [[ "$(default_state)" != "$target" ]]; then
+        say_err "$(tr_msg option_failed)"
+        return 1
+    fi
+
+    refresh_hook_file
+    restart_pveproxy
+    echo
+    say_ok "$(tr_msg default_done): ${BOLD}$(default_label "$target")"
+    say_info "$(tr_msg default_cookie_hint)"
+}
+
 uninstall_all() {
-    local name state backup_dir unknown=()
+    local name state backup_dir unknown=() restart_proxy=0
 
     if [[ "$(themes_state)" == "absent" && -z "$(applied_patches)" ]] && ! hook_is_enabled; then
         say_info "$(tr_msg nothing_to_uninstall)"
@@ -1007,6 +1224,13 @@ uninstall_all() {
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
     remove_hook_files
+    state="$(default_state)"
+    if [[ "$state" == modern-* ]]; then
+        engine default-set auto
+        restart_proxy=1
+    elif [[ "$state" == "unknown" ]]; then
+        unknown+=("default")
+    fi
     engine themes-remove "$THEME_DIR" "$(theme_parts_dir)"
     for name in selector charts logs summary storage; do
         state="$(patch_state "$name")"
@@ -1022,6 +1246,9 @@ uninstall_all() {
         return 1
     fi
 
+    if [[ "$restart_proxy" -eq 1 ]]; then
+        restart_pveproxy
+    fi
     echo
     say_ok "$(tr_msg uninstall_done)"
     for name in "${unknown[@]}"; do
@@ -1058,7 +1285,7 @@ confirm_backup_versions() {
 
 restore_specific() {
     local dir="$1"
-    local file
+    local file saved_proxy
     [[ -d "$dir" ]] || { say_err "$(tr_msg file_not_found): $dir"; return 1; }
     for file in "$PX_FILE" "$PVE_FILE"; do
         [[ -f "$dir/$(basename "$file")" ]] || { say_err "$(tr_msg file_not_found): $dir/$(basename "$file")"; return 1; }
@@ -1068,7 +1295,14 @@ restore_specific() {
 
     cp -a "$dir/$(basename "$PX_FILE")" "$PX_FILE"
     cp -a "$dir/$(basename "$PVE_FILE")" "$PVE_FILE"
-    refresh_hook_file
+    saved_proxy="$dir/$(basename "$PROXY_FILE")"
+    if [[ -f "$saved_proxy" ]] && ! cmp -s "$saved_proxy" "$PROXY_FILE"; then
+        cp -a "$saved_proxy" "$PROXY_FILE"
+        refresh_hook_file
+        restart_pveproxy
+    else
+        refresh_hook_file
+    fi
 
     say_ok "$(tr_msg restore_done): ${PMX_CYAN}${dir}${RESET}"
     say_info "$(tr_msg restore_themes_kept)"
@@ -1154,13 +1388,14 @@ main_menu() {
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
         printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_storage)"
-        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
-        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
-        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_uninstall)"
-        printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_default)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
+        printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_uninstall)"
+        printf " %b11)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-10]: " choice
+        read -r -p "$(tr_msg choose_option) [1-11]: " choice
         echo
 
         case "$choice" in
@@ -1187,18 +1422,22 @@ main_menu() {
                 pause
                 ;;
             7)
-                menu_action enable_hook
+                menu_action choose_default_theme
                 pause
                 ;;
             8)
-                menu_action disable_hook
+                menu_action enable_hook
                 pause
                 ;;
             9)
-                menu_action uninstall_all
+                menu_action disable_hook
                 pause
                 ;;
             10)
+                menu_action uninstall_all
+                pause
+                ;;
+            11)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;
