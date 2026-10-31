@@ -313,6 +313,11 @@
   background-color: transparent;
 }
 
+// ExtJS moves the splitter itself under the mouse while it is dragged
+.x-splitter-active {
+  background-color: $primary-color;
+}
+
 .x-window-header-title-default > .x-title-text-default {
   color: $text-color;
   font-weight: 600;

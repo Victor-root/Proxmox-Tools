@@ -1651,6 +1651,7 @@ a,.x-form-display-field a{color:#c2410c}
 .x-window-default,.x-menu-default,.x-boundlist{border-radius:10px;box-shadow:0 20px 50px rgba(16,24,40,.18);overflow:hidden}
 .x-window-header-default{background-color:#fff}
 .x-splitter{background-color:rgba(0,0,0,0)}
+.x-splitter-active{background-color:#e2590b}
 .x-window-header-title-default>.x-title-text-default{color:#1e2330;font-weight:600}
 .x-keyboard-mode .x-grid-item-focused .x-grid-cell-inner::before,.x-keyboard-mode .x-column-header.x-column-header-focus .x-column-header-inner::after,.x-keyboard-mode .x-btn-default-small.x-arrow-focus .x-btn-arrow-el,.x-keyboard-mode .x-btn-default-toolbar-small.x-arrow-focus .x-btn-arrow-el,.x-keyboard-mode .x-nbr .x-segmented-button-item.x-btn-focus::after{border-color:rgba(0,0,0,0)}
 .x-keyboard-mode .x-grid-item-focused:not(.x-grid-item-selected) .x-grid-cell{box-shadow:inset 0 0 0 1px rgba(226,89,11,.45)}
@@ -1951,6 +1952,7 @@ div.monitor{border-color:#333947}
 .x-window-default,.x-menu-default,.x-boundlist{border-radius:10px;box-shadow:0 20px 50px rgba(0,0,0,.55);overflow:hidden}
 .x-window-header-default{background-color:#161a22}
 .x-splitter{background-color:rgba(0,0,0,0)}
+.x-splitter-active{background-color:#f0690f}
 .x-window-header-title-default>.x-title-text-default{color:#e0e4eb;font-weight:600}
 .x-keyboard-mode .x-grid-item-focused .x-grid-cell-inner::before,.x-keyboard-mode .x-column-header.x-column-header-focus .x-column-header-inner::after,.x-keyboard-mode .x-btn-default-small.x-arrow-focus .x-btn-arrow-el,.x-keyboard-mode .x-btn-default-toolbar-small.x-arrow-focus .x-btn-arrow-el,.x-keyboard-mode .x-nbr .x-segmented-button-item.x-btn-focus::after{border-color:rgba(0,0,0,0)}
 .x-keyboard-mode .x-grid-item-focused:not(.x-grid-item-selected) .x-grid-cell{box-shadow:inset 0 0 0 1px rgba(240,105,15,.45)}
