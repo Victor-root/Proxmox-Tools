@@ -145,6 +145,8 @@ tr_msg() {
         en:status_summary) echo "Status panel sized to its content" ;;
         fr:status_gap) echo "Marge sous le panneau de statut" ;;
         en:status_gap) echo "Space at the bottom of the status panel" ;;
+        fr:status_notes) echo "Notes à la hauteur du panneau de statut" ;;
+        en:status_notes) echo "Notes as high as the status panel" ;;
 
         fr:status_storage) echo "Option tailles en Tio" ;;
         en:status_storage) echo "TiB sizes option" ;;
@@ -614,6 +616,22 @@ GAP_PATCHED = GAP_STOCK.replace(
     1,
 )
 
+# The status and notes panels share a row as high as the higher of the two, so
+# long notes stretched it. A fixed height takes the notes out of that measure:
+# the status panel sets the height and the notes scroll.
+NOTES_STOCK = (
+    "        var rrdstore;\n"
+    "        if (!template) {\n"
+    "            // in non-template mode put the two panels always together\n"
+    "            items = [\n"
+)
+NOTES_PATCHED = NOTES_STOCK.replace(
+    "        if (!template) {\n",
+    "        if (!template) {\n"
+    "            items.find((item) => item.itemId === 'notesview').height = 300;\n\n",
+    1,
+)
+
 # PVE.storage.StatusView is the only place that asks for SI units (TB).
 STORAGE_STOCK = (
     "            itemId: 'usage',\n"
@@ -635,6 +653,7 @@ PATCHES = {
     "logs": ("PVE_FILE", LOGS_STOCK, LOGS_PATCHED),
     "summary": ("PVE_FILE", SUMMARY_STOCK, SUMMARY_PATCHED),
     "gap": ("PVE_FILE", GAP_STOCK, GAP_PATCHED),
+    "notes": ("PVE_FILE", NOTES_STOCK, NOTES_PATCHED),
     "storage": ("PVE_FILE", STORAGE_STOCK, STORAGE_PATCHED),
 }
 
@@ -883,7 +902,7 @@ default_state() {
 
 applied_patches() {
     local name default
-    for name in selector charts logs summary gap storage; do
+    for name in selector charts logs summary gap notes storage; do
         if [[ "$(patch_state "$name")" == "patched" ]]; then
             echo "$name"
         fi
@@ -965,6 +984,7 @@ patch_label() {
         logs) tr_msg status_logs ;;
         summary) tr_msg status_summary ;;
         gap) tr_msg status_gap ;;
+        notes) tr_msg status_notes ;;
         storage) tr_msg status_storage ;;
     esac
 }
@@ -1025,6 +1045,7 @@ show_status() {
         "$(tr_msg status_logs): ${BOLD}$(state_label "$(patch_state logs)")" \
         "$(tr_msg status_summary): ${BOLD}$(state_label "$(patch_state summary)")" \
         "$(tr_msg status_gap): ${BOLD}$(state_label "$(patch_state gap)")" \
+        "$(tr_msg status_notes): ${BOLD}$(state_label "$(patch_state notes)")" \
         "$(tr_msg status_storage): ${BOLD}$(state_label "$(patch_state storage)")" \
         "$(tr_msg status_default): ${BOLD}$(default_label "$(default_state)")" \
         "$(tr_msg status_auto_reapply): ${BOLD}${hook_state}"
@@ -1047,7 +1068,7 @@ show_warning_and_confirm() {
 install_themes() {
     local name state backup_dir all_patched=1
 
-    for name in selector charts logs summary gap; do
+    for name in selector charts logs summary gap notes; do
         state="$(patch_state "$name")"
         if [[ "$state" == "unknown" ]]; then
             say_err "$(tr_msg incompatible)"
@@ -1071,13 +1092,13 @@ install_themes() {
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
     engine themes-write "$THEME_DIR" "$(theme_parts_dir)"
-    for name in selector charts logs summary gap; do
+    for name in selector charts logs summary gap notes; do
         if [[ "$(patch_state "$name")" == "stock" ]]; then
             engine apply "$name"
         fi
     done
 
-    for name in selector charts logs summary gap; do
+    for name in selector charts logs summary gap notes; do
         if [[ "$(patch_state "$name")" != "patched" ]]; then
             say_err "$(tr_msg install_failed)"
             return 1
@@ -1253,7 +1274,7 @@ uninstall_all() {
         unknown+=("default")
     fi
     engine themes-remove "$THEME_DIR" "$(theme_parts_dir)"
-    for name in selector charts logs summary gap storage; do
+    for name in selector charts logs summary gap notes storage; do
         state="$(patch_state "$name")"
         if [[ "$state" == "patched" ]]; then
             engine revert "$name"
@@ -1521,6 +1542,7 @@ a,.x-form-display-field a{color:#c2410c}
 .x-panel-header-title-default>.x-title-text-default{color:#1e2330}
 .x-panel-body-default{border-color:#e4e7ec}
 .x-border-layout-ct>.x-panel-default,.x-border-layout-ct>.x-tab-panel,.x-border-layout-ct>.x-container-default,.x-border-layout-ct>.x-container>.x-panel-default{border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.06),0 4px 16px rgba(16,24,40,.06)}
+.x-panel.x-fit-item>.x-panel-bodyWrap>.x-border-layout-ct{padding:10px}
 .pmx-rrd-chart,.x-panel-default.x-box-item[id^=proxmoxRRDChart],.x-panel-default[id^=pveNodeStatus],.x-panel-default[id^=pveGuestStatus]{border-radius:10px;overflow:hidden;border:1px solid #e4e7ec}
 .x-toolbar-default{background-color:#fff;border-color:#e4e7ec}
 .x-panel-header-text-default{font-weight:600;color:#1e2330}
@@ -1820,6 +1842,7 @@ div.monitor{border-color:#333947}
 .x-panel-header-title-default>.x-title-text-default{color:#e0e4eb}
 .x-panel-body-default{border-color:#242833}
 .x-border-layout-ct>.x-panel-default,.x-border-layout-ct>.x-tab-panel,.x-border-layout-ct>.x-container-default,.x-border-layout-ct>.x-container>.x-panel-default{border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.18)}
+.x-panel.x-fit-item>.x-panel-bodyWrap>.x-border-layout-ct{padding:10px}
 .pmx-rrd-chart,.x-panel-default.x-box-item[id^=proxmoxRRDChart],.x-panel-default[id^=pveNodeStatus],.x-panel-default[id^=pveGuestStatus]{border-radius:10px;overflow:hidden;border:1px solid #242833}
 .x-toolbar-default{background-color:#161a22;border-color:#242833}
 .x-panel-header-text-default{font-weight:600;color:#e0e4eb}
@@ -2045,10 +2068,10 @@ body>.x-mask{background-color:rgba(16,24,40,.25);backdrop-filter:blur(3px)}
 .usage-wrapper{margin-left:-3px;width:5px;padding:0;border:none;border-radius:3px;overflow:hidden;background-color:#d0d5dd}
 .usage{background-color:#e2590b}
 .x-tree-icon-custom::before,.x-grid-icon-custom::before{width:18px;height:18px;vertical-align:-4px}
-.x-form-checkbox-default,.x-form-radio-default,.x-grid-checkcolumn::after{box-sizing:border-box;width:15px;height:15px;border:1.5px solid #98a2b3;background:#fff none;filter:none;transition:background-color .15s,border-color .15s}
-.x-form-checkbox-default,.x-grid-checkcolumn::after{border-radius:4px}
+.x-form-checkbox-default,.x-form-radio-default,.x-grid-checkcolumn::after,.x-column-header-checkbox .x-column-header-checkbox::after{box-sizing:border-box;width:15px;height:15px;border:1.5px solid #98a2b3;background:#fff none;filter:none;transition:background-color .15s,border-color .15s}
+.x-form-checkbox-default,.x-grid-checkcolumn::after,.x-column-header-checkbox .x-column-header-checkbox::after{border-radius:4px}
 .x-form-radio-default{border-radius:50%}
-.x-form-cb-checked .x-form-checkbox-default,.x-keyboard-mode .x-form-cb-checked .x-form-checkbox-focus.x-form-checkbox-default,.x-grid-checkcolumn-checked::after{border-color:#e2590b;background:#e2590b url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 232 232' fill='%23fff'%3E%3Cpath d='M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E") center/11px no-repeat}
+.x-form-cb-checked .x-form-checkbox-default,.x-keyboard-mode .x-form-cb-checked .x-form-checkbox-focus.x-form-checkbox-default,.x-grid-checkcolumn-checked::after,.x-grid-item-selected .x-selmodel-column .x-grid-checkcolumn::after,.x-grid-hd-checker-on .x-column-header-checkbox::after{border-color:#e2590b;background:#e2590b url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 232 232' fill='%23fff'%3E%3Cpath d='M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E") center/11px no-repeat}
 .x-form-cb-checked .x-form-radio-default,.x-keyboard-mode .x-form-cb-checked .x-form-radio-focus.x-form-radio-default{border-color:#e2590b;background:radial-gradient(circle, #e2590b 0 3.5px, #ffffff 4px)}
 .x-form-checkbox-focus.x-form-checkbox-default,.x-form-radio-focus.x-form-radio-default{border-color:#e2590b}
 .x-btn-wrap-default-toolbar-small.x-btn-arrow-right::after,.x-btn-wrap-default-toolbar-small.x-btn-split-right::after{background-image:none;background-color:#667085;filter:none;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 232 232' fill='%23000'%3E%3Cpath d='M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E") center/10px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 232 232' fill='%23000'%3E%3Cpath d='M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E") center/10px no-repeat}
@@ -2103,10 +2126,10 @@ body>.x-mask{background-color:rgba(5,7,12,.55);backdrop-filter:blur(3px)}
 .usage-wrapper{margin-left:-3px;width:5px;padding:0;border:none;border-radius:3px;overflow:hidden;background-color:#333947}
 .usage{background-color:#f0690f}
 .x-tree-icon-custom::before,.x-grid-icon-custom::before{width:18px;height:18px;vertical-align:-4px}
-.x-form-checkbox-default,.x-form-radio-default,.x-grid-checkcolumn::after{box-sizing:border-box;width:15px;height:15px;border:1.5px solid #768093;background:#181c25 none;filter:none;transition:background-color .15s,border-color .15s}
-.x-form-checkbox-default,.x-grid-checkcolumn::after{border-radius:4px}
+.x-form-checkbox-default,.x-form-radio-default,.x-grid-checkcolumn::after,.x-column-header-checkbox .x-column-header-checkbox::after{box-sizing:border-box;width:15px;height:15px;border:1.5px solid #768093;background:#181c25 none;filter:none;transition:background-color .15s,border-color .15s}
+.x-form-checkbox-default,.x-grid-checkcolumn::after,.x-column-header-checkbox .x-column-header-checkbox::after{border-radius:4px}
 .x-form-radio-default{border-radius:50%}
-.x-form-cb-checked .x-form-checkbox-default,.x-keyboard-mode .x-form-cb-checked .x-form-checkbox-focus.x-form-checkbox-default,.x-grid-checkcolumn-checked::after{border-color:#f0690f;background:#f0690f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 232 232' fill='%23fff'%3E%3Cpath d='M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E") center/11px no-repeat}
+.x-form-cb-checked .x-form-checkbox-default,.x-keyboard-mode .x-form-cb-checked .x-form-checkbox-focus.x-form-checkbox-default,.x-grid-checkcolumn-checked::after,.x-grid-item-selected .x-selmodel-column .x-grid-checkcolumn::after,.x-grid-hd-checker-on .x-column-header-checkbox::after{border-color:#f0690f;background:#f0690f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 232 232' fill='%23fff'%3E%3Cpath d='M232.49,80.49l-128,128a12,12,0,0,1-17,0l-56-56a12,12,0,1,1,17-17L96,183,215.51,63.51a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E") center/11px no-repeat}
 .x-form-cb-checked .x-form-radio-default,.x-keyboard-mode .x-form-cb-checked .x-form-radio-focus.x-form-radio-default{border-color:#f0690f;background:radial-gradient(circle, #f0690f 0 3.5px, #181c25 4px)}
 .x-form-checkbox-focus.x-form-checkbox-default,.x-form-radio-focus.x-form-radio-default{border-color:#f0690f}
 .x-btn-wrap-default-toolbar-small.x-btn-arrow-right::after,.x-btn-wrap-default-toolbar-small.x-btn-split-right::after{background-image:none;background-color:#8790a1;filter:none;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 232 232' fill='%23000'%3E%3Cpath d='M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E") center/10px no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='12 12 232 232' fill='%23000'%3E%3Cpath d='M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z'/%3E%3C/svg%3E") center/10px no-repeat}

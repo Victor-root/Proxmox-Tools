@@ -131,7 +131,8 @@ body > .x-mask {
 // Checkboxes and radios drawn in CSS instead of the crisp sprites
 .x-form-checkbox-default,
 .x-form-radio-default,
-.x-grid-checkcolumn::after {
+.x-grid-checkcolumn::after,
+.x-column-header-checkbox .x-column-header-checkbox::after {
   box-sizing: border-box;
   width: 15px;
   height: 15px;
@@ -142,7 +143,8 @@ body > .x-mask {
 }
 
 .x-form-checkbox-default,
-.x-grid-checkcolumn::after {
+.x-grid-checkcolumn::after,
+.x-column-header-checkbox .x-column-header-checkbox::after {
   border-radius: 4px;
 }
 
@@ -153,7 +155,9 @@ body > .x-mask {
 // the keyboard-mode focus rules of crisp move the sprite and would push the mark out of the box
 .x-form-cb-checked .x-form-checkbox-default,
 .x-keyboard-mode .x-form-cb-checked .x-form-checkbox-focus.x-form-checkbox-default,
-.x-grid-checkcolumn-checked::after {
+.x-grid-checkcolumn-checked::after,
+.x-grid-item-selected .x-selmodel-column .x-grid-checkcolumn::after,
+.x-grid-hd-checker-on .x-column-header-checkbox::after {
   border-color: $primary-color;
   background: $primary-color $check-mark-white center / 11px no-repeat;
 }

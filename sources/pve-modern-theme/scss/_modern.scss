@@ -44,6 +44,11 @@
   box-shadow: $card-shadow;
 }
 
+// Pages split in two cards (SDN, firewall security groups and IPSets, Ceph configuration) fill their tab edge to edge
+.x-panel.x-fit-item > .x-panel-bodyWrap > .x-border-layout-ct {
+  padding: 10px;
+}
+
 .pmx-rrd-chart,
 .x-panel-default.x-box-item[id^="proxmoxRRDChart"],
 .x-panel-default[id^="pveNodeStatus"],
