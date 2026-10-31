@@ -6,6 +6,7 @@ THEME_DIR="/usr/share/javascript/proxmox-widget-toolkit/themes"
 PX_FILE="/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"
 PVE_FILE="/usr/share/pve-manager/js/pvemanagerlib.js"
 PROXY_FILE="/usr/share/perl5/PVE/Service/pveproxy.pm"
+XTERM_FILE="/usr/share/pve-xtermjs/style.css"
 HELPER_DIR="/usr/local/lib/pve-modern-theme"
 APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-modern-theme"
 
@@ -53,6 +54,9 @@ tr_msg() {
 
         fr:menu_storage) echo "Option : tailles des stockages en Tio comme Windows (activer ou désactiver)" ;;
         en:menu_storage) echo "Option: storage sizes in TiB like Windows (enable or disable)" ;;
+
+        fr:menu_console) echo "Option : bouton Démarrer dans la console d'un invité arrêté (activer ou désactiver)" ;;
+        en:menu_console) echo "Option: Start button in the console of a stopped guest (enable or disable)" ;;
 
         fr:menu_default) echo "Thème par défaut du serveur (aussi sur la page de connexion)" ;;
         en:menu_default) echo "Default theme of the server (login page included)" ;;
@@ -150,6 +154,8 @@ tr_msg() {
 
         fr:status_storage) echo "Option tailles en Tio" ;;
         en:status_storage) echo "TiB sizes option" ;;
+        fr:status_console) echo "Option bouton Démarrer de la console" ;;
+        en:status_console) echo "Console Start button option" ;;
 
         fr:status_default) echo "Thème par défaut du serveur" ;;
         en:status_default) echo "Default theme of the server" ;;
@@ -253,6 +259,13 @@ tr_msg() {
         fr:storage_body_2) echo "Cette option le fait compter par 1024 comme partout ailleurs. Le pourcentage ne change pas. Elle modifie une ligne de pvemanagerlib.js et fonctionne avec ou sans les thèmes." ;;
         en:storage_body_2) echo "This option makes it count by 1024 like everywhere else. The percentage does not change. It changes one line of pvemanagerlib.js and works with or without the themes." ;;
 
+        fr:console_title) echo "BOUTON DÉMARRER DE LA CONSOLE" ;;
+        en:console_title) echo "CONSOLE START BUTTON" ;;
+        fr:console_body_1) echo "Depuis Proxmox VE 9, la console xterm.js d'un conteneur ou d'une VM à l'arrêt s'ouvre sur un écran noir : le bouton « Start Now » est bien là, mais le terminal est dessiné par-dessus." ;;
+        en:console_body_1) echo "Since Proxmox VE 9, the xterm.js console of a stopped container or VM opens on a black screen: the \"Start Now\" button is there, but the terminal is drawn over it." ;;
+        fr:console_body_2) echo "Cette option remet le bouton au premier plan, sans gêner le terminal une fois l'invité démarré. Elle modifie un bloc de ${XTERM_FILE} (paquet pve-xtermjs) et fonctionne avec ou sans les thèmes. Rouvrez la console pour voir le résultat." ;;
+        en:console_body_2) echo "This option brings the button back in front, without getting in the way of the terminal once the guest runs. It changes one block of ${XTERM_FILE} (pve-xtermjs package) and works with or without the themes. Reopen the console to see the result." ;;
+
         fr:option_enable_q) echo "L'option est désactivée. Elle va être activée." ;;
         en:option_enable_q) echo "The option is disabled. It is about to be enabled." ;;
 
@@ -328,8 +341,8 @@ tr_msg() {
         fr:hook_nothing) echo "Rien n'est en place à réappliquer. Installez d'abord les thèmes ou une option." ;;
         en:hook_nothing) echo "Nothing is in place to re-apply. Install the themes or an option first." ;;
 
-        fr:hook_still_active) echo "La réapplication automatique est toujours active : les modifications reviendront à la prochaine mise à jour. Utilisez l'option 9 pour la désactiver." ;;
-        en:hook_still_active) echo "Automatic re-apply is still active: the changes will come back on the next update. Use option 9 to disable it." ;;
+        fr:hook_still_active) echo "La réapplication automatique est toujours active : les modifications reviendront à la prochaine mise à jour. Utilisez l'option 10 pour la désactiver." ;;
+        en:hook_still_active) echo "Automatic re-apply is still active: the changes will come back on the next update. Use option 10 to disable it." ;;
 
         fr:hook_file) echo "Fichier de hook APT" ;;
         en:hook_file) echo "APT hook file" ;;
@@ -489,6 +502,7 @@ require_files() {
     [[ -f "$PX_FILE" ]] || { say_err "$(tr_msg file_not_found): $PX_FILE"; exit 1; }
     [[ -f "$PVE_FILE" ]] || { say_err "$(tr_msg file_not_found): $PVE_FILE"; exit 1; }
     [[ -f "$PROXY_FILE" ]] || { say_err "$(tr_msg file_not_found): $PROXY_FILE"; exit 1; }
+    [[ -f "$XTERM_FILE" ]] || { say_err "$(tr_msg file_not_found): $XTERM_FILE"; exit 1; }
     [[ -d "$THEME_DIR" ]] || { say_err "$(tr_msg file_not_found): $THEME_DIR"; exit 1; }
     command -v python3 >/dev/null 2>&1 || { say_err "$(tr_msg missing_python)"; exit 1; }
     command -v sha256sum >/dev/null 2>&1 || { say_err "$(tr_msg missing_sha256sum)"; exit 1; }
@@ -632,6 +646,36 @@ NOTES_PATCHED = NOTES_STOCK.replace(
     1,
 )
 
+# pve-xtermjs puts the "Start Now" dialog of a stopped guest in a fixed overlay
+# placed before the terminal, without a z-index; the positioned layers of
+# xterm.js 5.5 and later are painted over it and catch its clicks. Raising the
+# overlay and letting clicks through it everywhere but on the dialog keeps the
+# running terminal usable.
+CONSOLE_STOCK = (
+    "div.center {\n"
+    "  display: flex;\n"
+    "  align-items: center;\n"
+    "  justify-content: center;\n"
+    "  position: fixed;\n"
+    "  top: 0;\n"
+    "  left: 0;\n"
+    "  width: 100%;\n"
+    "  height: 100%;\n"
+    "}\n"
+)
+CONSOLE_PATCHED = CONSOLE_STOCK.replace(
+    "  height: 100%;\n}\n",
+    "  height: 100%;\n"
+    "  z-index: 10;\n"
+    "  pointer-events: none;\n"
+    "}\n"
+    "\n"
+    "div.center > #connect_dlg {\n"
+    "  pointer-events: auto;\n"
+    "}\n",
+    1,
+)
+
 # PVE.storage.StatusView is the only place that asks for SI units (TB).
 STORAGE_STOCK = (
     "            itemId: 'usage',\n"
@@ -655,6 +699,7 @@ PATCHES = {
     "gap": ("PVE_FILE", GAP_STOCK, GAP_PATCHED),
     "notes": ("PVE_FILE", NOTES_STOCK, NOTES_PATCHED),
     "storage": ("PVE_FILE", STORAGE_STOCK, STORAGE_PATCHED),
+    "console": ("XTERM_FILE", CONSOLE_STOCK, CONSOLE_PATCHED),
 }
 
 # get_index() falls back to this theme when the browser sends no
@@ -807,7 +852,7 @@ PY
 )"
 
 engine() {
-    PX_FILE="$PX_FILE" PVE_FILE="$PVE_FILE" PROXY_FILE="$PROXY_FILE" python3 -c "$ENGINE_PY" "$@"
+    PX_FILE="$PX_FILE" PVE_FILE="$PVE_FILE" PROXY_FILE="$PROXY_FILE" XTERM_FILE="$XTERM_FILE" python3 -c "$ENGINE_PY" "$@"
 }
 
 patch_state() {
@@ -860,7 +905,7 @@ create_backup() {
     dir="${PATCH_PREFIX}-${ts}"
     mkdir -p "$dir"
 
-    cp -a "$PX_FILE" "$PVE_FILE" "$PROXY_FILE" "$dir/"
+    cp -a "$PX_FILE" "$PVE_FILE" "$PROXY_FILE" "$XTERM_FILE" "$dir/"
 
     {
         echo "created_at=$(date --iso-8601=seconds)"
@@ -868,12 +913,13 @@ create_backup() {
         echo "px_file=$PX_FILE"
         echo "pve_file=$PVE_FILE"
         echo "proxy_file=$PROXY_FILE"
+        echo "xterm_file=$XTERM_FILE"
         echo
         pveversion -v 2>/dev/null || true
     } >"$dir/INFO.txt"
 
     sha256sum "$dir/$(basename "$PX_FILE")" "$dir/$(basename "$PVE_FILE")" "$dir/$(basename "$PROXY_FILE")" \
-        >"$dir/SHA256SUMS.txt"
+        "$dir/$(basename "$XTERM_FILE")" >"$dir/SHA256SUMS.txt"
     echo "$dir"
 }
 
@@ -902,7 +948,7 @@ default_state() {
 
 applied_patches() {
     local name default
-    for name in selector charts logs summary gap notes storage; do
+    for name in selector charts logs summary gap notes storage console; do
         if [[ "$(patch_state "$name")" == "patched" ]]; then
             echo "$name"
         fi
@@ -926,7 +972,7 @@ write_hook_file() {
     cat >"$APT_HOOK_FILE" <<EOF_HOOK
 // Managed by Proxmox-Tools pve-modern-theme.sh
 // Re-applies the Modern theme changes when a package update restores the stock files.
-DPkg::Post-Invoke {"if [ -f ${HELPER_DIR}/engine.py ]; then PX_FILE=${PX_FILE} PVE_FILE=${PVE_FILE} PROXY_FILE=${PROXY_FILE} python3 ${HELPER_DIR}/engine.py reapply ${patches}; if [ \$? -eq 3 ]; then systemctl restart pveproxy.service >/dev/null 2>&1 || true; fi; fi"; };
+DPkg::Post-Invoke {"if [ -f ${HELPER_DIR}/engine.py ]; then PX_FILE=${PX_FILE} PVE_FILE=${PVE_FILE} PROXY_FILE=${PROXY_FILE} XTERM_FILE=${XTERM_FILE} python3 ${HELPER_DIR}/engine.py reapply ${patches}; if [ \$? -eq 3 ]; then systemctl restart pveproxy.service >/dev/null 2>&1 || true; fi; fi"; };
 EOF_HOOK
     chmod 0644 "$APT_HOOK_FILE"
 }
@@ -986,6 +1032,7 @@ patch_label() {
         gap) tr_msg status_gap ;;
         notes) tr_msg status_notes ;;
         storage) tr_msg status_storage ;;
+        console) tr_msg status_console ;;
     esac
 }
 
@@ -1047,6 +1094,7 @@ show_status() {
         "$(tr_msg status_gap): ${BOLD}$(state_label "$(patch_state gap)")" \
         "$(tr_msg status_notes): ${BOLD}$(state_label "$(patch_state notes)")" \
         "$(tr_msg status_storage): ${BOLD}$(state_label "$(patch_state storage)")" \
+        "$(tr_msg status_console): ${BOLD}$(state_label "$(patch_state console)")" \
         "$(tr_msg status_default): ${BOLD}$(default_label "$(default_state)")" \
         "$(tr_msg status_auto_reapply): ${BOLD}${hook_state}"
 }
@@ -1158,6 +1206,10 @@ toggle_option() {
 
 toggle_storage() {
     toggle_option storage "$(tr_msg storage_title)" "$(tr_msg storage_body_1)" "$(tr_msg storage_body_2)"
+}
+
+toggle_console() {
+    toggle_option console "$(tr_msg console_title)" "$(tr_msg console_body_1)" "$(tr_msg console_body_2)"
 }
 
 choose_default_theme() {
@@ -1274,7 +1326,7 @@ uninstall_all() {
         unknown+=("default")
     fi
     engine themes-remove "$THEME_DIR" "$(theme_parts_dir)"
-    for name in selector charts logs summary gap notes storage; do
+    for name in selector charts logs summary gap notes storage console; do
         state="$(patch_state "$name")"
         if [[ "$state" == "patched" ]]; then
             engine revert "$name"
@@ -1304,7 +1356,7 @@ confirm_backup_versions() {
     local pkg backup_version installed_version
     local mismatch=()
 
-    for pkg in pve-manager proxmox-widget-toolkit; do
+    for pkg in pve-manager proxmox-widget-toolkit pve-xtermjs; do
         backup_version="$(pkg_version_from_backup "$dir" "$pkg")"
         installed_version="$(installed_pkg_version "$pkg")"
         [[ -n "$backup_version" && -n "$installed_version" ]] || continue
@@ -1327,7 +1379,7 @@ confirm_backup_versions() {
 
 restore_specific() {
     local dir="$1"
-    local file saved_proxy
+    local file saved_proxy saved_xterm
     [[ -d "$dir" ]] || { say_err "$(tr_msg file_not_found): $dir"; return 1; }
     for file in "$PX_FILE" "$PVE_FILE"; do
         [[ -f "$dir/$(basename "$file")" ]] || { say_err "$(tr_msg file_not_found): $dir/$(basename "$file")"; return 1; }
@@ -1337,6 +1389,11 @@ restore_specific() {
 
     cp -a "$dir/$(basename "$PX_FILE")" "$PX_FILE"
     cp -a "$dir/$(basename "$PVE_FILE")" "$PVE_FILE"
+    # backups taken before the console option existed do not hold it
+    saved_xterm="$dir/$(basename "$XTERM_FILE")"
+    if [[ -f "$saved_xterm" ]]; then
+        cp -a "$saved_xterm" "$XTERM_FILE"
+    fi
     saved_proxy="$dir/$(basename "$PROXY_FILE")"
     if [[ -f "$saved_proxy" ]] && ! cmp -s "$saved_proxy" "$PROXY_FILE"; then
         cp -a "$saved_proxy" "$PROXY_FILE"
@@ -1430,14 +1487,15 @@ main_menu() {
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
         printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_storage)"
-        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_default)"
-        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
-        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
-        printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_uninstall)"
-        printf " %b11)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_console)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_default)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
+        printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
+        printf " %b11)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_uninstall)"
+        printf " %b12)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-11]: " choice
+        read -r -p "$(tr_msg choose_option) [1-12]: " choice
         echo
 
         case "$choice" in
@@ -1464,22 +1522,26 @@ main_menu() {
                 pause
                 ;;
             7)
-                menu_action choose_default_theme
+                menu_action toggle_console
                 pause
                 ;;
             8)
-                menu_action enable_hook
+                menu_action choose_default_theme
                 pause
                 ;;
             9)
-                menu_action disable_hook
+                menu_action enable_hook
                 pause
                 ;;
             10)
-                menu_action uninstall_all
+                menu_action disable_hook
                 pause
                 ;;
             11)
+                menu_action uninstall_all
+                pause
+                ;;
+            12)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;
