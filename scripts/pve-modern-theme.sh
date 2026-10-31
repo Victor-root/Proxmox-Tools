@@ -1627,7 +1627,7 @@ a,.x-form-display-field a{color:#c2410c}
 .x-tree-panel .x-grid-item-selected .x-grid-cell:first-child{position:relative}
 .x-tree-panel .x-grid-item-selected .x-tree-node-text{color:#9a3412;font-weight:600}
 .x-treelist-pve-nav,.x-treelist-pve-nav .x-treelist-item{background-color:#fff}
-.x-treelist-pve-nav .x-treelist-row{margin-left:8px;margin-right:8px;border-radius:7px}
+.x-treelist-pve-nav .x-treelist-row{margin-left:6px;margin-right:6px;padding-left:4px;padding-right:0;border-radius:7px}
 .x-treelist-pve-nav .x-treelist-item-selected>.x-treelist-row{position:relative;background-color:rgba(226,89,11,.1)}
 .x-treelist-pve-nav .x-treelist-item-selected>.x-treelist-row .x-treelist-item-text,.x-treelist-pve-nav .x-treelist-item-selected>.x-treelist-row .x-treelist-item-icon{color:#9a3412;font-weight:600}
 .x-grid-header-ct,.x-column-header{background-color:#fff;border-color:#e4e7ec}
@@ -1928,7 +1928,7 @@ div.monitor{border-color:#333947}
 .x-tree-panel .x-grid-item-selected .x-grid-cell:first-child{position:relative}
 .x-tree-panel .x-grid-item-selected .x-tree-node-text{color:#ffc599;font-weight:600}
 .x-treelist-pve-nav,.x-treelist-pve-nav .x-treelist-item{background-color:#161a22}
-.x-treelist-pve-nav .x-treelist-row{margin-left:8px;margin-right:8px;border-radius:7px}
+.x-treelist-pve-nav .x-treelist-row{margin-left:6px;margin-right:6px;padding-left:4px;padding-right:0;border-radius:7px}
 .x-treelist-pve-nav .x-treelist-item-selected>.x-treelist-row{position:relative;background-color:rgba(240,105,15,.14)}
 .x-treelist-pve-nav .x-treelist-item-selected>.x-treelist-row .x-treelist-item-text,.x-treelist-pve-nav .x-treelist-item-selected>.x-treelist-row .x-treelist-item-icon{color:#ffc599;font-weight:600}
 .x-grid-header-ct,.x-column-header{background-color:#161a22;border-color:#242833}
