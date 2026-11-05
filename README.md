@@ -332,6 +332,7 @@ Makes the browser tab of an **xterm.js** console show which guest it belongs to,
 * 🎯 adds **two lines** (a comment and the title) to `/usr/share/pve-xtermjs/main.js`, right after a line the script matches exactly
 * 🔎 refuses to touch a file that does not look exactly as expected
 * 🔁 safe to run twice: an already patched file is detected and left alone
+* 🔄 optional **automatic re-apply** after a `pve-xtermjs` update, through an APT hook
 * 💾 automatic **backup** before patching
 * ♻️ built-in **restore** options
 * 📋 interactive menu
@@ -342,7 +343,7 @@ Makes the browser tab of an **xterm.js** console show which guest it belongs to,
 * **Open a new console tab** after patching. A tab opened before keeps its title, and a guest renamed while its tab is open keeps the old name there.
 * **No restart needed**: `pveproxy` reads the file on every request.
 * **The browser cache can hide the change.** Proxmox sends no expiry for this file, so a browser may keep the old copy for days, and a plain or even hard refresh is not always enough. Check in a private window, then clear the site data in each browser you use.
-* Updates of the `pve-xtermjs` package overwrite the file, run the script again afterwards.
+* Updates of the `pve-xtermjs` package overwrite the file: run the script again afterwards, or enable the automatic re-apply from the menu. It puts the patch back after each update, and does nothing on a file that no longer looks as expected.
 
 #### Version compatibility
 

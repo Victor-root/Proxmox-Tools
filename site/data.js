@@ -603,25 +603,27 @@ const SCRIPTS = [
                 'Containers and VMs in xterm.js, and the node shell (Node · PVE)',
                 'Two lines added, matched exactly: a different file is reported, never patched blindly',
                 'Automatic backup before patching, restore from the menu',
-                'Only xterm.js consoles: noVNC and SPICE are not changed',
+                'Optional automatic re-apply after a pve-xtermjs update',
             ],
             fr: [
                 'L’onglet affiche ID (Nom) · Noeud · PVE, par exemple 101 (web01) · pve02 · PVE',
                 'Conteneurs et VM en xterm.js, et le shell du noeud (Noeud · PVE)',
                 'Deux lignes ajoutées, cherchées à l’identique : un fichier différent est signalé, jamais patché à l’aveugle',
                 'Backup automatique avant le patch, restauration depuis le menu',
-                'Seules les consoles xterm.js : noVNC et SPICE ne sont pas modifiées',
+                'Réapplication automatique optionnelle après une mise à jour de pve-xtermjs',
             ],
         },
         touches: {
             files: [
                 { path: '/usr/share/pve-xtermjs/main.js', role: { en: 'two lines added: a comment and the title of the console tab', fr: 'deux lignes ajoutées : un commentaire et le titre de l’onglet de console' } },
+                { path: '/etc/apt/apt.conf.d/99-pve-xterm-tab-title', role: { en: 'optional, re-applies the patch after an update', fr: 'optionnel, réapplique le patch après une mise à jour' } },
+                { path: '/usr/local/lib/pve-xterm-tab-title/patch.py', role: { en: 'optional, the program the APT hook runs', fr: 'optionnel, le programme lancé par le hook APT' } },
             ],
             backup: '/root/pve-xterm-tab-title-patch-<date>/',
         },
         note: {
-            en: 'Open a new console tab after patching: a tab opened before keeps its title. Updates of the pve-xtermjs package overwrite the patch, run the script again afterwards.',
-            fr: 'Ouvrez un nouvel onglet de console après le patch : un onglet ouvert avant garde son titre. Les mises à jour du paquet pve-xtermjs écrasent le patch, relancez le script ensuite.',
+            en: 'Open a new console tab after patching: a tab opened before keeps its title. Only xterm.js consoles are changed, not noVNC or SPICE. Updates of the pve-xtermjs package overwrite the patch: run the script again afterwards, unless the automatic re-apply is enabled.',
+            fr: 'Ouvrez un nouvel onglet de console après le patch : un onglet ouvert avant garde son titre. Seules les consoles xterm.js sont modifiées, pas noVNC ni SPICE. Les mises à jour du paquet pve-xtermjs écrasent le patch : relancez le script ensuite, sauf si la réapplication automatique est activée.',
         },
         terminal: {
             banner: 'proxmox',
@@ -633,6 +635,7 @@ const SCRIPTS = [
                 lines: [
                     'Detected version: pve-xtermjs 6.0.0-2',
                     'xterm.js tab title: ID (Name) · Node · PVE (patch active)',
+                    'Automatic re-apply: enabled',
                 ],
             },
             menu: [
@@ -641,9 +644,11 @@ const SCRIPTS = [
                 'Restore from selected backup',
                 'Show patch status',
                 'List backups',
+                'Re-apply automatically after an update',
+                'Stop re-applying automatically',
                 'Quit',
             ],
-            prompt: 'Choose an option [1-6]:',
+            prompt: 'Choose an option [1-8]:',
         },
     },
     {

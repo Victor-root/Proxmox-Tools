@@ -3,17 +3,8 @@ set -euo pipefail
 
 PATCH_PREFIX="/root/pve-xterm-tab-title-patch"
 MAIN_FILE="/usr/share/pve-xtermjs/main.js"
-
-# The xterm.js console page reads the guest name into vmname, but its title
-# only shows the node name from the template. The added lines set the title
-# after the cmdOpts line. The name is decoded because getQueryParameter returns
-# it percent-encoded. Patch and state check match these exact lines, so a file
-# that looks different is reported instead of patched blindly.
-ANCHOR="var cmdOpts = getQueryParameter('cmd-opts');
-"
-ADDED="// The name arrives percent-encoded in the URL, getQueryParameter does not decode it.
-document.title = [vmid && vmid + (vmname ? ' (' + decodeURIComponent(vmname) + ')' : ''), nodename, 'PVE'].filter(Boolean).join(' \u00b7 ');
-"
+HELPER_DIR="/usr/local/lib/pve-xterm-tab-title"
+APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-xterm-tab-title"
 
 # ------------------------------------------------------------
 # Language detection (EN default, FR if system locale starts with fr)
@@ -49,6 +40,12 @@ tr_msg() {
 
         fr:menu_backups) echo "Lister les backups" ;;
         en:menu_backups) echo "List backups" ;;
+
+        fr:menu_hook_enable) echo "Réappliquer automatiquement après une mise à jour" ;;
+        en:menu_hook_enable) echo "Re-apply automatically after an update" ;;
+
+        fr:menu_hook_disable) echo "Ne plus réappliquer automatiquement" ;;
+        en:menu_hook_disable) echo "Stop re-applying automatically" ;;
 
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
@@ -125,6 +122,36 @@ tr_msg() {
         fr:state_unknown) echo "structure du fichier inattendue" ;;
         en:state_unknown) echo "unexpected file structure" ;;
 
+        fr:status_auto_reapply) echo "Réapplication automatique" ;;
+        en:status_auto_reapply) echo "Automatic re-apply" ;;
+
+        fr:status_enabled) echo "activée" ;;
+        en:status_enabled) echo "enabled" ;;
+
+        fr:status_disabled) echo "désactivée" ;;
+        en:status_disabled) echo "disabled" ;;
+
+        fr:hook_enabled) echo "Le patch sera réappliqué automatiquement après chaque mise à jour de pve-xtermjs." ;;
+        en:hook_enabled) echo "The patch will be re-applied automatically after every pve-xtermjs update." ;;
+
+        fr:hook_disabled) echo "Réapplication automatique désactivée." ;;
+        en:hook_disabled) echo "Automatic re-apply disabled." ;;
+
+        fr:hook_already_enabled) echo "La réapplication automatique est déjà active." ;;
+        en:hook_already_enabled) echo "Automatic re-apply is already active." ;;
+
+        fr:hook_already_disabled) echo "La réapplication automatique n'est pas active." ;;
+        en:hook_already_disabled) echo "Automatic re-apply is not active." ;;
+
+        fr:hook_nothing) echo "Le patch n'est pas en place, il n'y a rien à réappliquer. Appliquez d'abord le patch." ;;
+        en:hook_nothing) echo "The patch is not in place, there is nothing to re-apply. Apply the patch first." ;;
+
+        fr:hook_removed) echo "Le patch n'est plus en place : la réapplication automatique est désactivée." ;;
+        en:hook_removed) echo "The patch is no longer in place: automatic re-apply is disabled." ;;
+
+        fr:hook_file) echo "Fichier de hook APT" ;;
+        en:hook_file) echo "APT hook file" ;;
+
         fr:available_backups) echo "Backups disponibles" ;;
         en:available_backups) echo "Available backups" ;;
 
@@ -158,8 +185,8 @@ tr_msg() {
         fr:warning_body_1) echo "Ce script modifie un fichier JavaScript du paquet pve-xtermjs, qui affiche les consoles xterm.js (conteneurs, shell de l'hôte, VM)." ;;
         en:warning_body_1) echo "This script modifies a JavaScript file of the pve-xtermjs package, which draws the xterm.js consoles (containers, host shell, VMs)." ;;
 
-        fr:warning_body_2) echo "Ceci est hors support et sera écrasé par les mises à jour du paquet pve-xtermjs, il faudra alors relancer le script." ;;
-        en:warning_body_2) echo "This is unsupported and will be overwritten by pve-xtermjs package updates, in which case you need to run the script again." ;;
+        fr:warning_body_2) echo "Ceci est hors support et sera écrasé par les mises à jour du paquet pve-xtermjs : il faudra alors relancer le script, sauf si la réapplication automatique est activée." ;;
+        en:warning_body_2) echo "This is unsupported and will be overwritten by pve-xtermjs package updates: you then need to run the script again, unless automatic re-apply is enabled." ;;
 
         fr:warning_body_3) echo "Les consoles noVNC et SPICE ne sont pas touchées par ce script." ;;
         en:warning_body_3) echo "The noVNC and SPICE consoles are not affected by this script." ;;
@@ -328,49 +355,73 @@ show_warning_and_confirm() {
 }
 
 # ------------------------------------------------------------
-# Patch state
+# Patch engine, also run by the APT hook after a package update
 # ------------------------------------------------------------
 
-# Prints stock, patched or unknown. The anchor must occur exactly once, and the
-# added lines must be exactly one copy right after it. A file that already sets
-# the title but not with these lines (an earlier version of this script) is
-# unknown: a second title line would silently override the first.
-get_state() {
-    MAIN_FILE="$MAIN_FILE" ANCHOR="$ANCHOR" ADDED="$ADDED" python3 <<'PY'
-from pathlib import Path
-import os
-
-text = Path(os.environ["MAIN_FILE"]).read_text(encoding="utf-8")
-anchor = os.environ["ANCHOR"]
-added = os.environ["ADDED"]
-
-patched = text.count(anchor + added)
-if text.count(anchor) != 1 or patched > 1:
-    print("unknown")
-elif patched == 1:
-    print("patched")
-elif "document.title" in text:
-    print("unknown")
-else:
-    print("stock")
-PY
-}
-
-apply_python_patch() {
-    MAIN_FILE="$MAIN_FILE" ANCHOR="$ANCHOR" ADDED="$ADDED" python3 <<'PY'
+# The xterm.js console page reads the guest name into vmname, but its title
+# only shows the node name from the template. The added lines set the title
+# after the cmdOpts line. The name is decoded because getQueryParameter returns
+# it percent-encoded. Patch and state check match these exact lines, so a file
+# that looks different is reported instead of patched blindly.
+PATCH_PY="$(cat <<'PY'
 from pathlib import Path
 import os
 import sys
 
-main_path = Path(os.environ["MAIN_FILE"])
-text = main_path.read_text(encoding="utf-8")
-anchor = os.environ["ANCHOR"]
+ANCHOR = "var cmdOpts = getQueryParameter('cmd-opts');\n"
+ADDED = (
+    "// The name arrives percent-encoded in the URL, getQueryParameter does not decode it.\n"
+    "document.title = [vmid && vmid + (vmname ? ' (' + decodeURIComponent(vmname) + ')' : ''), nodename, 'PVE']"
+    ".filter(Boolean).join(' \\u00b7 ');\n"
+)
 
-if text.count(anchor) != 1:
-    sys.exit(1)
 
-main_path.write_text(text.replace(anchor, anchor + os.environ["ADDED"], 1), encoding="utf-8")
+# The anchor must occur exactly once, and the added lines must be exactly one
+# copy right after it. A file that already sets the title but not with these
+# lines (an earlier version of this script) is unknown: a second title line
+# would silently override the first.
+def state(text):
+    patched = text.count(ANCHOR + ADDED)
+    if text.count(ANCHOR) != 1 or patched > 1:
+        return "unknown"
+    if patched == 1:
+        return "patched"
+    if "document.title" in text:
+        return "unknown"
+    return "stock"
+
+
+def main(command):
+    path = Path(os.environ["MAIN_FILE"])
+    text = path.read_text(encoding="utf-8")
+    current = state(text)
+    if command == "state":
+        print(current)
+        return 0
+    if command not in ("apply", "reapply"):
+        return 2
+    # reapply runs after every package operation: it only acts on a stock file
+    if current != "stock":
+        return 0 if command == "reapply" else 1
+    path.write_text(text.replace(ANCHOR, ANCHOR + ADDED, 1), encoding="utf-8")
+    return 0
+
+
+sys.exit(main(sys.argv[1]))
 PY
+)"
+
+patch_engine() {
+    MAIN_FILE="$MAIN_FILE" python3 -c "$PATCH_PY" "$@"
+}
+
+# Prints stock, patched or unknown.
+get_state() {
+    patch_engine state
+}
+
+apply_python_patch() {
+    patch_engine apply
 }
 
 # ------------------------------------------------------------
@@ -417,11 +468,75 @@ installed_pkg_version() {
 }
 
 # ------------------------------------------------------------
+# APT hook, so a package update does not silently drop the patch
+# ------------------------------------------------------------
+
+hook_is_enabled() {
+    [[ -f "$APT_HOOK_FILE" ]]
+}
+
+write_hook_file() {
+    mkdir -p "$HELPER_DIR"
+    printf '%s\n' "$PATCH_PY" >"$HELPER_DIR/patch.py"
+    chmod 0644 "$HELPER_DIR/patch.py"
+
+    cat >"$APT_HOOK_FILE" <<EOF_HOOK
+// Managed by Proxmox-Tools pve-xterm-tab-title.sh
+// Re-applies the patch when a pve-xtermjs update restores the stock file.
+DPkg::Post-Invoke {"if [ -f ${HELPER_DIR}/patch.py ] && [ -f ${MAIN_FILE} ]; then MAIN_FILE=${MAIN_FILE} python3 ${HELPER_DIR}/patch.py reapply || true; fi"; };
+EOF_HOOK
+    chmod 0644 "$APT_HOOK_FILE"
+}
+
+remove_hook_files() {
+    rm -f "$APT_HOOK_FILE"
+    rm -rf "$HELPER_DIR"
+}
+
+# The hook only carries a patch that is in place, and its copy of the patch
+# engine follows the version of this script.
+refresh_hook_file() {
+    hook_is_enabled || return 0
+    if [[ "$(get_state)" == "patched" ]]; then
+        write_hook_file
+    else
+        remove_hook_files
+        say_info "$(tr_msg hook_removed)"
+    fi
+}
+
+enable_hook() {
+    if hook_is_enabled; then
+        say_info "$(tr_msg hook_already_enabled)"
+        return 0
+    fi
+
+    if [[ "$(get_state)" != "patched" ]]; then
+        say_info "$(tr_msg hook_nothing)"
+        return 0
+    fi
+
+    write_hook_file
+    say_ok "$(tr_msg hook_enabled)"
+    say_info "$(tr_msg hook_file): ${PMX_CYAN}${APT_HOOK_FILE}${RESET}"
+}
+
+disable_hook() {
+    if ! hook_is_enabled; then
+        say_info "$(tr_msg hook_already_disabled)"
+        return 0
+    fi
+
+    remove_hook_files
+    say_ok "$(tr_msg hook_disabled)"
+}
+
+# ------------------------------------------------------------
 # Actions
 # ------------------------------------------------------------
 
 show_status() {
-    local xt_version state state_label
+    local xt_version state state_label hook_state
 
     xt_version="$(installed_pkg_version pve-xtermjs)"
     state="$(get_state)"
@@ -432,9 +547,16 @@ show_status() {
         *) state_label="${PMX_AMBER}$(tr_msg state_unknown)${RESET}" ;;
     esac
 
+    if hook_is_enabled; then
+        hook_state="${PMX_GREEN}$(tr_msg status_enabled)${RESET}"
+    else
+        hook_state="${PMX_GREY}$(tr_msg status_disabled)${RESET}"
+    fi
+
     panel "$PMX_ORANGE" "$(tr_msg status_title)" \
         "$(tr_msg detected_version): pve-xtermjs ${BOLD}${xt_version:-?}${RESET}" \
-        "$(tr_msg status_tab_title): ${BOLD}${state_label}"
+        "$(tr_msg status_tab_title): ${BOLD}${state_label}" \
+        "$(tr_msg status_auto_reapply): ${BOLD}${hook_state}"
 }
 
 apply_patch() {
@@ -503,6 +625,7 @@ restore_specific() {
     cp -av "$dir/$(basename "$MAIN_FILE")" "$MAIN_FILE"
 
     say_ok "$(tr_msg restore_done): ${PMX_CYAN}${dir}${RESET}"
+    refresh_hook_file
 }
 
 restore_latest() {
@@ -580,10 +703,12 @@ main_menu() {
         printf " %b3)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_restore_select)"
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
-        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-6]: " choice
+        read -r -p "$(tr_msg choose_option) [1-8]: " choice
         echo
 
         case "$choice" in
@@ -606,6 +731,14 @@ main_menu() {
                 menu_action show_backups
                 ;;
             6)
+                menu_action enable_hook
+                pause
+                ;;
+            7)
+                menu_action disable_hook
+                pause
+                ;;
+            8)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;
