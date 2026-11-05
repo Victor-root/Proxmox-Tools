@@ -262,6 +262,8 @@ Fixes two Proxmox VE panels that always start in the wrong state and need a manu
 * 🌳 each **PVE node** in the left resource tree **opens automatically** on the default Server View, exactly like clicking its chevron by hand
 * 🎯 targeted: **pools, storages, VMs and containers stay as they are**, only the node groups themselves are affected
 * 📉 separate option: the bottom **Logs panel** (Tasks tab and cluster log) **collapses by default** instead of covering part of the screen at every login
+* 🔎 each change is a whole block matched exactly: on an unexpected file the script refuses and touches nothing
+* 🔄 optional **automatic re-apply** after a `pve-manager` update, through an APT hook: it puts back only the patches in place
 * 💾 automatic **backup** before patching
 * ♻️ built-in **restore** options, plus a direct on/off toggle for the Logs panel
 * 📋 interactive menu
@@ -271,6 +273,10 @@ Fixes two Proxmox VE panels that always start in the wrong state and need a manu
 Checked against the official Proxmox VE sources: both patched lines are identical in Proxmox VE 8 and 9, so this script behaves the same on both.
 
 On an unsupported release it stops with a clear message, creates no backup and leaves the file untouched.
+
+#### Good to know
+
+* Updates of the `pve-manager` package overwrite the file: run the script again afterwards, or enable the automatic re-apply from the menu. It puts back the patches in place when it was enabled (or when one was added or taken out since), restarts nothing since `pveproxy` reads the file on every request, and does nothing on a file that no longer looks as expected.
 
 #### Run it directly
 

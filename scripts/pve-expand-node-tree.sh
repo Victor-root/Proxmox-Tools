@@ -3,25 +3,8 @@ set -euo pipefail
 
 PATCH_PREFIX="/root/pve-expand-node-tree-patch"
 PM_FILE="/usr/share/pve-manager/js/pvemanagerlib.js"
-
-# ResourceTree.addChildSorted() creates every node of the left tree, including
-# each PVE node's own entry (info.type === 'node'), right before this line.
-# ExtJS tree nodes default to collapsed, so each node starts folded on every
-# fresh page load. Inserting an expanded flag for that one type opens it by
-# default, without touching pools, storages, guests or the datacenter root,
-# which the stock code already expands.
-STOCK_ANCHOR="        let child = Ext.create('PVETree', info);"
-PATCH_MARKER="info.expanded = true;"
-
-# Workspace.js's south region, the "Logs" panel that holds the Tasks tab and
-# the cluster log, has no initial collapsed state either, so it always opens
-# expanded and covers the bottom of the screen until folded back by hand.
-# "collapsible: true," on its own is NOT unique once every manager6 file is
-# assembled into pvemanagerlib.js (a datacenter panel and an unrelated
-# fieldset also have it at the same indentation), so both applying the patch
-# and detecting it anchor on the full block down to its "stateId: 'pvesouth'",
-# which only exists once.
-LOGS_STOCK_ANCHOR="collapsible: true,"
+HELPER_DIR="/usr/local/lib/pve-expand-node-tree"
+APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-expand-node-tree"
 
 # ------------------------------------------------------------
 # Language detection (EN default, FR if system locale starts with fr)
@@ -63,6 +46,12 @@ tr_msg() {
 
         fr:menu_logs_remove) echo "Garder le panneau Logs déplié par défaut" ;;
         en:menu_logs_remove) echo "Keep the Logs panel expanded by default" ;;
+
+        fr:menu_hook_enable) echo "Réappliquer automatiquement après une mise à jour" ;;
+        en:menu_hook_enable) echo "Re-apply automatically after an update" ;;
+
+        fr:menu_hook_disable) echo "Ne plus réappliquer automatiquement" ;;
+        en:menu_hook_disable) echo "Stop re-applying automatically" ;;
 
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
@@ -139,6 +128,39 @@ tr_msg() {
         fr:status_inactive) echo "inactif" ;;
         en:status_inactive) echo "inactive" ;;
 
+        fr:state_unknown) echo "structure du fichier inattendue" ;;
+        en:state_unknown) echo "unexpected file structure" ;;
+
+        fr:status_auto_reapply) echo "Réapplication automatique" ;;
+        en:status_auto_reapply) echo "Automatic re-apply" ;;
+
+        fr:status_enabled) echo "activée" ;;
+        en:status_enabled) echo "enabled" ;;
+
+        fr:status_disabled) echo "désactivée" ;;
+        en:status_disabled) echo "disabled" ;;
+
+        fr:hook_enabled) echo "Les patchs en place seront réappliqués automatiquement après chaque mise à jour de pve-manager." ;;
+        en:hook_enabled) echo "The patches in place will be re-applied automatically after every pve-manager update." ;;
+
+        fr:hook_disabled) echo "Réapplication automatique désactivée." ;;
+        en:hook_disabled) echo "Automatic re-apply disabled." ;;
+
+        fr:hook_already_enabled) echo "La réapplication automatique est déjà active." ;;
+        en:hook_already_enabled) echo "Automatic re-apply is already active." ;;
+
+        fr:hook_already_disabled) echo "La réapplication automatique n'est pas active." ;;
+        en:hook_already_disabled) echo "Automatic re-apply is not active." ;;
+
+        fr:hook_nothing) echo "Aucun patch n'est en place, il n'y a rien à réappliquer. Appliquez d'abord un patch." ;;
+        en:hook_nothing) echo "No patch is in place, there is nothing to re-apply. Apply a patch first." ;;
+
+        fr:hook_removed) echo "Plus aucun patch n'est en place : la réapplication automatique est désactivée." ;;
+        en:hook_removed) echo "No patch is in place any more: automatic re-apply is disabled." ;;
+
+        fr:hook_file) echo "Fichier de hook APT" ;;
+        en:hook_file) echo "APT hook file" ;;
+
         fr:status_logs) echo "Panneau Logs replié par défaut" ;;
         en:status_logs) echo "Logs panel collapsed by default" ;;
 
@@ -196,8 +218,8 @@ tr_msg() {
         fr:warning_body_1) echo "Ce script modifie un fichier JavaScript fourni par Proxmox VE." ;;
         en:warning_body_1) echo "This script modifies a JavaScript file provided by Proxmox VE." ;;
 
-        fr:warning_body_2) echo "Ceci est hors support, sera écrasé par les mises à jour du paquet pve-manager, et toute erreur de patch peut casser l'interface web jusqu'à la restauration du backup." ;;
-        en:warning_body_2) echo "This is unsupported, will be overwritten by pve-manager package updates, and any patching error may break the web UI until you restore the backup." ;;
+        fr:warning_body_2) echo "Ceci est hors support, sera écrasé par les mises à jour du paquet pve-manager (sauf si la réapplication automatique est activée), et toute erreur de patch peut casser l'interface web jusqu'à la restauration du backup." ;;
+        en:warning_body_2) echo "This is unsupported, will be overwritten by pve-manager package updates (unless automatic re-apply is enabled), and any patching error may break the web UI until you restore the backup." ;;
 
         fr:warning_body_3) echo "Veuillez garder une session SSH root active avant de continuer." ;;
         en:warning_body_3) echo "Please keep an active root SSH session open before continuing." ;;
@@ -367,138 +389,108 @@ show_warning_and_confirm() {
 }
 
 # ------------------------------------------------------------
-# Patch state
+# Patch engine, also run by the APT hook after a package update
 # ------------------------------------------------------------
+
+PATCH_PY="$(cat <<'PY'
+from pathlib import Path
+import os
+import sys
+
+# ResourceTree.addChildSorted() creates every node of the left tree, including
+# each PVE node's own entry (info.type === 'node'), right before this line.
+# ExtJS tree nodes default to collapsed, so each node starts folded on every
+# fresh page load. Inserting an expanded flag for that one type opens it by
+# default, without touching pools, storages, guests or the datacenter root,
+# which the stock code already expands.
+TREE_STOCK = "        let child = Ext.create('PVETree', info);\n"
+TREE_PATCHED = (
+    "        if (info.type === 'node') {\n"
+    "            info.expanded = true;\n"
+    "        }\n"
+    + TREE_STOCK
+)
+
+# Workspace.js's south region, the "Logs" panel that holds the Tasks tab and
+# the cluster log, has no initial collapsed state either, so it always opens
+# expanded and covers the bottom of the screen until folded back by hand.
+# "collapsible: true," on its own is NOT unique once every manager6 file is
+# assembled into pvemanagerlib.js (a datacenter panel and an unrelated
+# fieldset also have it at the same indentation), and "collapsed: true," is
+# already in two stock fieldsets, so both applying the patch and detecting it
+# match the full block down from its "stateId: 'pvesouth'", which only exists
+# once.
+LOGS_STOCK = (
+    "                    stateId: 'pvesouth',\n"
+    "                    itemId: 'south',\n"
+    "                    region: 'south',\n"
+    "                    margin: '0 5 5 5',\n"
+    "                    title: gettext('Logs'),\n"
+    "                    collapsible: true,\n"
+)
+LOGS_PATCHED = LOGS_STOCK + "                    collapsed: true,\n"
+
+PATCHES = {"tree": (TREE_STOCK, TREE_PATCHED), "logs": (LOGS_STOCK, LOGS_PATCHED)}
+
+
+def state(text, name):
+    stock, patched = PATCHES[name]
+    applied = text.count(patched)
+    # a patched block still contains the stock one
+    pristine = text.count(stock) - applied * patched.count(stock)
+    if applied == 1 and pristine == 0:
+        return "patched"
+    if applied == 0 and pristine == 1:
+        return "stock"
+    return "unknown"
+
+
+def main(args):
+    if len(args) < 2 or any(name not in PATCHES for name in args[1:]):
+        return 2
+    path = Path(os.environ["PM_FILE"])
+    text = path.read_text(encoding="utf-8")
+    command = args[0]
+    if command == "state":
+        print(state(text, args[1]))
+        return 0
+    # reapply runs after every package operation: it puts back the patches it
+    # carries on a stock file and leaves anything else alone
+    if command == "reapply":
+        for name in args[1:]:
+            if state(text, name) == "stock":
+                text = text.replace(*PATCHES[name], 1)
+        path.write_text(text, encoding="utf-8")
+        return 0
+    if command not in ("apply", "revert"):
+        return 2
+    name = args[1]
+    expected = "stock" if command == "apply" else "patched"
+    if state(text, name) != expected:
+        return 1
+    stock, patched = PATCHES[name]
+    before, after = (stock, patched) if command == "apply" else (patched, stock)
+    path.write_text(text.replace(before, after, 1), encoding="utf-8")
+    return 0
+
+
+sys.exit(main(sys.argv[1:]))
+PY
+)"
+
+patch_engine() {
+    PM_FILE="$PM_FILE" python3 -c "$PATCH_PY" "$@"
+}
+
+# Prints stock, patched or unknown for the tree or the logs patch.
+patch_state() {
+    patch_engine state "$1"
+}
 
 restart_pveproxy() {
     say_info "$(tr_msg restart_proxy)"
     printf "  %b%s%b\n" "${PMX_GREY}" "$(tr_msg restart_proxy_wait)" "${RESET}"
     systemctl restart pveproxy.service
-}
-
-is_patched() {
-    grep -qF "$PATCH_MARKER" "$PM_FILE"
-}
-
-is_patchable() {
-    grep -qF "$STOCK_ANCHOR" "$PM_FILE"
-}
-
-# The anchor line has single quotes and needs two new lines inserted right
-# before it: a python replace keeps that precise, unlike a sed one-liner
-# fighting its own quoting, and matches how pve-console-newtab.sh already
-# patches this same file.
-apply_python_patch() {
-    PM_FILE="$PM_FILE" python3 <<'PY'
-from pathlib import Path
-import os
-import sys
-
-pm_path = Path(os.environ["PM_FILE"])
-text = pm_path.read_text(encoding="utf-8")
-
-anchor = "        let child = Ext.create('PVETree', info);\n"
-if text.count(anchor) != 1:
-    sys.exit(1)
-
-replacement = (
-    "        if (info.type === 'node') {\n"
-    "            info.expanded = true;\n"
-    "        }\n"
-    + anchor
-)
-
-pm_path.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
-PY
-}
-
-# A plain grep for "collapsed: true," would also match two unrelated
-# collapsible fieldsets Proxmox ships stock, reporting the patch as already
-# applied when it never touched the file. Checking the whole block anchored
-# on "stateId: 'pvesouth'" only matches the actual Logs panel.
-logs_is_patched() {
-    PM_FILE="$PM_FILE" python3 <<'PY'
-from pathlib import Path
-import os
-import sys
-
-text = Path(os.environ["PM_FILE"]).read_text(encoding="utf-8")
-
-marker = (
-    "                    stateId: 'pvesouth',\n"
-    "                    itemId: 'south',\n"
-    "                    region: 'south',\n"
-    "                    margin: '0 5 5 5',\n"
-    "                    title: gettext('Logs'),\n"
-    "                    collapsible: true,\n"
-    "                    collapsed: true,\n"
-)
-sys.exit(0 if marker in text else 1)
-PY
-}
-
-logs_is_patchable() {
-    grep -qF "$LOGS_STOCK_ANCHOR" "$PM_FILE"
-}
-
-apply_logs_python_patch() {
-    PM_FILE="$PM_FILE" python3 <<'PY'
-from pathlib import Path
-import os
-import sys
-
-pm_path = Path(os.environ["PM_FILE"])
-text = pm_path.read_text(encoding="utf-8")
-
-anchor = (
-    "                    stateId: 'pvesouth',\n"
-    "                    itemId: 'south',\n"
-    "                    region: 'south',\n"
-    "                    margin: '0 5 5 5',\n"
-    "                    title: gettext('Logs'),\n"
-    "                    collapsible: true,\n"
-)
-if text.count(anchor) != 1:
-    sys.exit(1)
-
-replacement = anchor + "                    collapsed: true,\n"
-
-pm_path.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
-PY
-}
-
-revert_logs_python_patch() {
-    PM_FILE="$PM_FILE" python3 <<'PY'
-from pathlib import Path
-import os
-import sys
-
-pm_path = Path(os.environ["PM_FILE"])
-text = pm_path.read_text(encoding="utf-8")
-
-anchor = (
-    "                    stateId: 'pvesouth',\n"
-    "                    itemId: 'south',\n"
-    "                    region: 'south',\n"
-    "                    margin: '0 5 5 5',\n"
-    "                    title: gettext('Logs'),\n"
-    "                    collapsible: true,\n"
-    "                    collapsed: true,\n"
-)
-if text.count(anchor) != 1:
-    sys.exit(1)
-
-replacement = (
-    "                    stateId: 'pvesouth',\n"
-    "                    itemId: 'south',\n"
-    "                    region: 'south',\n"
-    "                    margin: '0 5 5 5',\n"
-    "                    title: gettext('Logs'),\n"
-    "                    collapsible: true,\n"
-)
-
-pm_path.write_text(text.replace(anchor, replacement, 1), encoding="utf-8")
-PY
 }
 
 # ------------------------------------------------------------
@@ -545,56 +537,141 @@ installed_pkg_version() {
 }
 
 # ------------------------------------------------------------
+# APT hook, so a package update does not silently drop the patches
+# ------------------------------------------------------------
+
+hook_is_enabled() {
+    [[ -f "$APT_HOOK_FILE" ]]
+}
+
+applied_patches() {
+    local name
+    for name in tree logs; do
+        if [[ "$(patch_state "$name")" == "patched" ]]; then
+            echo "$name"
+        fi
+    done
+}
+
+# pveproxy reads pvemanagerlib.js from disk on every request, and an update of
+# pve-manager restarts it anyway, so the hook restarts nothing. It only carries
+# the patches in place when it is written, so a patch the user never applied,
+# or took out since, never comes back after an update.
+write_hook_file() {
+    local patches
+    patches="$(applied_patches | tr '\n' ' ')"
+
+    mkdir -p "$HELPER_DIR"
+    printf '%s\n' "$PATCH_PY" >"$HELPER_DIR/patch.py"
+    chmod 0644 "$HELPER_DIR/patch.py"
+
+    cat >"$APT_HOOK_FILE" <<EOF_HOOK
+// Managed by Proxmox-Tools pve-expand-node-tree.sh
+// Re-applies the patches when a pve-manager update restores the stock file.
+DPkg::Post-Invoke {"if [ -f ${HELPER_DIR}/patch.py ] && [ -f ${PM_FILE} ]; then PM_FILE=${PM_FILE} python3 ${HELPER_DIR}/patch.py reapply ${patches}|| true; fi"; };
+EOF_HOOK
+    chmod 0644 "$APT_HOOK_FILE"
+}
+
+remove_hook_files() {
+    rm -f "$APT_HOOK_FILE"
+    rm -rf "$HELPER_DIR"
+}
+
+# Keep the hook in step with the patches that are actually in place.
+refresh_hook_file() {
+    hook_is_enabled || return 0
+    if [[ -n "$(applied_patches)" ]]; then
+        write_hook_file
+    else
+        remove_hook_files
+        say_info "$(tr_msg hook_removed)"
+    fi
+}
+
+enable_hook() {
+    if hook_is_enabled; then
+        say_info "$(tr_msg hook_already_enabled)"
+        return 0
+    fi
+
+    if [[ -z "$(applied_patches)" ]]; then
+        say_info "$(tr_msg hook_nothing)"
+        return 0
+    fi
+
+    write_hook_file
+    say_ok "$(tr_msg hook_enabled)"
+    say_info "$(tr_msg hook_file): ${PMX_CYAN}${APT_HOOK_FILE}${RESET}"
+}
+
+disable_hook() {
+    if ! hook_is_enabled; then
+        say_info "$(tr_msg hook_already_disabled)"
+        return 0
+    fi
+
+    remove_hook_files
+    say_ok "$(tr_msg hook_disabled)"
+}
+
+# ------------------------------------------------------------
 # Actions
 # ------------------------------------------------------------
 
+state_label() {
+    case "$1" in
+        patched) echo "${PMX_GREEN}$(tr_msg status_active)${RESET}" ;;
+        stock) echo "${PMX_GREY}$(tr_msg status_inactive)${RESET}" ;;
+        *) echo "${PMX_AMBER}$(tr_msg state_unknown)${RESET}" ;;
+    esac
+}
+
 show_status() {
-    local pm_version tree_state logs_state
+    local pm_version hook_state
 
     pm_version="$(installed_pkg_version pve-manager)"
 
-    if is_patched; then
-        tree_state="${PMX_GREEN}$(tr_msg status_active)${RESET}"
+    if hook_is_enabled; then
+        hook_state="${PMX_GREEN}$(tr_msg status_enabled)${RESET}"
     else
-        tree_state="${PMX_GREY}$(tr_msg status_inactive)${RESET}"
-    fi
-
-    if logs_is_patched; then
-        logs_state="${PMX_GREEN}$(tr_msg status_active)${RESET}"
-    else
-        logs_state="${PMX_GREY}$(tr_msg status_inactive)${RESET}"
+        hook_state="${PMX_GREY}$(tr_msg status_disabled)${RESET}"
     fi
 
     panel "$PMX_ORANGE" "$(tr_msg status_title)" \
         "$(tr_msg detected_version): pve-manager ${BOLD}${pm_version:-?}${RESET}" \
-        "$(tr_msg status_tree): ${BOLD}${tree_state}" \
-        "$(tr_msg status_logs): ${BOLD}${logs_state}"
+        "$(tr_msg status_tree): ${BOLD}$(state_label "$(patch_state tree)")" \
+        "$(tr_msg status_logs): ${BOLD}$(state_label "$(patch_state logs)")" \
+        "$(tr_msg status_auto_reapply): ${BOLD}${hook_state}"
 }
 
 apply_patch() {
     local backup_dir
 
-    if is_patched; then
-        say_ok "$(tr_msg already_patched)"
-        return 0
-    fi
-
-    if ! is_patchable; then
-        say_err "$(tr_msg patch_incompatible)"
-        say_info "$(tr_msg no_file_modified)"
-        return 1
-    fi
+    case "$(patch_state tree)" in
+        stock) ;;
+        patched)
+            say_ok "$(tr_msg already_patched)"
+            return 0
+            ;;
+        *)
+            say_err "$(tr_msg patch_incompatible)"
+            say_info "$(tr_msg no_file_modified)"
+            return 1
+            ;;
+    esac
 
     show_warning_and_confirm || return 0
 
     backup_dir="$(create_backup)"
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
-    if ! apply_python_patch || ! is_patched; then
+    if ! patch_engine apply tree || [[ "$(patch_state tree)" != "patched" ]]; then
         say_err "$(tr_msg patch_failed)"
         return 1
     fi
 
+    refresh_hook_file
     restart_pveproxy
     echo
     say_ok "$(tr_msg patch_applied)"
@@ -605,16 +682,18 @@ apply_patch() {
 apply_logs_patch() {
     local backup_dir
 
-    if logs_is_patched; then
-        say_ok "$(tr_msg logs_already_applied)"
-        return 0
-    fi
-
-    if ! logs_is_patchable; then
-        say_err "$(tr_msg patch_incompatible)"
-        say_info "$(tr_msg no_file_modified)"
-        return 1
-    fi
+    case "$(patch_state logs)" in
+        stock) ;;
+        patched)
+            say_ok "$(tr_msg logs_already_applied)"
+            return 0
+            ;;
+        *)
+            say_err "$(tr_msg patch_incompatible)"
+            say_info "$(tr_msg no_file_modified)"
+            return 1
+            ;;
+    esac
 
     panel "$PMX_BLUE" "$(tr_msg logs_title)" \
         "$(tr_msg logs_body_1)" \
@@ -628,11 +707,12 @@ apply_logs_patch() {
     backup_dir="$(create_backup)"
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
-    if ! apply_logs_python_patch || ! logs_is_patched; then
+    if ! patch_engine apply logs || [[ "$(patch_state logs)" != "patched" ]]; then
         say_err "$(tr_msg patch_failed)"
         return 1
     fi
 
+    refresh_hook_file
     restart_pveproxy
     echo
     say_ok "$(tr_msg logs_applied)"
@@ -643,19 +723,28 @@ apply_logs_patch() {
 remove_logs_patch() {
     local backup_dir
 
-    if ! logs_is_patched; then
-        say_info "$(tr_msg logs_not_applied)"
-        return 0
-    fi
+    case "$(patch_state logs)" in
+        patched) ;;
+        stock)
+            say_info "$(tr_msg logs_not_applied)"
+            return 0
+            ;;
+        *)
+            say_err "$(tr_msg patch_incompatible)"
+            say_info "$(tr_msg no_file_modified)"
+            return 1
+            ;;
+    esac
 
     backup_dir="$(create_backup)"
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
-    if ! revert_logs_python_patch || logs_is_patched; then
+    if ! patch_engine revert logs || [[ "$(patch_state logs)" != "stock" ]]; then
         say_err "$(tr_msg patch_failed)"
         return 1
     fi
 
+    refresh_hook_file
     restart_pveproxy
     echo
     say_ok "$(tr_msg logs_removed)"
@@ -693,6 +782,7 @@ restore_specific() {
 
     cp -av "$dir/$(basename "$PM_FILE")" "$PM_FILE"
 
+    refresh_hook_file
     restart_pveproxy
     say_ok "$(tr_msg restore_done): ${PMX_CYAN}${dir}${RESET}"
 }
@@ -774,10 +864,12 @@ main_menu() {
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
         printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_logs_apply)"
         printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_logs_remove)"
-        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
+        printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-8]: " choice
+        read -r -p "$(tr_msg choose_option) [1-10]: " choice
         echo
 
         case "$choice" in
@@ -808,6 +900,14 @@ main_menu() {
                 pause
                 ;;
             8)
+                menu_action enable_hook
+                pause
+                ;;
+            9)
+                menu_action disable_hook
+                pause
+                ;;
+            10)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;
