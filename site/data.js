@@ -487,6 +487,13 @@ const SCRIPTS = [
             backup: '/root/pve-expand-node-tree-patch-<date>/',
             restarts: 'pveproxy',
         },
+        demo: {
+            file: 'expand-node-tree.webp',
+            alt: {
+                en: 'As shipped, each node and the Logs panel have to be set by hand after login; with the script the page opens that way',
+                fr: 'D’origine, chaque nœud et le panneau Logs se règlent à la main après la connexion ; avec le script la page s’ouvre directement ainsi',
+            },
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
@@ -724,6 +731,13 @@ const SCRIPTS = [
             en: 'Each browser picks its theme in Color Theme; the ones that made no choice follow the default theme of the server. Browsers can keep the old copy of the files: check in a private window, then clear the site data. Updates of proxmox-widget-toolkit and pve-manager remove the themes from the menu until the script runs again, unless the APT hook is enabled.',
             fr: 'Chaque navigateur choisit son thème dans Thème de couleur ; ceux qui n’ont rien choisi suivent le thème par défaut du serveur. Les navigateurs peuvent garder l’ancienne copie des fichiers : vérifiez dans une fenêtre privée, puis effacez les données du site. Les mises à jour de proxmox-widget-toolkit et pve-manager retirent les thèmes du menu jusqu’à ce que le script soit relancé, sauf si le hook APT est activé.',
         },
+        demo: {
+            file: 'modern-theme.webp',
+            alt: {
+                en: 'Proxmox VE as shipped, then with the Modern theme in orange, blue, violet, green and pink',
+                fr: 'Proxmox VE d’origine, puis avec le thème Modern en orange, bleu, violet, vert et rose',
+            },
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
@@ -879,6 +893,11 @@ const UI = {
     touchesInstalls: { en: 'Installs', fr: 'Installe' },
     touchesBackup: { en: 'Copy kept in', fr: 'Copie gardée dans' },
     touchesRestarts: { en: 'Restarts', fr: 'Redémarre' },
+    demoTab: { en: 'Demo', fr: 'Démo' },
+    menuTab: { en: 'Script menu', fr: 'Menu du script' },
+    demoZoom: { en: 'Click to enlarge', fr: 'Cliquer pour agrandir' },
+    demoClose: { en: 'Close', fr: 'Fermer' },
+    demoNote: { en: 'The real Proxmox VE interface, with demo data', fr: 'La vraie interface Proxmox VE, avec des données de démonstration' },
     copyOk: { en: 'Command copied, paste it as root', fr: 'Commande copiée, collez-la en root' },
     linkOk: { en: 'Link to this script copied', fr: 'Lien vers ce script copié' },
     copyFail: { en: 'Copy failed, select the line by hand', fr: 'Copie impossible, sélectionnez la ligne à la main' },

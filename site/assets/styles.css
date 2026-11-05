@@ -527,6 +527,63 @@ code {
 @media (max-width: 1100px) { .term-body { font-size: 10px; } }
 @media (max-width: 620px) { .term-body { font-size: 8.5px; } }
 
+/* ---------- recording of a script at work, next to its menu ---------- */
+
+.term-side.has-demo { flex-direction: column; background: var(--term-bg); }
+.side-tabs {
+    display: flex; gap: 6px; padding: 0 10px; height: 44px; align-items: center;
+    background: var(--term-frame); border-bottom: 1px solid var(--term-line);
+}
+.side-tab {
+    display: inline-flex; align-items: center; gap: 7px;
+    height: 30px; padding: 0 13px; border-radius: 8px;
+    font: inherit; font-size: 0.8rem; font-weight: 650; color: #9aa7b8;
+    background: transparent; border: 1px solid transparent; cursor: pointer;
+    transition: background .13s, color .13s, border-color .13s;
+}
+.side-tab .ico { width: 16px; height: 16px; }
+.side-tab:hover { color: #e8ecf2; background: #1d232c; }
+.side-tab[aria-pressed="true"] {
+    color: #fff; background: color-mix(in srgb, var(--orange) 22%, transparent);
+    border-color: color-mix(in srgb, var(--orange) 55%, transparent);
+}
+.side-tab[aria-pressed="true"] .ico { color: var(--orange-bright); }
+.side-view { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.side-view[hidden] { display: none; }
+.side-view[data-view="demo"] { padding: 16px; gap: 12px; justify-content: center; }
+
+.demo {
+    position: relative; display: block; width: 100%; padding: 0; cursor: zoom-in;
+    border: 1px solid var(--term-line); border-radius: 10px; overflow: hidden;
+    background: #202124; box-shadow: 0 14px 34px -18px #000;
+}
+.demo img { display: block; width: 100%; height: auto; }
+.demo-zoom {
+    position: absolute; top: 10px; right: 10px;
+    display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px;
+    color: #fff; background: rgba(10, 12, 15, .72); opacity: 0; transition: opacity .15s;
+}
+.demo-zoom .ico { width: 18px; height: 18px; }
+.demo:hover .demo-zoom, .demo:focus-visible .demo-zoom { opacity: 1; }
+.demo-note {
+    display: flex; align-items: center; gap: 7px; margin: 0;
+    font-size: 0.78rem; color: #8592a5;
+}
+.demo-note .ico { width: 15px; height: 15px; }
+
+.zoom {
+    position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 3vmin;
+    background: rgba(5, 7, 10, .88); cursor: zoom-out; animation: zoom-in .16s ease-out;
+}
+.zoom img { max-width: 100%; max-height: 100%; border-radius: 10px; box-shadow: 0 30px 80px -20px #000; }
+.zoom-close {
+    position: absolute; top: 16px; right: 16px; display: grid; place-items: center;
+    width: 40px; height: 40px; border-radius: 10px; border: 0; cursor: pointer;
+    color: #e8ecf2; background: rgba(255, 255, 255, .1);
+}
+.zoom-close .ico { width: 20px; height: 20px; }
+@keyframes zoom-in { from { opacity: 0; } to { opacity: 1; } }
+
 /* the pasted line above the hero terminal, wrapping the way a shell does */
 .t-run {
     margin: 0 0 10px; font: inherit;

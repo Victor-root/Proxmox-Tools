@@ -206,6 +206,32 @@
         ].join('\n');
     }
 
+    /* Right side of a card: the script menu in its terminal, and when the card
+       has a recording of the script at work, that recording first, with a
+       switch between the two. */
+    function side(script) {
+        const term = termFrame(script.terminal.host, termScreen(script.terminal, true));
+        if (!script.demo) return '<div class="term-side">' + term + '</div>';
+
+        const src = 'demos/' + script.demo.file;
+        const alt = tr(script.demo.alt);
+        const tab = (view, name, label, on) =>
+            '<button type="button" class="side-tab" data-view="' + view + '" aria-pressed="' + on + '">' + icon(name) + '<span>' + esc(tr(label)) + '</span></button>';
+        return [
+            '<div class="term-side has-demo">',
+            '  <div class="side-tabs">' + tab('demo', 'player-play', UI.demoTab, true) + tab('menu', 'terminal', UI.menuTab, false) + '</div>',
+            '  <div class="side-view" data-view="demo">',
+            '    <button type="button" class="demo" data-zoom="' + esc(src) + '" data-alt="' + esc(alt) + '" title="' + esc(tr(UI.demoZoom)) + '">',
+            '      <img src="' + esc(src) + '" alt="' + esc(alt) + '" width="1280" height="800" loading="lazy" decoding="async">',
+            '      <span class="demo-zoom">' + icon('maximize') + '</span>',
+            '    </button>',
+            '    <p class="demo-note">' + icon('info') + '<span>' + esc(tr(UI.demoNote)) + '</span></p>',
+            '  </div>',
+            '  <div class="side-view" data-view="menu" hidden>' + term + '</div>',
+            '</div>',
+        ].join('\n');
+    }
+
     /* shareable address of one card, whatever the page is served from */
     const pageLink = (id) => location.origin + location.pathname + '#' + id;
 
@@ -245,9 +271,7 @@
             '        <button type="button" data-copy="' + esc(pageLink(script.id)) + '" data-toast="linkOk">' + icon('link') + esc(tr(UI.cardLink)) + '</button>',
             '      </div>',
             '    </div>',
-            '    <div class="term-side">',
-            termFrame(script.terminal.host, termScreen(script.terminal, true)),
-            '    </div>',
+            side(script),
             '  </div>',
             '</article>',
         ].join('\n');
@@ -256,6 +280,40 @@
     function renderCards() {
         document.getElementById('cards').innerHTML = SCRIPTS.map(card).join('\n');
         wireCopy();
+        wireDemos();
+    }
+
+    /* ---------- demos ---------- */
+
+    function wireDemos() {
+        document.querySelectorAll('.side-tab').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const side = btn.closest('.term-side');
+                side.querySelectorAll('.side-tab').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+                side.querySelectorAll('.side-view').forEach((v) => { v.hidden = v.dataset.view !== btn.dataset.view; });
+            });
+        });
+        document.querySelectorAll('[data-zoom]').forEach((btn) => {
+            btn.addEventListener('click', () => openZoom(btn.dataset.zoom, btn.dataset.alt));
+        });
+    }
+
+    /* full size view of a recording, closed by a click anywhere or Escape */
+    function openZoom(src, alt) {
+        const box = document.createElement('div');
+        box.className = 'zoom';
+        box.setAttribute('role', 'dialog');
+        box.setAttribute('aria-label', alt);
+        box.innerHTML = '<img src="' + esc(src) + '" alt="' + esc(alt) + '"><button type="button" class="zoom-close" aria-label="' + esc(tr(UI.demoClose)) + '">' + icon('x') + '</button>';
+        const close = () => {
+            box.remove();
+            document.removeEventListener('keydown', onKey);
+        };
+        const onKey = (e) => { if (e.key === 'Escape') close(); };
+        box.addEventListener('click', close);
+        document.addEventListener('keydown', onKey);
+        document.body.appendChild(box);
+        box.querySelector('.zoom-close').focus();
     }
 
     function renderFaq() {
