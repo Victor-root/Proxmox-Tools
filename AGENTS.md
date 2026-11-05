@@ -26,7 +26,7 @@ License: GNU AGPL v3. Do not add code you cannot license under it.
 
 ```text
 scripts/            one file per script, named pve-<thing>.sh (Proxmox host) or lxc-<thing>.sh (inside a container)
-sources/            build sources of content generated into a script (the CSS of pve-modern-theme.sh), never run by users
+sources/            build sources of generated content (the CSS of pve-modern-theme.sh, the recordings of the site), never run by users
 site/
   index.html        page shell and the SVG icon sprite (rarely changes, except to add an icon)
   data.js           every script card and every interface string: this is what you edit
@@ -314,6 +314,10 @@ Append a block **at the end of the `SCRIPTS` array** (the first block is the one
             restarts: 'pveproxy',              // optional, omit if nothing is restarted
         },
         note: { en: 'Optional warning.', fr: 'Avertissement optionnel.' },   // optional
+        demo: {                                // optional, a recording in site/demos/
+            file: 'my-script.webp',
+            alt: { en: 'What it shows, before and after.', fr: 'Ce qu’elle montre, avant et après.' },
+        },
         terminal: {
             banner: 'proxmox',                 // 'proxmox' or 'wireguard'
             theme: 'orange',                   // 'orange' or 'red'
@@ -333,6 +337,7 @@ Append a block **at the end of the `SCRIPTS` array** (the first block is the one
 * `touches` is filled **from the script itself**, never from memory: the paths at the top of the file, the backup directory it builds, the services it restarts. It is the block people read before running something as root, it has to be exact.
 * `terminal` reproduces the script **exactly as it runs in English**, not translated: same subtitle, same status panel wording, the menu entries in the same order with the same text, the same prompt (`[1-N]`). When you change the script's menu or texts, change this block too.
 * `compat` must match what you verified in phase 1.
+* `demo`, when the change is visible in the web interface: record it with `sources/site-demos` (see its README), from the stock Proxmox VE files and the same files patched by the script's own code, never a mockup. The `alt` text says what it shows.
 * `points`: concrete and short, no long sentences.
 * Icon: from [Tabler Icons](https://tabler.io/icons) (MIT), outline set. Add it to the sprite at the top of `site/index.html` as `<symbol viewBox="0 0 24 24" id="i-name">...</symbol>`, copying only the visible paths (drop the invisible `stroke="none"` rectangle), keeping the `viewBox`. Reuse an existing icon when it fits, check the sprite first.
 * A logo other than Proxmox or WireGuard goes in `BANNERS` at the bottom of `data.js`, copied line by line from the script's `banner()`.

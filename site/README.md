@@ -8,6 +8,7 @@ site/
 ├── index.html        page shell, rarely changes
 ├── data.js           the scripts AND every interface string, THIS is what you edit
 ├── README.md         this file
+├── demos/            recordings of the scripts at work, made by sources/site-demos
 └── assets/
     ├── styles.css    look and feel, light and dark themes
     └── app.js        builds the cards, handles language and theme
@@ -67,6 +68,17 @@ The run command, the "read the source" link and the history link are built from
 
 `panel`, `note`, `touches.installs` and `touches.restarts` can be removed if the
 script has none.
+
+A card can also show the script at work in the real Proxmox VE interface: a
+recording made with [`sources/site-demos`](../sources/site-demos), shown first,
+with a switch to the script menu. Add it next to `terminal`:
+
+```js
+    demo: {
+        file: 'my-script.webp',            // inside site/demos/
+        alt: 'What the recording shows, before and after the script.',
+    },
+```
 
 Fill `touches` from the script itself, never from memory: the paths at the top
 of the file, the backup directory it builds, the services it restarts. It is

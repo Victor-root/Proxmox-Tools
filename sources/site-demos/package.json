@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "description": "Records the demos of the Proxmox-Tools site",
+  "dependencies": {
+    "playwright": "1.63.0"
+  }
+}
