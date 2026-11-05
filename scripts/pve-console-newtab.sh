@@ -4,6 +4,8 @@ set -euo pipefail
 PATCH_PREFIX="/root/pve-console-newtab-patch"
 PM_FILE="/usr/share/pve-manager/js/pvemanagerlib.js"
 PX_FILE="/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js"
+HELPER_DIR="/usr/local/lib/pve-console-newtab"
+APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-console-newtab"
 
 # ------------------------------------------------------------
 # Language detection (EN default, FR if system locale starts with fr)
@@ -42,6 +44,12 @@ tr_msg() {
 
         fr:menu_tree) echo "Ajouter le clic molette sur les VM/LXC de l'arborescence" ;;
         en:menu_tree) echo "Add the middle click on the VM/LXC of the resource tree" ;;
+
+        fr:menu_hook_enable) echo "Réappliquer automatiquement après une mise à jour" ;;
+        en:menu_hook_enable) echo "Re-apply automatically after an update" ;;
+
+        fr:menu_hook_disable) echo "Ne plus réappliquer automatiquement" ;;
+        en:menu_hook_disable) echo "Stop re-applying automatically" ;;
 
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
@@ -105,6 +113,36 @@ tr_msg() {
 
         fr:status_title) echo "État du patch" ;;
         en:status_title) echo "Patch status" ;;
+
+        fr:status_auto_reapply) echo "Réapplication automatique" ;;
+        en:status_auto_reapply) echo "Automatic re-apply" ;;
+
+        fr:status_enabled) echo "activée" ;;
+        en:status_enabled) echo "enabled" ;;
+
+        fr:status_disabled) echo "désactivée" ;;
+        en:status_disabled) echo "disabled" ;;
+
+        fr:hook_enabled) echo "Les patchs en place seront réappliqués automatiquement après chaque mise à jour de pve-manager ou de proxmox-widget-toolkit." ;;
+        en:hook_enabled) echo "The patches in place will be re-applied automatically after every pve-manager or proxmox-widget-toolkit update." ;;
+
+        fr:hook_disabled) echo "Réapplication automatique désactivée." ;;
+        en:hook_disabled) echo "Automatic re-apply disabled." ;;
+
+        fr:hook_already_enabled) echo "La réapplication automatique est déjà active." ;;
+        en:hook_already_enabled) echo "Automatic re-apply is already active." ;;
+
+        fr:hook_already_disabled) echo "La réapplication automatique n'est pas active." ;;
+        en:hook_already_disabled) echo "Automatic re-apply is not active." ;;
+
+        fr:hook_nothing) echo "Le patch principal n'est pas en place, il n'y a rien à réappliquer. Utilisez l'option 1 d'abord." ;;
+        en:hook_nothing) echo "The main patch is not in place, there is nothing to re-apply. Use option 1 first." ;;
+
+        fr:hook_removed) echo "Le patch principal n'est plus en place : la réapplication automatique est désactivée." ;;
+        en:hook_removed) echo "The main patch is no longer in place: automatic re-apply is disabled." ;;
+
+        fr:hook_file) echo "Fichier de hook APT" ;;
+        en:hook_file) echo "APT hook file" ;;
 
         fr:available_backups) echo "Backups disponibles" ;;
         en:available_backups) echo "Available backups" ;;
@@ -175,8 +213,8 @@ tr_msg() {
         fr:warning_body_1) echo "Ce script modifie des fichiers JavaScript fournis par Proxmox VE." ;;
         en:warning_body_1) echo "This script modifies JavaScript files provided by Proxmox VE." ;;
 
-        fr:warning_body_2) echo "Ceci est hors support, peut être écrasé par de futures mises à jour, et toute erreur de patch peut casser l'interface web jusqu'à la restauration du backup." ;;
-        en:warning_body_2) echo "This is unsupported, may be overwritten by future updates, and any patching error may break the web UI until you restore the backup." ;;
+        fr:warning_body_2) echo "Ceci est hors support, sera écrasé par les mises à jour (sauf si la réapplication automatique est activée), et toute erreur de patch peut casser l'interface web jusqu'à la restauration du backup." ;;
+        en:warning_body_2) echo "This is unsupported, will be overwritten by updates (unless automatic re-apply is enabled), and any patching error may break the web UI until you restore the backup." ;;
 
         fr:warning_body_3) echo "Veuillez garder une session SSH root active avant de continuer." ;;
         en:warning_body_3) echo "Please keep an active root SSH session open before continuing." ;;
@@ -204,7 +242,6 @@ APP_NAME="$(tr_msg banner_subtitle)"
 if [[ -t 1 ]]; then
     RESET='\033[0m'
     BOLD='\033[1m'
-    DIM='\033[2m'
 
     PMX_ORANGE='\033[38;5;166m'
     PMX_ORANGE_DARK='\033[38;5;130m'
@@ -218,7 +255,6 @@ if [[ -t 1 ]]; then
 else
     RESET=''
     BOLD=''
-    DIM=''
 
     PMX_ORANGE=''
     PMX_ORANGE_DARK=''
@@ -247,8 +283,6 @@ hr() {
     printf -v line "%*s" "$cols" ""
     printf "%b%s%b\n" "${PMX_ORANGE_DARK}" "${line// /─}" "${RESET}"
 }
-
-rule() { hr; }
 
 panel() {
     local color="$1"
@@ -385,22 +419,20 @@ installed_pkg_version() {
     pveversion -v 2>/dev/null | sed -n "s/^${pkg}: \([^ ]*\).*/\1/p" | head -n1 || true
 }
 
-# Single patch engine shared by the status view, the pre-flight check and the
-# patch itself. Modes: status (report only), check (dry run), apply (write).
+# Single patch engine shared by the status view, the pre-flight check, the
+# patch itself and the APT hook. Arguments: a mode, status (report only), check
+# (dry run) or apply (write), then the target, console (default) or tree.
 # Each file is inspected and patched on its own, so a Proxmox update that only
 # refreshes one of the two packages can still be re-patched.
 # Exit codes: 0 work to do or done, 10 nothing to do, 11 needs the main patch
 # first, 1 unsupported layout.
-run_patch_tool() {
-    local mode="$1"
-    local target="${2:-console}"
-    PM_FILE="$PM_FILE" PX_FILE="$PX_FILE" PATCH_MODE="$mode" PATCH_TARGET="$target" python3 <<'PY'
+PATCH_PY="$(cat <<'PY'
 from pathlib import Path
 import os
 import sys
 
-MODE = os.environ["PATCH_MODE"]
-TARGET = os.environ.get("PATCH_TARGET", "console")
+MODE = sys.argv[1]
+TARGET = sys.argv[2] if len(sys.argv) > 2 else "console"
 
 pm_path = Path(os.environ["PM_FILE"])
 px_path = Path(os.environ["PX_FILE"])
@@ -1057,15 +1089,117 @@ if MODE == "apply":
             path.write_text(text, encoding="utf-8")
             print(f"[OK] patched: {path}")
 PY
+)"
+
+run_patch_tool() {
+    PM_FILE="$PM_FILE" PX_FILE="$PX_FILE" python3 -c "$PATCH_PY" "$@"
+}
+
+# console or tree, when its patch is fully in place
+target_is_patched() {
+    local rc=0
+    run_patch_tool check "$1" >/dev/null 2>&1 || rc=$?
+    [[ "$rc" -eq 10 ]]
+}
+
+# ------------------------------------------------------------
+# APT hook, so a package update does not silently drop the patches
+# ------------------------------------------------------------
+
+hook_is_enabled() {
+    [[ -f "$APT_HOOK_FILE" ]]
+}
+
+# The middle click in the tree builds on the main patch, so it only counts
+# while the main one is in place too.
+applied_targets() {
+    if target_is_patched console; then
+        echo console
+        if target_is_patched tree; then
+            echo tree
+        fi
+    fi
+}
+
+# Both files are read from disk on every request, and an update of their
+# package restarts pveproxy anyway, so the hook restarts nothing. It only
+# carries the patches in place when it is written, the main one first since
+# the tree one needs it, and the apply mode already leaves a patched file
+# alone and refuses an unexpected one without writing anything.
+write_hook_file() {
+    local target runs=""
+    for target in $(applied_targets); do
+        runs+="PM_FILE=${PM_FILE} PX_FILE=${PX_FILE} python3 ${HELPER_DIR}/patch.py apply ${target} >/dev/null 2>&1; "
+    done
+
+    mkdir -p "$HELPER_DIR"
+    printf '%s\n' "$PATCH_PY" >"$HELPER_DIR/patch.py"
+    chmod 0644 "$HELPER_DIR/patch.py"
+
+    cat >"$APT_HOOK_FILE" <<EOF_HOOK
+// Managed by Proxmox-Tools pve-console-newtab.sh
+// Re-applies the patches when a package update restores the stock files.
+DPkg::Post-Invoke {"if [ -f ${HELPER_DIR}/patch.py ] && [ -f ${PM_FILE} ] && [ -f ${PX_FILE} ]; then ${runs}true; fi"; };
+EOF_HOOK
+    chmod 0644 "$APT_HOOK_FILE"
+}
+
+remove_hook_files() {
+    rm -f "$APT_HOOK_FILE"
+    rm -rf "$HELPER_DIR"
+}
+
+# Keep the hook in step with the patches that are actually in place.
+refresh_hook_file() {
+    hook_is_enabled || return 0
+    if target_is_patched console; then
+        write_hook_file
+    else
+        remove_hook_files
+        say_info "$(tr_msg hook_removed)"
+    fi
+}
+
+enable_hook() {
+    if hook_is_enabled; then
+        say_info "$(tr_msg hook_already_enabled)"
+        return 0
+    fi
+
+    if ! target_is_patched console; then
+        say_info "$(tr_msg hook_nothing)"
+        return 0
+    fi
+
+    write_hook_file
+    say_ok "$(tr_msg hook_enabled)"
+    say_info "$(tr_msg hook_file): ${PMX_CYAN}${APT_HOOK_FILE}${RESET}"
+}
+
+disable_hook() {
+    if ! hook_is_enabled; then
+        say_info "$(tr_msg hook_already_disabled)"
+        return 0
+    fi
+
+    remove_hook_files
+    say_ok "$(tr_msg hook_disabled)"
 }
 
 show_status() {
-    local pm_version px_version
+    local pm_version px_version hook_state
     pm_version="$(installed_pkg_version pve-manager)"
     px_version="$(installed_pkg_version proxmox-widget-toolkit)"
 
+    if hook_is_enabled; then
+        hook_state="${PMX_GREEN}$(tr_msg status_enabled)${RESET}"
+    else
+        hook_state="${PMX_GREY}$(tr_msg status_disabled)${RESET}"
+    fi
+
     panel "$PMX_ORANGE" "$(tr_msg status_title)" \
-        "$(tr_msg detected_version): pve-manager ${BOLD}${pm_version:-?}${RESET} · proxmox-widget-toolkit ${BOLD}${px_version:-?}${RESET}"
+        "$(tr_msg detected_version): pve-manager ${BOLD}${pm_version:-?}${RESET} · proxmox-widget-toolkit ${BOLD}${px_version:-?}${RESET}" \
+        "$(tr_msg status_auto_reapply): ${BOLD}${hook_state}"
     echo
     run_patch_tool status
 }
@@ -1100,6 +1234,7 @@ apply_patch() {
         return 1
     fi
 
+    refresh_hook_file
     restart_pveproxy
     echo
     say_ok "$(tr_msg patch_applied)"
@@ -1151,6 +1286,7 @@ apply_tree_patch() {
         return 1
     fi
 
+    refresh_hook_file
     restart_pveproxy
     echo
     say_ok "$(tr_msg tree_applied)"
@@ -1195,6 +1331,7 @@ restore_specific() {
     cp -av "$dir/$(basename "$PM_FILE")" "$PM_FILE"
     cp -av "$dir/$(basename "$PX_FILE")" "$PX_FILE"
 
+    refresh_hook_file
     restart_pveproxy
     say_ok "$(tr_msg restore_done): ${PMX_CYAN}${dir}${RESET}"
 }
@@ -1275,10 +1412,12 @@ main_menu() {
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
         printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_tree)"
-        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-7]: " choice
+        read -r -p "$(tr_msg choose_option) [1-9]: " choice
         echo
 
         case "$choice" in
@@ -1305,6 +1444,14 @@ main_menu() {
                 pause
                 ;;
             7)
+                menu_action enable_hook
+                pause
+                ;;
+            8)
+                menu_action disable_hook
+                pause
+                ;;
+            9)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;

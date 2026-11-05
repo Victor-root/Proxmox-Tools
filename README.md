@@ -74,6 +74,7 @@ Adds a more convenient browser workflow for the Proxmox VE web interface:
 * 🖱️ **Middle click** on **xterm.js** opens it in a **new tab**
 * 🖱️ **Middle click** on **SPICE** behaves like a normal click, without opening a useless browser tab
 * 🌳 separate option: **middle click** on a **VM or container of the left tree** opens its console in a **new tab**, where that click did nothing before
+* 🔄 optional **automatic re-apply** after a `pve-manager` or `proxmox-widget-toolkit` update, through an APT hook: it puts back only the patches in place
 * 💾 automatic **backup** before patching
 * ♻️ built-in **restore** options
 * 📋 interactive menu
@@ -93,6 +94,8 @@ Proxmox re-formatted its JavaScript sources in June 2025, so the code blocks thi
 On an unsupported release the script stops with a clear message, creates no backup and leaves both files untouched, so nothing can break.
 
 Each of the two patched files is also checked and patched on its own: a Proxmox update that refreshes only one of the two packages can simply be re-patched.
+
+The automatic re-apply does exactly that after every package update: it puts back the main patch, and the tree one if it was in place, restarts nothing since `pveproxy` reads both files on every request, and leaves an unexpected file untouched.
 
 #### About the resource tree
 
