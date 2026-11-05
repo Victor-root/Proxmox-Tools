@@ -76,14 +76,14 @@ const SCRIPTS = [
         points: {
             en: [
                 'Sets the system locale and the web interface language together',
-                'Optional, Proxmox VE 9 only: its mobile interface follows that default too, on every new device',
+                'Optional, Proxmox VE 9 only: its mobile interface follows that default too, kept after updates if you want',
                 '29 languages, the script interface speaks them too',
                 'Optional timezone and NTP setup',
                 'Warns instead of writing a language Proxmox would silently drop',
             ],
             fr: [
                 'Règle la locale système et la langue de l’interface web ensemble',
-                'Optionnel, Proxmox VE 9 uniquement : son interface mobile suit aussi ce défaut, sur chaque nouvel appareil',
+                'Optionnel, Proxmox VE 9 uniquement : son interface mobile suit aussi ce défaut, gardé après les mises à jour si vous voulez',
                 '29 langues, l’interface du script les parle aussi',
                 'Configuration optionnelle du fuseau horaire et du NTP',
                 'Prévient au lieu d’écrire une langue que Proxmox ignorerait',
@@ -97,6 +97,8 @@ const SCRIPTS = [
                 { path: '/etc/profile.d/proxmox-tools-locale.sh', role: { en: 'created, applies the locale to each shell', fr: 'créé, applique la locale à chaque shell' } },
                 { path: '/etc/timezone', role: { en: 'only if you choose a timezone', fr: 'seulement si vous choisissez un fuseau horaire' } },
                 { path: '/usr/share/pve-yew-mobile-gui/index.html.tpl', role: { en: 'a few lines added, only if you apply the default to the mobile interface of Proxmox VE 9', fr: 'quelques lignes ajoutées, seulement si vous appliquez le défaut à l’interface mobile de Proxmox VE 9' } },
+                { path: '/etc/apt/apt.conf.d/99-pve-default-language', role: { en: 'optional, re-applies the mobile setting after an update', fr: 'optionnel, réapplique le réglage mobile après une mise à jour' } },
+                { path: '/usr/local/lib/pve-default-language/mobile.py', role: { en: 'optional, the program the APT hook runs', fr: 'optionnel, le programme lancé par le hook APT' } },
             ],
             backup: '/root/pve-default-language-<date>/',
             restarts: 'pveproxy',
@@ -123,9 +125,11 @@ const SCRIPTS = [
                 'List backups',
                 'Apply the default language to the mobile interface',
                 'Remove that setting from the mobile interface',
+                'Re-apply the mobile setting automatically after an update',
+                'Stop re-applying the mobile setting automatically',
                 'Quit',
             ],
-            prompt: 'Choose an option [1-9]:',
+            prompt: 'Choose an option [1-11]:',
         },
     },
     {

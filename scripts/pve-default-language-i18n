@@ -8,14 +8,9 @@ DATACENTER_CFG="/etc/pve/datacenter.cfg"
 PROFILE_LOCALE_FILE="/etc/profile.d/proxmox-tools-locale.sh"
 TIMEZONE_FILE="/etc/timezone"
 
-# The mobile interface is a separate application. Its page already receives the
-# language of datacenter.cfg, but it keeps its own language in the browser store
-# and never looks at that value, so it always starts in English. These few lines
-# copy the server default into that store, and only when the browser has never
-# chosen a language: a choice made in the mobile settings still wins.
 MOBILE_INDEX_TPL="/usr/share/pve-yew-mobile-gui/index.html.tpl"
-MOBILE_SNIPPET_BEGIN="<!-- BEGIN Proxmox-Tools default language -->"
-MOBILE_SNIPPET_END="<!-- END Proxmox-Tools default language -->"
+HELPER_DIR="/usr/local/lib/pve-default-language"
+APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-default-language"
 
 # ------------------------------------------------------------
 # Full script i18n
@@ -117,6 +112,15 @@ ar|mobile_missing|واجهة الهاتف غير مثبتة على هذا الم
 ar|mobile_failed|تعذّر تعديل صفحة واجهة الهاتف.
 ar|mobile_reload_hint|أغلق واجهة الهاتف ثم افتحها من جديد لرؤية النتيجة.
 ar|label_mobile_language|افتراضي واجهة الهاتف
+ar|menu_mobile_hook_enable|إعادة تطبيق إعداد الهاتف تلقائياً بعد كل تحديث
+ar|menu_mobile_hook_disable|إيقاف إعادة تطبيق إعداد الهاتف تلقائياً
+ar|mobile_hook_enabled|سيُعاد تطبيق إعداد الهاتف تلقائياً بعد كل تحديث لواجهة الهاتف.
+ar|mobile_hook_disabled|تم تعطيل إعادة التطبيق التلقائي لإعداد الهاتف.
+ar|mobile_hook_nothing|إعداد الهاتف غير مطبق، لا يوجد ما يُعاد تطبيقه. طبّقه أولاً.
+ar|mobile_hook_removed|لم يعد إعداد الهاتف مطبقاً: تم تعطيل إعادة تطبيقه التلقائي.
+ar|label_mobile_hook|إعادة التطبيق التلقائي لإعداد الهاتف
+ar|status_enabled|مفعّلة
+ar|status_disabled|معطّلة
 ar|status_applied|مطبق
 ar|status_not_applied|غير مطبق
 ca|script_title|Utilitat de llengua per defecte
@@ -205,6 +209,15 @@ ca|mobile_missing|La interfície mòbil no està instal·lada en aquest amfitri�
 ca|mobile_failed|No s'ha pogut modificar la pàgina de la interfície mòbil.
 ca|mobile_reload_hint|Tanca i torna a obrir la interfície mòbil per veure el resultat.
 ca|label_mobile_language|Valor per defecte de la interfície mòbil
+ca|menu_mobile_hook_enable|Torna a aplicar automàticament l'ajust mòbil després d'una actualització
+ca|menu_mobile_hook_disable|Deixa de tornar a aplicar automàticament l'ajust mòbil
+ca|mobile_hook_enabled|L'ajust mòbil es tornarà a aplicar automàticament després de cada actualització de la interfície mòbil.
+ca|mobile_hook_disabled|Reaplicació automàtica de l'ajust mòbil desactivada.
+ca|mobile_hook_nothing|L'ajust mòbil no està aplicat, no hi ha res per tornar a aplicar. Aplica'l primer.
+ca|mobile_hook_removed|L'ajust mòbil ja no està aplicat: la seva reaplicació automàtica està desactivada.
+ca|label_mobile_hook|Reaplicació automàtica de l'ajust mòbil
+ca|status_enabled|activada
+ca|status_disabled|desactivada
 ca|status_applied|aplicat
 ca|status_not_applied|no aplicat
 da|script_title|Værktøj til standardsprog
@@ -293,6 +306,15 @@ da|mobile_missing|Den mobile grænseflade er ikke installeret på denne vært. (
 da|mobile_failed|Siden for den mobile grænseflade kunne ikke ændres.
 da|mobile_reload_hint|Luk og åbn den mobile grænseflade igen for at se resultatet.
 da|label_mobile_language|Standard for mobil grænseflade
+da|menu_mobile_hook_enable|Anvend den mobile indstilling igen automatisk efter en opdatering
+da|menu_mobile_hook_disable|Stop med at anvende den mobile indstilling igen automatisk
+da|mobile_hook_enabled|Den mobile indstilling anvendes automatisk igen efter hver opdatering af den mobile grænseflade.
+da|mobile_hook_disabled|Automatisk genanvendelse af den mobile indstilling slået fra.
+da|mobile_hook_nothing|Den mobile indstilling er ikke anvendt, der er intet at anvende igen. Anvend den først.
+da|mobile_hook_removed|Den mobile indstilling er ikke længere anvendt: dens automatiske genanvendelse er slået fra.
+da|label_mobile_hook|Automatisk genanvendelse af den mobile indstilling
+da|status_enabled|slået til
+da|status_disabled|slået fra
 da|status_applied|anvendt
 da|status_not_applied|ikke anvendt
 de|script_title|Werkzeug für die Standardsprache
@@ -381,6 +403,15 @@ de|mobile_missing|Die mobile Oberfläche ist auf diesem Host nicht installiert. 
 de|mobile_failed|Die Seite der mobilen Oberfläche konnte nicht geändert werden.
 de|mobile_reload_hint|Schließen Sie die mobile Oberfläche und öffnen Sie sie erneut, um das Ergebnis zu sehen.
 de|label_mobile_language|Standard der mobilen Oberfläche
+de|menu_mobile_hook_enable|Mobile Einstellung nach einem Update automatisch erneut anwenden
+de|menu_mobile_hook_disable|Mobile Einstellung nicht mehr automatisch erneut anwenden
+de|mobile_hook_enabled|Die mobile Einstellung wird nach jedem Update der mobilen Oberfläche automatisch erneut angewendet.
+de|mobile_hook_disabled|Automatisches erneutes Anwenden der mobilen Einstellung deaktiviert.
+de|mobile_hook_nothing|Die mobile Einstellung ist nicht aktiv, es gibt nichts erneut anzuwenden. Wenden Sie sie zuerst an.
+de|mobile_hook_removed|Die mobile Einstellung ist nicht mehr aktiv: ihr automatisches erneutes Anwenden ist deaktiviert.
+de|label_mobile_hook|Automatisches erneutes Anwenden der mobilen Einstellung
+de|status_enabled|aktiviert
+de|status_disabled|deaktiviert
 de|status_applied|angewendet
 de|status_not_applied|nicht angewendet
 en|script_title|Default Language Utility
@@ -469,6 +500,15 @@ en|mobile_missing|The mobile interface is not installed on this host. (Proxmox V
 en|mobile_failed|The mobile interface page could not be changed.
 en|mobile_reload_hint|Close and reopen the mobile interface to see the result.
 en|label_mobile_language|Mobile interface default
+en|menu_mobile_hook_enable|Re-apply the mobile setting automatically after an update
+en|menu_mobile_hook_disable|Stop re-applying the mobile setting automatically
+en|mobile_hook_enabled|The mobile setting will be re-applied automatically after every update of the mobile interface.
+en|mobile_hook_disabled|Automatic re-apply of the mobile setting disabled.
+en|mobile_hook_nothing|The mobile setting is not in place, there is nothing to re-apply. Apply it first.
+en|mobile_hook_removed|The mobile setting is no longer in place: its automatic re-apply is disabled.
+en|label_mobile_hook|Automatic re-apply of the mobile setting
+en|status_enabled|enabled
+en|status_disabled|disabled
 en|status_applied|applied
 en|status_not_applied|not applied
 es|script_title|Utilidad de idioma predeterminado
@@ -557,6 +597,15 @@ es|mobile_missing|La interfaz móvil no está instalada en este host. (Proxmox V
 es|mobile_failed|No se ha podido modificar la página de la interfaz móvil.
 es|mobile_reload_hint|Cierre y vuelva a abrir la interfaz móvil para ver el resultado.
 es|label_mobile_language|Predeterminado de la interfaz móvil
+es|menu_mobile_hook_enable|Volver a aplicar automáticamente el ajuste móvil tras una actualización
+es|menu_mobile_hook_disable|Dejar de volver a aplicar automáticamente el ajuste móvil
+es|mobile_hook_enabled|El ajuste móvil se volverá a aplicar automáticamente tras cada actualización de la interfaz móvil.
+es|mobile_hook_disabled|Reaplicación automática del ajuste móvil desactivada.
+es|mobile_hook_nothing|El ajuste móvil no está aplicado, no hay nada que volver a aplicar. Aplíquelo primero.
+es|mobile_hook_removed|El ajuste móvil ya no está aplicado: su reaplicación automática está desactivada.
+es|label_mobile_hook|Reaplicación automática del ajuste móvil
+es|status_enabled|activada
+es|status_disabled|desactivada
 es|status_applied|aplicado
 es|status_not_applied|no aplicado
 eu|script_title|Hizkuntza lehenetsiaren tresna
@@ -645,6 +694,15 @@ eu|mobile_missing|Interfaze mugikorra ez dago instalatuta ostalari honetan. (Pro
 eu|mobile_failed|Ezin izan da interfaze mugikorraren orria aldatu.
 eu|mobile_reload_hint|Itxi eta ireki berriro interfaze mugikorra emaitza ikusteko.
 eu|label_mobile_language|Interfaze mugikorraren lehenetsia
+eu|menu_mobile_hook_enable|Ezarri berriro ezarpen mugikorra automatikoki eguneratze baten ondoren
+eu|menu_mobile_hook_disable|Utzi ezarpen mugikorra automatikoki berriro ezartzeari
+eu|mobile_hook_enabled|Ezarpen mugikorra automatikoki ezarriko da berriro interfaze mugikorraren eguneratze bakoitzaren ondoren.
+eu|mobile_hook_disabled|Ezarpen mugikorraren berriro ezartze automatikoa desgaituta.
+eu|mobile_hook_nothing|Ezarpen mugikorra ez dago ezarrita, ez dago ezer berriro ezartzeko. Ezarri lehenik.
+eu|mobile_hook_removed|Ezarpen mugikorra jada ez dago ezarrita: haren berriro ezartze automatikoa desgaituta dago.
+eu|label_mobile_hook|Ezarpen mugikorraren berriro ezartze automatikoa
+eu|status_enabled|gaituta
+eu|status_disabled|desgaituta
 eu|status_applied|ezarrita
 eu|status_not_applied|ez dago ezarrita
 fa|script_title|ابزار زبان پیش‌فرض
@@ -733,6 +791,15 @@ fa|mobile_missing|رابط موبایل روی این میزبان نصب نیس
 fa|mobile_failed|صفحه رابط موبایل تغییر نکرد.
 fa|mobile_reload_hint|برای دیدن نتیجه، رابط موبایل را ببندید و دوباره باز کنید.
 fa|label_mobile_language|پیش‌فرض رابط موبایل
+fa|menu_mobile_hook_enable|اعمال دوبارهٔ خودکار تنظیم موبایل پس از به‌روزرسانی
+fa|menu_mobile_hook_disable|توقف اعمال دوبارهٔ خودکار تنظیم موبایل
+fa|mobile_hook_enabled|تنظیم موبایل پس از هر به‌روزرسانی رابط موبایل به‌طور خودکار دوباره اعمال می‌شود.
+fa|mobile_hook_disabled|اعمال دوبارهٔ خودکار تنظیم موبایل غیرفعال شد.
+fa|mobile_hook_nothing|تنظیم موبایل اعمال نشده است، چیزی برای اعمال دوباره وجود ندارد. ابتدا آن را اعمال کنید.
+fa|mobile_hook_removed|تنظیم موبایل دیگر اعمال نشده است: اعمال دوبارهٔ خودکار آن غیرفعال شد.
+fa|label_mobile_hook|اعمال دوبارهٔ خودکار تنظیم موبایل
+fa|status_enabled|فعال
+fa|status_disabled|غیرفعال
 fa|status_applied|اعمال‌شده
 fa|status_not_applied|اعمال‌نشده
 fr|script_title|Utilitaire de langue par défaut
@@ -821,6 +888,15 @@ fr|mobile_missing|L'interface mobile n'est pas installée sur cet hôte. (Proxmo
 fr|mobile_failed|La page de l'interface mobile n'a pas pu être modifiée.
 fr|mobile_reload_hint|Fermez et rouvrez l'interface mobile pour voir le résultat.
 fr|label_mobile_language|Défaut de l'interface mobile
+fr|menu_mobile_hook_enable|Réappliquer automatiquement le réglage mobile après une mise à jour
+fr|menu_mobile_hook_disable|Ne plus réappliquer automatiquement le réglage mobile
+fr|mobile_hook_enabled|Le réglage mobile sera réappliqué automatiquement après chaque mise à jour de l'interface mobile.
+fr|mobile_hook_disabled|Réapplication automatique du réglage mobile désactivée.
+fr|mobile_hook_nothing|Le réglage mobile n'est pas en place, il n'y a rien à réappliquer. Appliquez-le d'abord.
+fr|mobile_hook_removed|Le réglage mobile n'est plus en place : sa réapplication automatique est désactivée.
+fr|label_mobile_hook|Réapplication automatique du réglage mobile
+fr|status_enabled|activée
+fr|status_disabled|désactivée
 fr|status_applied|appliqué
 fr|status_not_applied|non appliqué
 gl|script_title|Utilidade de idioma predeterminado
@@ -909,6 +985,15 @@ gl|mobile_missing|A interface móbil non está instalada neste host. (Proxmox VE
 gl|mobile_failed|Non se puido modificar a páxina da interface móbil.
 gl|mobile_reload_hint|Peche e volva abrir a interface móbil para ver o resultado.
 gl|label_mobile_language|Predeterminado da interface móbil
+gl|menu_mobile_hook_enable|Volver aplicar automaticamente o axuste móbil tras unha actualización
+gl|menu_mobile_hook_disable|Deixar de volver aplicar automaticamente o axuste móbil
+gl|mobile_hook_enabled|O axuste móbil volverase aplicar automaticamente tras cada actualización da interface móbil.
+gl|mobile_hook_disabled|Reaplicación automática do axuste móbil desactivada.
+gl|mobile_hook_nothing|O axuste móbil non está aplicado, non hai nada que volver aplicar. Aplíqueo primeiro.
+gl|mobile_hook_removed|O axuste móbil xa non está aplicado: a súa reaplicación automática está desactivada.
+gl|label_mobile_hook|Reaplicación automática do axuste móbil
+gl|status_enabled|activada
+gl|status_disabled|desactivada
 gl|status_applied|aplicado
 gl|status_not_applied|non aplicado
 he|script_title|כלי שפת ברירת מחדל
@@ -997,6 +1082,15 @@ he|mobile_missing|ממשק הנייד אינו מותקן על מארח זה. (P
 he|mobile_failed|לא ניתן היה לשנות את הדף של ממשק הנייד.
 he|mobile_reload_hint|סגור ופתח מחדש את ממשק הנייד כדי לראות את התוצאה.
 he|label_mobile_language|ברירת המחדל של ממשק הנייד
+he|menu_mobile_hook_enable|החלה מחדש אוטומטית של הגדרת הנייד לאחר עדכון
+he|menu_mobile_hook_disable|הפסקת ההחלה מחדש האוטומטית של הגדרת הנייד
+he|mobile_hook_enabled|הגדרת הנייד תוחל מחדש אוטומטית לאחר כל עדכון של ממשק הנייד.
+he|mobile_hook_disabled|ההחלה מחדש האוטומטית של הגדרת הנייד הושבתה.
+he|mobile_hook_nothing|הגדרת הנייד לא הוחלה, אין מה להחיל מחדש. יש להחיל אותה תחילה.
+he|mobile_hook_removed|הגדרת הנייד כבר לא מוחלת: ההחלה מחדש האוטומטית שלה הושבתה.
+he|label_mobile_hook|החלה מחדש אוטומטית של הגדרת הנייד
+he|status_enabled|פעילה
+he|status_disabled|מושבתת
 he|status_applied|הוחל
 he|status_not_applied|לא הוחל
 hr|script_title|Alat za zadani jezik
@@ -1085,6 +1179,15 @@ hr|mobile_missing|Mobilno sučelje nije instalirano na ovom poslužitelju. (Prox
 hr|mobile_failed|Stranicu mobilnog sučelja nije bilo moguće promijeniti.
 hr|mobile_reload_hint|Zatvorite i ponovno otvorite mobilno sučelje da vidite rezultat.
 hr|label_mobile_language|Zadano za mobilno sučelje
+hr|menu_mobile_hook_enable|Automatski ponovno primijeni mobilnu postavku nakon ažuriranja
+hr|menu_mobile_hook_disable|Prestani automatski ponovno primjenjivati mobilnu postavku
+hr|mobile_hook_enabled|Mobilna postavka automatski će se ponovno primijeniti nakon svakog ažuriranja mobilnog sučelja.
+hr|mobile_hook_disabled|Automatska ponovna primjena mobilne postavke isključena.
+hr|mobile_hook_nothing|Mobilna postavka nije primijenjena, nema ničega za ponovnu primjenu. Najprije je primijenite.
+hr|mobile_hook_removed|Mobilna postavka više nije primijenjena: njezina automatska ponovna primjena je isključena.
+hr|label_mobile_hook|Automatska ponovna primjena mobilne postavke
+hr|status_enabled|uključena
+hr|status_disabled|isključena
 hr|status_applied|primijenjeno
 hr|status_not_applied|nije primijenjeno
 hu|script_title|Alapértelmezett nyelv eszköz
@@ -1173,6 +1276,15 @@ hu|mobile_missing|A mobilfelület nincs telepítve ezen a gépen. (Proxmox VE 9+
 hu|mobile_failed|A mobilfelület lapját nem sikerült módosítani.
 hu|mobile_reload_hint|Zárja be és nyissa meg újra a mobilfelületet az eredmény megtekintéséhez.
 hu|label_mobile_language|Mobilfelület alapértelmezése
+hu|menu_mobile_hook_enable|A mobil beállítás automatikus újraalkalmazása frissítés után
+hu|menu_mobile_hook_disable|A mobil beállítás automatikus újraalkalmazásának leállítása
+hu|mobile_hook_enabled|A mobil beállítás a mobilfelület minden frissítése után automatikusan újra alkalmazva lesz.
+hu|mobile_hook_disabled|A mobil beállítás automatikus újraalkalmazása kikapcsolva.
+hu|mobile_hook_nothing|A mobil beállítás nincs alkalmazva, nincs mit újra alkalmazni. Először alkalmazza.
+hu|mobile_hook_removed|A mobil beállítás már nincs alkalmazva: az automatikus újraalkalmazása kikapcsolva.
+hu|label_mobile_hook|A mobil beállítás automatikus újraalkalmazása
+hu|status_enabled|bekapcsolva
+hu|status_disabled|kikapcsolva
 hu|status_applied|alkalmazva
 hu|status_not_applied|nincs alkalmazva
 it|script_title|Utility lingua predefinita
@@ -1261,6 +1373,15 @@ it|mobile_missing|L'interfaccia mobile non è installata su questo host. (Proxmo
 it|mobile_failed|Non è stato possibile modificare la pagina dell'interfaccia mobile.
 it|mobile_reload_hint|Chiudi e riapri l'interfaccia mobile per vedere il risultato.
 it|label_mobile_language|Predefinito dell'interfaccia mobile
+it|menu_mobile_hook_enable|Riapplica automaticamente l'impostazione mobile dopo un aggiornamento
+it|menu_mobile_hook_disable|Non riapplicare più automaticamente l'impostazione mobile
+it|mobile_hook_enabled|L'impostazione mobile verrà riapplicata automaticamente dopo ogni aggiornamento dell'interfaccia mobile.
+it|mobile_hook_disabled|Riapplicazione automatica dell'impostazione mobile disattivata.
+it|mobile_hook_nothing|L'impostazione mobile non è applicata, non c'è nulla da riapplicare. Applicala prima.
+it|mobile_hook_removed|L'impostazione mobile non è più applicata: la sua riapplicazione automatica è disattivata.
+it|label_mobile_hook|Riapplicazione automatica dell'impostazione mobile
+it|status_enabled|attivata
+it|status_disabled|disattivata
 it|status_applied|applicata
 it|status_not_applied|non applicata
 ja|script_title|デフォルト言語ユーティリティ
@@ -1349,6 +1470,15 @@ ja|mobile_missing|このホストにはモバイルインターフェースが�
 ja|mobile_failed|モバイルインターフェースのページを変更できませんでした。
 ja|mobile_reload_hint|結果を確認するには、モバイルインターフェースを閉じて開き直してください。
 ja|label_mobile_language|モバイルインターフェースの既定
+ja|menu_mobile_hook_enable|更新後にモバイル設定を自動的に再適用
+ja|menu_mobile_hook_disable|モバイル設定の自動再適用を停止
+ja|mobile_hook_enabled|モバイルインターフェースが更新されるたびに、モバイル設定が自動的に再適用されます。
+ja|mobile_hook_disabled|モバイル設定の自動再適用を無効にしました。
+ja|mobile_hook_nothing|モバイル設定が適用されていないため、再適用するものはありません。先に適用してください。
+ja|mobile_hook_removed|モバイル設定が適用されなくなったため、自動再適用を無効にしました。
+ja|label_mobile_hook|モバイル設定の自動再適用
+ja|status_enabled|有効
+ja|status_disabled|無効
 ja|status_applied|適用済み
 ja|status_not_applied|未適用
 ka|script_title|ნაგულისხმევი ენის ხელსაწყო
@@ -1437,6 +1567,15 @@ ka|mobile_missing|მობილური ინტერფეისი ამ
 ka|mobile_failed|მობილური ინტერფეისის გვერდის შეცვლა ვერ მოხერხდა.
 ka|mobile_reload_hint|დახურეთ და ხელახლა გახსენით მობილური ინტერფეისი შედეგის სანახავად.
 ka|label_mobile_language|მობილური ინტერფეისის ნაგულისხმევი
+ka|menu_mobile_hook_enable|მობილური პარამეტრის ავტომატურად ხელახლა გამოყენება განახლების შემდეგ
+ka|menu_mobile_hook_disable|მობილური პარამეტრის ავტომატურად ხელახლა გამოყენების შეწყვეტა
+ka|mobile_hook_enabled|მობილური პარამეტრი ავტომატურად ხელახლა იქნება გამოყენებული მობილური ინტერფეისის ყოველი განახლების შემდეგ.
+ka|mobile_hook_disabled|მობილური პარამეტრის ავტომატური ხელახალი გამოყენება გამორთულია.
+ka|mobile_hook_nothing|მობილური პარამეტრი არ არის გამოყენებული, ხელახლა გამოსაყენებელი არაფერია. ჯერ გამოიყენეთ ის.
+ka|mobile_hook_removed|მობილური პარამეტრი აღარ არის გამოყენებული: მისი ავტომატური ხელახალი გამოყენება გამორთულია.
+ka|label_mobile_hook|მობილური პარამეტრის ავტომატური ხელახალი გამოყენება
+ka|status_enabled|ჩართულია
+ka|status_disabled|გამორთულია
 ka|status_applied|გამოყენებულია
 ka|status_not_applied|არ არის გამოყენებული
 kr|script_title|기본 언어 유틸리티
@@ -1525,6 +1664,15 @@ kr|mobile_missing|이 호스트에는 모바일 인터페이스가 설치되어 
 kr|mobile_failed|모바일 인터페이스 페이지를 변경하지 못했습니다.
 kr|mobile_reload_hint|결과를 보려면 모바일 인터페이스를 닫았다가 다시 여세요.
 kr|label_mobile_language|모바일 인터페이스 기본값
+kr|menu_mobile_hook_enable|업데이트 후 모바일 설정 자동 재적용
+kr|menu_mobile_hook_disable|모바일 설정 자동 재적용 중지
+kr|mobile_hook_enabled|모바일 인터페이스가 업데이트될 때마다 모바일 설정이 자동으로 다시 적용됩니다.
+kr|mobile_hook_disabled|모바일 설정 자동 재적용이 비활성화되었습니다.
+kr|mobile_hook_nothing|모바일 설정이 적용되어 있지 않아 다시 적용할 것이 없습니다. 먼저 적용하세요.
+kr|mobile_hook_removed|모바일 설정이 더 이상 적용되어 있지 않아 자동 재적용이 비활성화되었습니다.
+kr|label_mobile_hook|모바일 설정 자동 재적용
+kr|status_enabled|활성화됨
+kr|status_disabled|비활성화됨
 kr|status_applied|적용됨
 kr|status_not_applied|적용되지 않음
 nb|script_title|Verktøy for standardspråk
@@ -1613,6 +1761,15 @@ nb|mobile_missing|Det mobile grensesnittet er ikke installert på denne verten. 
 nb|mobile_failed|Siden for det mobile grensesnittet kunne ikke endres.
 nb|mobile_reload_hint|Lukk og åpne det mobile grensesnittet på nytt for å se resultatet.
 nb|label_mobile_language|Standard for mobilt grensesnitt
+nb|menu_mobile_hook_enable|Bruk den mobile innstillingen automatisk igjen etter en oppdatering
+nb|menu_mobile_hook_disable|Slutt å bruke den mobile innstillingen automatisk igjen
+nb|mobile_hook_enabled|Den mobile innstillingen brukes automatisk igjen etter hver oppdatering av det mobile grensesnittet.
+nb|mobile_hook_disabled|Automatisk gjenbruk av den mobile innstillingen er slått av.
+nb|mobile_hook_nothing|Den mobile innstillingen er ikke i bruk, det er ingenting å bruke igjen. Bruk den først.
+nb|mobile_hook_removed|Den mobile innstillingen er ikke lenger i bruk: automatisk gjenbruk av den er slått av.
+nb|label_mobile_hook|Automatisk gjenbruk av den mobile innstillingen
+nb|status_enabled|slått på
+nb|status_disabled|slått av
 nb|status_applied|brukt
 nb|status_not_applied|ikke brukt
 nl|script_title|Hulpmiddel voor standaardtaal
@@ -1701,6 +1858,15 @@ nl|mobile_missing|De mobiele interface is niet geïnstalleerd op deze host. (Pro
 nl|mobile_failed|De pagina van de mobiele interface kon niet worden gewijzigd.
 nl|mobile_reload_hint|Sluit de mobiele interface en open ze opnieuw om het resultaat te zien.
 nl|label_mobile_language|Standaard van de mobiele interface
+nl|menu_mobile_hook_enable|Mobiele instelling na een update automatisch opnieuw toepassen
+nl|menu_mobile_hook_disable|Mobiele instelling niet meer automatisch opnieuw toepassen
+nl|mobile_hook_enabled|De mobiele instelling wordt na elke update van de mobiele interface automatisch opnieuw toegepast.
+nl|mobile_hook_disabled|Automatisch opnieuw toepassen van de mobiele instelling uitgeschakeld.
+nl|mobile_hook_nothing|De mobiele instelling is niet toegepast, er is niets om opnieuw toe te passen. Pas haar eerst toe.
+nl|mobile_hook_removed|De mobiele instelling is niet meer toegepast: het automatisch opnieuw toepassen is uitgeschakeld.
+nl|label_mobile_hook|Automatisch opnieuw toepassen van de mobiele instelling
+nl|status_enabled|ingeschakeld
+nl|status_disabled|uitgeschakeld
 nl|status_applied|toegepast
 nl|status_not_applied|niet toegepast
 nn|script_title|Verktøy for standardspråk
@@ -1789,6 +1955,15 @@ nn|mobile_missing|Det mobile grensesnittet er ikkje installert på denne verten.
 nn|mobile_failed|Sida for det mobile grensesnittet kunne ikkje endrast.
 nn|mobile_reload_hint|Lukk og opne det mobile grensesnittet på nytt for å sjå resultatet.
 nn|label_mobile_language|Standard for mobilt grensesnitt
+nn|menu_mobile_hook_enable|Bruk den mobile innstillinga automatisk igjen etter ei oppdatering
+nn|menu_mobile_hook_disable|Slutt å bruke den mobile innstillinga automatisk igjen
+nn|mobile_hook_enabled|Den mobile innstillinga blir brukt automatisk igjen etter kvar oppdatering av det mobile grensesnittet.
+nn|mobile_hook_disabled|Automatisk gjenbruk av den mobile innstillinga er slått av.
+nn|mobile_hook_nothing|Den mobile innstillinga er ikkje i bruk, det er ingenting å bruke igjen. Bruk ho først.
+nn|mobile_hook_removed|Den mobile innstillinga er ikkje lenger i bruk: automatisk gjenbruk av ho er slått av.
+nn|label_mobile_hook|Automatisk gjenbruk av den mobile innstillinga
+nn|status_enabled|slått på
+nn|status_disabled|slått av
 nn|status_applied|i bruk
 nn|status_not_applied|ikkje i bruk
 pl|script_title|Narzędzie domyślnego języka
@@ -1877,6 +2052,15 @@ pl|mobile_missing|Interfejs mobilny nie jest zainstalowany na tym hoście. (Prox
 pl|mobile_failed|Nie udało się zmienić strony interfejsu mobilnego.
 pl|mobile_reload_hint|Zamknij i otwórz ponownie interfejs mobilny, aby zobaczyć wynik.
 pl|label_mobile_language|Domyślny dla interfejsu mobilnego
+pl|menu_mobile_hook_enable|Automatycznie stosuj ponownie ustawienie mobilne po aktualizacji
+pl|menu_mobile_hook_disable|Przestań automatycznie stosować ponownie ustawienie mobilne
+pl|mobile_hook_enabled|Ustawienie mobilne będzie automatycznie stosowane ponownie po każdej aktualizacji interfejsu mobilnego.
+pl|mobile_hook_disabled|Automatyczne ponowne stosowanie ustawienia mobilnego wyłączone.
+pl|mobile_hook_nothing|Ustawienie mobilne nie jest zastosowane, nie ma czego stosować ponownie. Najpierw je zastosuj.
+pl|mobile_hook_removed|Ustawienie mobilne nie jest już zastosowane: jego automatyczne ponowne stosowanie zostało wyłączone.
+pl|label_mobile_hook|Automatyczne ponowne stosowanie ustawienia mobilnego
+pl|status_enabled|włączone
+pl|status_disabled|wyłączone
 pl|status_applied|zastosowane
 pl|status_not_applied|niezastosowane
 pt_BR|script_title|Utilitário de idioma padrão
@@ -1965,6 +2149,15 @@ pt_BR|mobile_missing|A interface móvel não está instalada neste host. (Proxmo
 pt_BR|mobile_failed|Não foi possível alterar a página da interface móvel.
 pt_BR|mobile_reload_hint|Feche e reabra a interface móvel para ver o resultado.
 pt_BR|label_mobile_language|Padrão da interface móvel
+pt_BR|menu_mobile_hook_enable|Reaplicar automaticamente o ajuste móvel após uma atualização
+pt_BR|menu_mobile_hook_disable|Parar de reaplicar automaticamente o ajuste móvel
+pt_BR|mobile_hook_enabled|O ajuste móvel será reaplicado automaticamente após cada atualização da interface móvel.
+pt_BR|mobile_hook_disabled|Reaplicação automática do ajuste móvel desativada.
+pt_BR|mobile_hook_nothing|O ajuste móvel não está aplicado, não há nada para reaplicar. Aplique-o primeiro.
+pt_BR|mobile_hook_removed|O ajuste móvel não está mais aplicado: sua reaplicação automática está desativada.
+pt_BR|label_mobile_hook|Reaplicação automática do ajuste móvel
+pt_BR|status_enabled|ativada
+pt_BR|status_disabled|desativada
 pt_BR|status_applied|aplicado
 pt_BR|status_not_applied|não aplicado
 ru|script_title|Утилита языка по умолчанию
@@ -2053,6 +2246,15 @@ ru|mobile_missing|Мобильный интерфейс не установле�
 ru|mobile_failed|Не удалось изменить страницу мобильного интерфейса.
 ru|mobile_reload_hint|Закройте и снова откройте мобильный интерфейс, чтобы увидеть результат.
 ru|label_mobile_language|По умолчанию для мобильного интерфейса
+ru|menu_mobile_hook_enable|Автоматически применять мобильную настройку снова после обновления
+ru|menu_mobile_hook_disable|Больше не применять мобильную настройку автоматически
+ru|mobile_hook_enabled|Мобильная настройка будет автоматически применяться снова после каждого обновления мобильного интерфейса.
+ru|mobile_hook_disabled|Автоматическое повторное применение мобильной настройки отключено.
+ru|mobile_hook_nothing|Мобильная настройка не применена, применять снова нечего. Сначала примените её.
+ru|mobile_hook_removed|Мобильная настройка больше не применена: её автоматическое повторное применение отключено.
+ru|label_mobile_hook|Автоматическое повторное применение мобильной настройки
+ru|status_enabled|включено
+ru|status_disabled|отключено
 ru|status_applied|применено
 ru|status_not_applied|не применено
 sl|script_title|Orodje za privzeti jezik
@@ -2141,6 +2343,15 @@ sl|mobile_missing|Mobilni vmesnik ni nameščen na tem gostitelju. (Proxmox VE 9
 sl|mobile_failed|Strani mobilnega vmesnika ni bilo mogoče spremeniti.
 sl|mobile_reload_hint|Zaprite in znova odprite mobilni vmesnik, da vidite rezultat.
 sl|label_mobile_language|Privzeto za mobilni vmesnik
+sl|menu_mobile_hook_enable|Samodejno znova uporabi mobilno nastavitev po posodobitvi
+sl|menu_mobile_hook_disable|Ne uporabljaj več samodejno znova mobilne nastavitve
+sl|mobile_hook_enabled|Mobilna nastavitev bo samodejno znova uporabljena po vsaki posodobitvi mobilnega vmesnika.
+sl|mobile_hook_disabled|Samodejna ponovna uporaba mobilne nastavitve izklopljena.
+sl|mobile_hook_nothing|Mobilna nastavitev ni uporabljena, ničesar ni za ponovno uporabo. Najprej jo uporabite.
+sl|mobile_hook_removed|Mobilna nastavitev ni več uporabljena: njena samodejna ponovna uporaba je izklopljena.
+sl|label_mobile_hook|Samodejna ponovna uporaba mobilne nastavitve
+sl|status_enabled|vklopljena
+sl|status_disabled|izklopljena
 sl|status_applied|uporabljeno
 sl|status_not_applied|ni uporabljeno
 sv|script_title|Verktyg för standardspråk
@@ -2229,6 +2440,15 @@ sv|mobile_missing|Det mobila gränssnittet är inte installerat på den här vä
 sv|mobile_failed|Sidan för det mobila gränssnittet kunde inte ändras.
 sv|mobile_reload_hint|Stäng och öppna det mobila gränssnittet igen för att se resultatet.
 sv|label_mobile_language|Standard för mobilt gränssnitt
+sv|menu_mobile_hook_enable|Tillämpa den mobila inställningen automatiskt igen efter en uppdatering
+sv|menu_mobile_hook_disable|Sluta tillämpa den mobila inställningen automatiskt igen
+sv|mobile_hook_enabled|Den mobila inställningen tillämpas automatiskt igen efter varje uppdatering av det mobila gränssnittet.
+sv|mobile_hook_disabled|Automatisk återtillämpning av den mobila inställningen avstängd.
+sv|mobile_hook_nothing|Den mobila inställningen är inte tillämpad, det finns inget att tillämpa igen. Tillämpa den först.
+sv|mobile_hook_removed|Den mobila inställningen är inte längre tillämpad: dess automatiska återtillämpning är avstängd.
+sv|label_mobile_hook|Automatisk återtillämpning av den mobila inställningen
+sv|status_enabled|på
+sv|status_disabled|av
 sv|status_applied|tillämpat
 sv|status_not_applied|inte tillämpat
 tr|script_title|Varsayılan Dil Aracı
@@ -2317,6 +2537,15 @@ tr|mobile_missing|Mobil arayüz bu sunucuda kurulu değil. (Proxmox VE 9+)
 tr|mobile_failed|Mobil arayüz sayfası değiştirilemedi.
 tr|mobile_reload_hint|Sonucu görmek için mobil arayüzü kapatıp yeniden açın.
 tr|label_mobile_language|Mobil arayüz varsayılanı
+tr|menu_mobile_hook_enable|Mobil ayarı bir güncellemeden sonra otomatik olarak yeniden uygula
+tr|menu_mobile_hook_disable|Mobil ayarı otomatik olarak yeniden uygulamayı durdur
+tr|mobile_hook_enabled|Mobil ayar, mobil arayüzün her güncellemesinden sonra otomatik olarak yeniden uygulanacak.
+tr|mobile_hook_disabled|Mobil ayarın otomatik olarak yeniden uygulanması devre dışı bırakıldı.
+tr|mobile_hook_nothing|Mobil ayar uygulanmamış, yeniden uygulanacak bir şey yok. Önce ayarı uygulayın.
+tr|mobile_hook_removed|Mobil ayar artık uygulanmıyor: otomatik olarak yeniden uygulanması devre dışı bırakıldı.
+tr|label_mobile_hook|Mobil ayarın otomatik olarak yeniden uygulanması
+tr|status_enabled|etkin
+tr|status_disabled|devre dışı
 tr|status_applied|uygulandı
 tr|status_not_applied|uygulanmadı
 ukr|script_title|Утиліта мови за замовчуванням
@@ -2405,6 +2634,15 @@ ukr|mobile_missing|Мобільний інтерфейс не встановле
 ukr|mobile_failed|Не вдалося змінити сторінку мобільного інтерфейсу.
 ukr|mobile_reload_hint|Закрийте і знову відкрийте мобільний інтерфейс, щоб побачити результат.
 ukr|label_mobile_language|За замовчуванням для мобільного інтерфейсу
+ukr|menu_mobile_hook_enable|Автоматично застосовувати мобільне налаштування знову після оновлення
+ukr|menu_mobile_hook_disable|Більше не застосовувати мобільне налаштування автоматично
+ukr|mobile_hook_enabled|Мобільне налаштування автоматично застосовуватиметься знову після кожного оновлення мобільного інтерфейсу.
+ukr|mobile_hook_disabled|Автоматичне повторне застосування мобільного налаштування вимкнено.
+ukr|mobile_hook_nothing|Мобільне налаштування не застосовано, немає чого застосовувати знову. Спочатку застосуйте його.
+ukr|mobile_hook_removed|Мобільне налаштування більше не застосовано: його автоматичне повторне застосування вимкнено.
+ukr|label_mobile_hook|Автоматичне повторне застосування мобільного налаштування
+ukr|status_enabled|увімкнено
+ukr|status_disabled|вимкнено
 ukr|status_applied|застосовано
 ukr|status_not_applied|не застосовано
 zh_CN|script_title|默认语言工具
@@ -2493,6 +2731,15 @@ zh_CN|mobile_missing|此主机未安装移动界面。 (Proxmox VE 9+)
 zh_CN|mobile_failed|无法修改移动界面的页面。
 zh_CN|mobile_reload_hint|关闭并重新打开移动界面即可看到效果。
 zh_CN|label_mobile_language|移动界面默认
+zh_CN|menu_mobile_hook_enable|更新后自动重新应用移动设置
+zh_CN|menu_mobile_hook_disable|停止自动重新应用移动设置
+zh_CN|mobile_hook_enabled|每次移动界面更新后，移动设置都会自动重新应用。
+zh_CN|mobile_hook_disabled|已禁用移动设置的自动重新应用。
+zh_CN|mobile_hook_nothing|移动设置未应用，没有可重新应用的内容。请先应用它。
+zh_CN|mobile_hook_removed|移动设置已不再应用：其自动重新应用已禁用。
+zh_CN|label_mobile_hook|移动设置的自动重新应用
+zh_CN|status_enabled|已启用
+zh_CN|status_disabled|已禁用
 zh_CN|status_applied|已应用
 zh_CN|status_not_applied|未应用
 zh_TW|script_title|預設語言工具
@@ -2581,6 +2828,15 @@ zh_TW|mobile_missing|此主機未安裝行動介面。 (Proxmox VE 9+)
 zh_TW|mobile_failed|無法修改行動介面的頁面。
 zh_TW|mobile_reload_hint|關閉並重新開啟行動介面即可看到結果。
 zh_TW|label_mobile_language|行動介面預設
+zh_TW|menu_mobile_hook_enable|更新後自動重新套用行動設定
+zh_TW|menu_mobile_hook_disable|停止自動重新套用行動設定
+zh_TW|mobile_hook_enabled|每次行動介面更新後，行動設定都會自動重新套用。
+zh_TW|mobile_hook_disabled|已停用行動設定的自動重新套用。
+zh_TW|mobile_hook_nothing|行動設定未套用，沒有可重新套用的內容。請先套用。
+zh_TW|mobile_hook_removed|行動設定已不再套用：其自動重新套用已停用。
+zh_TW|label_mobile_hook|行動設定的自動重新套用
+zh_TW|status_enabled|已啟用
+zh_TW|status_disabled|已停用
 zh_TW|status_applied|已套用
 zh_TW|status_not_applied|未套用
 I18N_DATA
@@ -2701,7 +2957,7 @@ tr_msg() {
 }
 
 # ------------------------------------------------------------
-# Colors (Proxmox-inspired) — same visual engine as
+# Colors (Proxmox-inspired), same visual engine as
 # lxc-wireguard-server-install.sh, orange as the accent color.
 # ------------------------------------------------------------
 if [[ -t 1 ]]; then
@@ -2748,8 +3004,6 @@ hr() {
     printf -v line "%*s" "$cols" ""
     printf "%b%s%b\n" "${PMX_ORANGE_DARK}" "${line// /─}" "${RESET}"
 }
-
-rule() { hr; }
 
 panel() {
     local color="$1"
@@ -3059,6 +3313,7 @@ restore_from_manifest() {
         fi
     done < "$dir/MANIFEST.txt"
 
+    refresh_hook_file
     restart_pveproxy
 
     if command -v timedatectl >/dev/null 2>&1 && [[ -f "$TIMEZONE_FILE" ]]; then
@@ -3248,49 +3503,143 @@ mobile_tpl_exists() {
     [[ -f "$MOBILE_INDEX_TPL" ]]
 }
 
+# The mobile interface is a separate application. Its page already receives the
+# language of datacenter.cfg, but it keeps its own language in the browser store
+# and never looks at that value, so it always starts in English. These few lines
+# copy the server default into that store, and only when the browser has never
+# chosen a language: a choice made in the mobile settings still wins.
+# The block goes on its own lines right before </head>, so it runs once the page
+# has defined the server values and before the application itself starts.
+# The same engine is run by the APT hook after a package update.
+MOBILE_PY="$(cat <<'PY'
+from pathlib import Path
+import os
+import sys
+
+BEGIN = "<!-- BEGIN Proxmox-Tools default language -->"
+END = "<!-- END Proxmox-Tools default language -->"
+SNIPPET = (
+    "  " + BEGIN + "\n"
+    '  <script type="text/javascript">\n'
+    "    try {\n"
+    '        if (Proxmox.defaultLang && !localStorage.getItem("Language")) {\n'
+    '            localStorage.setItem("Language", JSON.stringify(Proxmox.defaultLang));\n'
+    "        }\n"
+    "    } catch (e) { /* storage unavailable, keep the built in language */ }\n"
+    "  </script>\n"
+    "  " + END + "\n"
+)
+HEAD_END = "\n</head>\n"
+PATCHED = "\n" + SNIPPET + "</head>\n"
+
+
+def state(text):
+    if BEGIN not in text and text.count(HEAD_END) == 1:
+        return "stock"
+    if text.count(BEGIN) == 1 and text.count(PATCHED) == 1:
+        return "patched"
+    return "unknown"
+
+
+def main(command):
+    path = Path(os.environ["MOBILE_INDEX_TPL"])
+    text = path.read_text(encoding="utf-8")
+    current = state(text)
+    if command == "state":
+        print(current)
+        return 0
+    # reapply runs after every package operation: it only acts on a stock file
+    if command == "reapply":
+        if current != "stock":
+            return 0
+        command = "apply"
+    if command == "apply" and current == "stock":
+        before, after = HEAD_END, PATCHED
+    elif command == "revert" and current == "patched":
+        before, after = PATCHED, HEAD_END
+    else:
+        return 1
+    # written through the existing file, which keeps its owner and permissions
+    path.write_text(text.replace(before, after, 1), encoding="utf-8")
+    return 0
+
+
+sys.exit(main(sys.argv[1]))
+PY
+)"
+
+mobile_engine() {
+    if ! command -v python3 >/dev/null 2>&1; then
+        say_err "$(tr_msg missing_command): python3"
+        return 1
+    fi
+    MOBILE_INDEX_TPL="$MOBILE_INDEX_TPL" python3 -c "$MOBILE_PY" "$@"
+}
+
+# Prints stock, patched or unknown.
+mobile_state() {
+    mobile_engine state
+}
+
 mobile_language_applied() {
-    mobile_tpl_exists && grep -qF "$MOBILE_SNIPPET_BEGIN" "$MOBILE_INDEX_TPL"
+    mobile_tpl_exists && [[ "$(mobile_state)" == "patched" ]]
 }
 
-# The block goes right before </head>, so it runs once the page has defined the
-# server values and before the application itself starts.
-add_mobile_language_snippet() {
-    local tmp
-    tmp="$(mktemp)"
+# ------------------------------------------------------------
+# APT hook, so an update of the mobile interface does not silently drop the
+# mobile setting. The rest of what this script changes is configuration that
+# package updates leave alone.
+# ------------------------------------------------------------
 
-    awk -v begin="$MOBILE_SNIPPET_BEGIN" -v end="$MOBILE_SNIPPET_END" '
-        !inserted && /<\/head>/ {
-            print "  " begin
-            print "  <script type=\"text/javascript\">"
-            print "    try {"
-            print "        if (Proxmox.defaultLang && !localStorage.getItem(\"Language\")) {"
-            print "            localStorage.setItem(\"Language\", JSON.stringify(Proxmox.defaultLang));"
-            print "        }"
-            print "    } catch (e) { /* storage unavailable, keep the built in language */ }"
-            print "  </script>"
-            print "  " end
-            inserted = 1
-        }
-        { print }
-    ' "$MOBILE_INDEX_TPL" >"$tmp"
-
-    # Written through the existing file to keep its owner and permissions.
-    cat "$tmp" >"$MOBILE_INDEX_TPL"
-    rm -f "$tmp"
+hook_is_enabled() {
+    [[ -f "$APT_HOOK_FILE" ]]
 }
 
-remove_mobile_language_snippet() {
-    local tmp
-    tmp="$(mktemp)"
+# pveproxy reads the template on every request, so the hook restarts nothing.
+write_hook_file() {
+    mkdir -p "$HELPER_DIR"
+    printf '%s\n' "$MOBILE_PY" >"$HELPER_DIR/mobile.py"
+    chmod 0644 "$HELPER_DIR/mobile.py"
 
-    awk -v begin="$MOBILE_SNIPPET_BEGIN" -v end="$MOBILE_SNIPPET_END" '
-        index($0, begin) { skip = 1 }
-        !skip { print }
-        index($0, end) { skip = 0 }
-    ' "$MOBILE_INDEX_TPL" >"$tmp"
+    cat >"$APT_HOOK_FILE" <<EOF_HOOK
+// Managed by Proxmox-Tools pve-default-language-i18n
+// Re-applies the mobile setting when a package update restores the stock page.
+DPkg::Post-Invoke {"if [ -f ${HELPER_DIR}/mobile.py ] && [ -f ${MOBILE_INDEX_TPL} ]; then MOBILE_INDEX_TPL=${MOBILE_INDEX_TPL} python3 ${HELPER_DIR}/mobile.py reapply || true; fi"; };
+EOF_HOOK
+    chmod 0644 "$APT_HOOK_FILE"
+}
 
-    cat "$tmp" >"$MOBILE_INDEX_TPL"
-    rm -f "$tmp"
+remove_hook_files() {
+    rm -f "$APT_HOOK_FILE"
+    rm -rf "$HELPER_DIR"
+}
+
+# The hook only exists while the mobile setting is in place, and its copy of
+# the engine follows the version of this script.
+refresh_hook_file() {
+    hook_is_enabled || return 0
+    if mobile_language_applied; then
+        write_hook_file
+    else
+        remove_hook_files
+        say_info "$(tr_msg mobile_hook_removed)"
+    fi
+}
+
+enable_hook() {
+    if ! mobile_language_applied; then
+        say_info "$(tr_msg mobile_hook_nothing)"
+        return 0
+    fi
+
+    write_hook_file
+    say_ok "$(tr_msg mobile_hook_enabled)"
+    say_info "${PMX_CYAN}${APT_HOOK_FILE}${RESET}"
+}
+
+disable_hook() {
+    remove_hook_files
+    say_ok "$(tr_msg mobile_hook_disabled)"
 }
 
 set_timezone_and_ntp() {
@@ -3419,7 +3768,7 @@ choose_and_apply() {
 }
 
 show_status() {
-    local dc_lang locale_value default_lc_all_value tz_value profile_status generated_status current_shell current_lc_all mobile_status
+    local dc_lang locale_value default_lc_all_value tz_value profile_status generated_status current_shell current_lc_all mobile_status hook_status
 
     dc_lang="$(current_datacenter_language || true)"
     locale_value="$(current_default_locale || true)"
@@ -3449,6 +3798,12 @@ show_status() {
         mobile_status="$(tr_msg status_not_applied) (Proxmox VE 9+)"
     fi
 
+    if hook_is_enabled; then
+        hook_status="$(tr_msg status_enabled)"
+    else
+        hook_status="$(tr_msg status_disabled)"
+    fi
+
     if [[ -n "$locale_value" && "$locale_value" != "$(tr_msg not_set)" ]] && locale -a 2>/dev/null | grep -qi "^${locale_value%.UTF-8}\(\.utf8\|\.UTF-8\)$"; then
         generated_status="$(tr_msg status_ok)"
     else
@@ -3464,7 +3819,8 @@ show_status() {
         "$(tr_msg label_generated_locale): ${BOLD}${generated_status}${RESET}" \
         "$(tr_msg label_timezone): ${BOLD}${tz_value}${RESET}" \
         "$(tr_msg label_shell_profile): ${BOLD}${profile_status}${RESET}" \
-        "$(tr_msg label_mobile_language): ${BOLD}${mobile_status}${RESET}"
+        "$(tr_msg label_mobile_language): ${BOLD}${mobile_status}${RESET}" \
+        "$(tr_msg label_mobile_hook): ${BOLD}${hook_status}${RESET}"
 }
 
 apply_mobile_language() {
@@ -3475,10 +3831,17 @@ apply_mobile_language() {
         return 1
     fi
 
-    if mobile_language_applied; then
-        say_ok "$(tr_msg mobile_already_applied)"
-        return 0
-    fi
+    case "$(mobile_state)" in
+        stock) ;;
+        patched)
+            say_ok "$(tr_msg mobile_already_applied)"
+            return 0
+            ;;
+        *)
+            say_err "$(tr_msg mobile_failed)"
+            return 1
+            ;;
+    esac
 
     panel "$PMX_BLUE" "$(tr_msg mobile_title)" \
         "$(tr_msg mobile_body_1)" \
@@ -3496,13 +3859,12 @@ apply_mobile_language() {
     backup_dir="$(create_backup)"
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
-    add_mobile_language_snippet
-
-    if ! mobile_language_applied; then
+    if ! mobile_engine apply || ! mobile_language_applied; then
         say_err "$(tr_msg mobile_failed)"
         return 1
     fi
 
+    refresh_hook_file
     restart_pveproxy
     echo
     say_ok "$(tr_msg mobile_applied)"
@@ -3521,13 +3883,12 @@ remove_mobile_language() {
     backup_dir="$(create_backup)"
     say_info "$(tr_msg backup_created): ${PMX_CYAN}${backup_dir}${RESET}"
 
-    remove_mobile_language_snippet
-
-    if mobile_language_applied; then
+    if ! mobile_engine revert || mobile_language_applied; then
         say_err "$(tr_msg mobile_failed)"
         return 1
     fi
 
+    refresh_hook_file
     restart_pveproxy
     echo
     say_ok "$(tr_msg mobile_removed)"
@@ -3547,11 +3908,13 @@ main_menu() {
         printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
         printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_apply)"
         printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_remove)"
-        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_hook_enable)"
+        printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_hook_disable)"
+        printf " %b11)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
         local choice
-        read -r -p "$(tr_msg choose_option) [1-9]: " choice
+        read -r -p "$(tr_msg choose_option) [1-11]: " choice
         echo
 
         case "$choice" in
@@ -3563,7 +3926,9 @@ main_menu() {
             6) show_backups ;;
             7) apply_mobile_language || true; pause ;;
             8) remove_mobile_language || true; pause ;;
-            9) say_info "$(tr_msg bye)"; exit 0 ;;
+            9) enable_hook; pause ;;
+            10) disable_hook; pause ;;
+            11) say_info "$(tr_msg bye)"; exit 0 ;;
             *) say_err "$(tr_msg invalid_choice)"; pause ;;
         esac
     done
