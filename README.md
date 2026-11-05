@@ -293,6 +293,7 @@ Raises the history of the Proxmox VE web consoles from the default **1000 lines*
 * 🎯 changes **a single line** of `/usr/share/pve-xtermjs/util.js`: the default options handed to every console
 * 🔎 the expected code is matched exactly before any change: if the file looks different the script says so and touches nothing
 * 🔁 safe to run twice: an already patched file is detected and left alone
+* 🔄 optional **automatic re-apply** after a `pve-xtermjs` update, with the number of lines you chose, through an APT hook
 * 💾 automatic **backup** before patching
 * ♻️ built-in **restore** options
 * 🧪 a test option prints 500 more numbered lines than the limit you chose, so you can scroll up and check it right away
@@ -304,7 +305,7 @@ Raises the history of the Proxmox VE web consoles from the default **1000 lines*
 * **A value saved in a browser wins.** Recent versions of `pve-xtermjs` read a `pve-xterm-scrollback` key from the browser storage, there is no field for it in the Proxmox settings yet, and it takes priority over the default set by this script.
 * **No restart needed**: `pveproxy` reads the file on every request. Open a new console.
 * **The browser cache can hide the change.** Proxmox sends no expiry for this file, so a browser may keep the old copy for days, and a plain or even hard refresh is not always enough. Check in a private window, then clear the site data in each browser you use.
-* Updates of the `pve-xtermjs` package overwrite the file, run the script again afterwards.
+* Updates of the `pve-xtermjs` package overwrite the file: run the script again afterwards, or enable the automatic re-apply from the menu. It puts the patch back after each update with the number of lines in place when it was enabled (or last changed), and does nothing on a file that no longer looks as expected.
 
 #### Version compatibility
 

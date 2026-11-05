@@ -8,18 +8,8 @@ SCROLLBACK_RECOMMENDED=100000
 SCROLLBACK_MIN=1000
 SCROLLBACK_MAX=1000000
 SCROLLBACK_PRESETS=(10000 25000 50000 100000 250000)
-
-# getTerminalSettings() in util.js builds the options given to every xterm.js
-# console (host shell, containers, VMs). It starts from an empty object, so
-# xterm.js falls back to its own default of 1000 lines. Starting from
-# { scrollback: N } instead sets the default for all consoles, while a
-# pve-xterm-scrollback value saved in the browser, read further down by
-# recent versions, still wins.
-# The patch and the state detection both match this whole two line block, with
-# either the stock {} or an already patched { scrollback: N }, so a file that
-# no longer looks like this is reported instead of patched blindly.
-BLOCK_HEAD="function getTerminalSettings() {
-    var res = "
+HELPER_DIR="/usr/local/lib/pve-xtermjs-scrollback"
+APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-xtermjs-scrollback"
 
 # ------------------------------------------------------------
 # Language detection (EN default, FR if system locale starts with fr)
@@ -58,6 +48,12 @@ tr_msg() {
 
         fr:menu_test) echo "Générer des lignes de test (vérifier l'historique de la console)" ;;
         en:menu_test) echo "Generate test lines (check the console history)" ;;
+
+        fr:menu_hook_enable) echo "Réappliquer automatiquement après une mise à jour" ;;
+        en:menu_hook_enable) echo "Re-apply automatically after an update" ;;
+
+        fr:menu_hook_disable) echo "Ne plus réappliquer automatiquement" ;;
+        en:menu_hook_disable) echo "Stop re-applying automatically" ;;
 
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
@@ -133,6 +129,36 @@ tr_msg() {
 
         fr:state_unknown) echo "structure du fichier inattendue" ;;
         en:state_unknown) echo "unexpected file structure" ;;
+
+        fr:status_auto_reapply) echo "Réapplication automatique" ;;
+        en:status_auto_reapply) echo "Automatic re-apply" ;;
+
+        fr:status_enabled) echo "activée" ;;
+        en:status_enabled) echo "enabled" ;;
+
+        fr:status_disabled) echo "désactivée" ;;
+        en:status_disabled) echo "disabled" ;;
+
+        fr:hook_enabled) echo "Le patch sera réappliqué automatiquement, avec le même nombre de lignes, après chaque mise à jour de pve-xtermjs." ;;
+        en:hook_enabled) echo "The patch will be re-applied automatically, with the same number of lines, after every pve-xtermjs update." ;;
+
+        fr:hook_disabled) echo "Réapplication automatique désactivée." ;;
+        en:hook_disabled) echo "Automatic re-apply disabled." ;;
+
+        fr:hook_already_enabled) echo "La réapplication automatique est déjà active." ;;
+        en:hook_already_enabled) echo "Automatic re-apply is already active." ;;
+
+        fr:hook_already_disabled) echo "La réapplication automatique n'est pas active." ;;
+        en:hook_already_disabled) echo "Automatic re-apply is not active." ;;
+
+        fr:hook_nothing) echo "Le patch n'est pas en place, il n'y a rien à réappliquer. Appliquez d'abord le patch." ;;
+        en:hook_nothing) echo "The patch is not in place, there is nothing to re-apply. Apply the patch first." ;;
+
+        fr:hook_removed) echo "Le patch n'est plus en place : la réapplication automatique est désactivée." ;;
+        en:hook_removed) echo "The patch is no longer in place: automatic re-apply is disabled." ;;
+
+        fr:hook_file) echo "Fichier de hook APT" ;;
+        en:hook_file) echo "APT hook file" ;;
 
         fr:lines_title) echo "NOMBRE DE LIGNES" ;;
         en:lines_title) echo "NUMBER OF LINES" ;;
@@ -227,8 +253,8 @@ tr_msg() {
         fr:warning_body_1) echo "Ce script modifie un fichier JavaScript du paquet pve-xtermjs, qui affiche les consoles xterm.js (shell de l'hôte, conteneurs, VM)." ;;
         en:warning_body_1) echo "This script modifies a JavaScript file of the pve-xtermjs package, which draws the xterm.js consoles (host shell, containers, VMs)." ;;
 
-        fr:warning_body_2) echo "Ceci est hors support et sera écrasé par les mises à jour du paquet pve-xtermjs, il faudra alors relancer le script." ;;
-        en:warning_body_2) echo "This is unsupported and will be overwritten by pve-xtermjs package updates, in which case you need to run the script again." ;;
+        fr:warning_body_2) echo "Ceci est hors support et sera écrasé par les mises à jour du paquet pve-xtermjs : il faudra alors relancer le script, sauf si la réapplication automatique est activée." ;;
+        en:warning_body_2) echo "This is unsupported and will be overwritten by pve-xtermjs package updates: you then need to run the script again, unless automatic re-apply is enabled." ;;
 
         fr:warning_body_3) echo "Une console pleine à ${SCROLLBACK_LINES} lignes occupe jusqu'à environ $(mem_mb "$SCROLLBACK_LINES" 80) Mo dans le navigateur en 80 colonnes, $(mem_mb "$SCROLLBACK_LINES" 200) Mo en 200 colonnes (contre 1 à 2,5 Mo par défaut), par onglet ouvert." ;;
         en:warning_body_3) echo "A console filled to ${SCROLLBACK_LINES} lines uses up to about $(mem_mb "$SCROLLBACK_LINES" 80) MB in the browser at 80 columns, $(mem_mb "$SCROLLBACK_LINES" 200) MB at 200 columns (against 1 to 2.5 MB by default), per open tab." ;;
@@ -398,50 +424,76 @@ show_warning_and_confirm() {
 }
 
 # ------------------------------------------------------------
-# Patch state
+# Patch engine, also run by the APT hook after a package update
 # ------------------------------------------------------------
 
-# Prints stock, patched:N or unknown. Only a file holding exactly one copy of
-# the block, in one of its two known forms, is recognised.
-get_state() {
-    UTIL_FILE="$UTIL_FILE" BLOCK_HEAD="$BLOCK_HEAD" python3 <<'PY'
-from pathlib import Path
-import os
-import re
-
-text = Path(os.environ["UTIL_FILE"]).read_text(encoding="utf-8")
-head = os.environ["BLOCK_HEAD"]
-
-stock = text.count(head + "{};\n")
-patched = re.findall(re.escape(head) + r"\{ scrollback: (\d+) \};\n", text)
-
-if stock == 1 and not patched:
-    print("stock")
-elif stock == 0 and len(patched) == 1:
-    print("patched:" + patched[0])
-else:
-    print("unknown")
-PY
-}
-
-apply_python_patch() {
-    UTIL_FILE="$UTIL_FILE" BLOCK_HEAD="$BLOCK_HEAD" SCROLLBACK_LINES="$SCROLLBACK_LINES" python3 <<'PY'
+# getTerminalSettings() in util.js builds the options given to every xterm.js
+# console (host shell, containers, VMs). It starts from an empty object, so
+# xterm.js falls back to its own default of 1000 lines. Starting from
+# { scrollback: N } instead sets the default for all consoles, while a
+# pve-xterm-scrollback value saved in the browser, read further down by
+# recent versions, still wins.
+# The patch and the state detection both match this whole two line block, with
+# either the stock {} or an already patched { scrollback: N }, so a file that
+# no longer looks like this is reported instead of patched blindly.
+PATCH_PY="$(cat <<'PY'
 from pathlib import Path
 import os
 import re
 import sys
 
-util_path = Path(os.environ["UTIL_FILE"])
-text = util_path.read_text(encoding="utf-8")
-head = os.environ["BLOCK_HEAD"]
+BLOCK_HEAD = "function getTerminalSettings() {\n    var res = "
+STOCK = BLOCK_HEAD + "{};\n"
+PATCHED = re.compile(re.escape(BLOCK_HEAD) + r"\{ scrollback: (\d+) \};\n")
+EITHER = re.compile(re.escape(BLOCK_HEAD) + r"(?:\{\}|\{ scrollback: \d+ \});\n")
 
-block = re.compile(re.escape(head) + r"(?:\{\}|\{ scrollback: \d+ \});\n")
-if len(block.findall(text)) != 1:
-    sys.exit(1)
 
-new_block = head + "{ scrollback: " + os.environ["SCROLLBACK_LINES"] + " };\n"
-util_path.write_text(block.sub(lambda _: new_block, text, count=1), encoding="utf-8")
+# Only a file holding exactly one copy of the block, in one of its two known
+# forms, is recognised.
+def state(text):
+    stock = text.count(STOCK)
+    patched = PATCHED.findall(text)
+    if stock == 1 and not patched:
+        return "stock"
+    if stock == 0 and len(patched) == 1:
+        return "patched:" + patched[0]
+    return "unknown"
+
+
+def main(args):
+    path = Path(os.environ["UTIL_FILE"])
+    text = path.read_text(encoding="utf-8")
+    current = state(text)
+    if args == ["state"]:
+        print(current)
+        return 0
+    if len(args) != 2 or args[0] not in ("apply", "reapply") or not args[1].isdigit():
+        return 2
+    # reapply runs after every package operation: it only acts on a stock file
+    if args[0] == "reapply" and current != "stock":
+        return 0
+    if current == "unknown":
+        return 1
+    new_block = BLOCK_HEAD + "{ scrollback: " + args[1] + " };\n"
+    path.write_text(EITHER.sub(lambda _: new_block, text, count=1), encoding="utf-8")
+    return 0
+
+
+sys.exit(main(sys.argv[1:]))
 PY
+)"
+
+patch_engine() {
+    UTIL_FILE="$UTIL_FILE" python3 -c "$PATCH_PY" "$@"
+}
+
+# Prints stock, patched:N or unknown.
+get_state() {
+    patch_engine state
+}
+
+apply_python_patch() {
+    patch_engine apply "$SCROLLBACK_LINES"
 }
 
 # Upper bound of the browser memory used by one full console, 12 bytes a cell.
@@ -492,13 +544,81 @@ installed_pkg_version() {
     pveversion -v 2>/dev/null | sed -n "s/^${pkg}: \([^ ]*\).*/\1/p" | head -n1 || true
 }
 
+# ------------------------------------------------------------
+# APT hook, so a package update does not silently drop the patch
+# ------------------------------------------------------------
+
+hook_is_enabled() {
+    [[ -f "$APT_HOOK_FILE" ]]
+}
+
+# Only called while the patch is in place: the hook puts back the number of
+# lines applied at that moment.
+write_hook_file() {
+    local state
+    state="$(get_state)"
+
+    mkdir -p "$HELPER_DIR"
+    printf '%s\n' "$PATCH_PY" >"$HELPER_DIR/patch.py"
+    chmod 0644 "$HELPER_DIR/patch.py"
+
+    cat >"$APT_HOOK_FILE" <<EOF_HOOK
+// Managed by Proxmox-Tools pve-xtermjs-scrollback.sh
+// Re-applies the patch when a pve-xtermjs update restores the stock file.
+DPkg::Post-Invoke {"if [ -f ${HELPER_DIR}/patch.py ] && [ -f ${UTIL_FILE} ]; then UTIL_FILE=${UTIL_FILE} python3 ${HELPER_DIR}/patch.py reapply ${state#patched:} || true; fi"; };
+EOF_HOOK
+    chmod 0644 "$APT_HOOK_FILE"
+}
+
+remove_hook_files() {
+    rm -f "$APT_HOOK_FILE"
+    rm -rf "$HELPER_DIR"
+}
+
+# The hook only carries a patch that is in place, with its current number of
+# lines, and its copy of the patch engine follows the version of this script.
+refresh_hook_file() {
+    hook_is_enabled || return 0
+    if [[ "$(get_state)" == patched:* ]]; then
+        write_hook_file
+    else
+        remove_hook_files
+        say_info "$(tr_msg hook_removed)"
+    fi
+}
+
+enable_hook() {
+    if hook_is_enabled; then
+        say_info "$(tr_msg hook_already_enabled)"
+        return 0
+    fi
+
+    if [[ "$(get_state)" != patched:* ]]; then
+        say_info "$(tr_msg hook_nothing)"
+        return 0
+    fi
+
+    write_hook_file
+    say_ok "$(tr_msg hook_enabled)"
+    say_info "$(tr_msg hook_file): ${PMX_CYAN}${APT_HOOK_FILE}${RESET}"
+}
+
+disable_hook() {
+    if ! hook_is_enabled; then
+        say_info "$(tr_msg hook_already_disabled)"
+        return 0
+    fi
+
+    remove_hook_files
+    say_ok "$(tr_msg hook_disabled)"
+}
 
 # ------------------------------------------------------------
 # Actions
 # ------------------------------------------------------------
 
 show_status() {
-    local xt_version state state_label
+    local xt_version state state_label hook_state
 
     xt_version="$(installed_pkg_version pve-xtermjs)"
     state="$(get_state)"
@@ -512,9 +632,16 @@ show_status() {
         *) state_label="${PMX_AMBER}$(tr_msg state_unknown)${RESET}" ;;
     esac
 
+    if hook_is_enabled; then
+        hook_state="${PMX_GREEN}$(tr_msg status_enabled)${RESET}"
+    else
+        hook_state="${PMX_GREY}$(tr_msg status_disabled)${RESET}"
+    fi
+
     panel "$PMX_ORANGE" "$(tr_msg status_title)" \
         "$(tr_msg detected_version): pve-xtermjs ${BOLD}${xt_version:-?}${RESET}" \
-        "$(tr_msg status_scrollback): ${BOLD}${state_label}"
+        "$(tr_msg status_scrollback): ${BOLD}${state_label}" \
+        "$(tr_msg status_auto_reapply): ${BOLD}${hook_state}"
 }
 
 # Sets SCROLLBACK_LINES from a preset or a custom number. Returns 1 when the
@@ -592,6 +719,7 @@ apply_patch() {
         return 1
     fi
 
+    refresh_hook_file
     echo
     say_ok "$(tr_msg patch_applied)"
     say_info "$(tr_msg reopen_console)"
@@ -630,6 +758,7 @@ restore_specific() {
     cp -av "$dir/$(basename "$UTIL_FILE")" "$UTIL_FILE"
 
     say_ok "$(tr_msg restore_done): ${PMX_CYAN}${dir}${RESET}"
+    refresh_hook_file
 }
 
 restore_latest() {
@@ -736,10 +865,12 @@ main_menu() {
         printf " %b4)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_backups)"
         printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_test)"
-        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_enable)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_hook_disable)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-7]: " choice
+        read -r -p "$(tr_msg choose_option) [1-9]: " choice
         echo
 
         case "$choice" in
@@ -765,6 +896,14 @@ main_menu() {
                 generate_test_lines
                 ;;
             7)
+                menu_action enable_hook
+                pause
+                ;;
+            8)
+                menu_action disable_hook
+                pause
+                ;;
+            9)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;

@@ -531,25 +531,27 @@ const SCRIPTS = [
                 'Applies to the host shell, containers and VM serial consoles',
                 'Set once on the server: no browser setting to redo on every computer',
                 'One line changed, matched exactly: a changed file is reported, never patched blindly',
-                'No restart needed, automatic backup before patching, restore from the menu',
+                'No restart, automatic backup and restore, optional re-apply after updates',
             ],
             fr: [
                 'Cinq tailles prêtes jusqu’à 250000 lignes, ou votre propre nombre, modifiable ensuite',
                 'S’applique au shell de l’hôte, aux conteneurs et aux consoles série des VM',
                 'Réglé une fois sur le serveur : plus de réglage à refaire dans chaque navigateur',
                 'Une seule ligne modifiée, cherchée à l’identique : un fichier différent est signalé, jamais patché à l’aveugle',
-                'Aucun redémarrage, backup automatique avant le patch, restauration depuis le menu',
+                'Aucun redémarrage, backup et restauration, réapplication optionnelle après les mises à jour',
             ],
         },
         touches: {
             files: [
                 { path: '/usr/share/pve-xtermjs/util.js', role: { en: 'one line changed: the default options given to every console', fr: 'une ligne modifiée : les options par défaut données à chaque console' } },
+                { path: '/etc/apt/apt.conf.d/99-pve-xtermjs-scrollback', role: { en: 'optional, re-applies the patch after an update', fr: 'optionnel, réapplique le patch après une mise à jour' } },
+                { path: '/usr/local/lib/pve-xtermjs-scrollback/patch.py', role: { en: 'optional, the program the APT hook runs', fr: 'optionnel, le programme lancé par le hook APT' } },
             ],
             backup: '/root/pve-xtermjs-scrollback-patch-<date>/',
         },
         note: {
-            en: 'A full console takes about 1 MB per 1000 lines in the browser at 80 columns (100000 lines: about 100 MB), per open tab. A value saved in a browser still wins over the one you pick. Updates of the pve-xtermjs package overwrite the patch, run the script again afterwards.',
-            fr: 'Une console pleine occupe environ 1 Mo par 1000 lignes dans le navigateur en 80 colonnes (100000 lignes : environ 100 Mo), par onglet ouvert. Une valeur enregistrée dans un navigateur reste prioritaire sur celle que vous choisissez. Les mises à jour du paquet pve-xtermjs écrasent le patch, relancez le script ensuite.',
+            en: 'A full console takes about 1 MB per 1000 lines in the browser at 80 columns (100000 lines: about 100 MB), per open tab. A value saved in a browser still wins over the one you pick. Updates of the pve-xtermjs package overwrite the patch: run the script again afterwards, unless the automatic re-apply is enabled.',
+            fr: 'Une console pleine occupe environ 1 Mo par 1000 lignes dans le navigateur en 80 colonnes (100000 lignes : environ 100 Mo), par onglet ouvert. Une valeur enregistrée dans un navigateur reste prioritaire sur celle que vous choisissez. Les mises à jour du paquet pve-xtermjs écrasent le patch : relancez le script ensuite, sauf si la réapplication automatique est activée.',
         },
         terminal: {
             banner: 'proxmox',
@@ -561,6 +563,7 @@ const SCRIPTS = [
                 lines: [
                     'Detected version: pve-xtermjs 6.0.0-2',
                     'Console scrollback: 100000 lines (patch active)',
+                    'Automatic re-apply: enabled',
                 ],
             },
             menu: [
@@ -570,9 +573,11 @@ const SCRIPTS = [
                 'Show patch status',
                 'List backups',
                 'Generate test lines (check the console history)',
+                'Re-apply automatically after an update',
+                'Stop re-applying automatically',
                 'Quit',
             ],
-            prompt: 'Choose an option [1-7]:',
+            prompt: 'Choose an option [1-9]:',
         },
     },
     {
