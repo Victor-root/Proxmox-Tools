@@ -1596,7 +1596,7 @@ theme_css_light_head() {
 .x-tab-default.x-tab.x-tab-disabled{background-color:rgba(0,0,0,0);border-color:rgba(0,0,0,0)}
 a,.x-form-display-field a{color:#c2410c}
 .x-splitter-collapsed,.x-layout-split-bottom{background-color:#eceff4}
-:root{--pwt-chart-primary: #d0d5dd;--pwt-gauge-default: #e2590b;--pwt-chart-grid-stroke: #e4e7ec;--pmt-chart-fill-opacity: 0.22;--pmt-chart-series: #e2590b, #64748b, #cbd5e1, #c2410c}
+:root{--pwt-chart-primary: #d0d5dd;--pwt-gauge-default: #e2590b;--pwt-chart-grid-stroke: #e4e7ec;--pmt-chart-fill-opacity: 0.22;--pmt-chart-series: #e2590b, #64748b, #06b6d4, #c2410c}
 *{scrollbar-width:thin;scrollbar-color:rgba(226,89,11,.55) rgba(0,0,0,0)}
 #versioninfo-body{color:#667085}
 .x-panel-default,.x-panel-default-framed{border-color:#e4e7ec}
@@ -1897,7 +1897,7 @@ div.monitor{border-color:#333947}
 .x-datepicker-selected div.x-datepicker-date,.x-monthpicker-item a.x-monthpicker-selected,a.x-monthpicker-item-inner:hover,div.x-datepicker-date:hover{background-color:#2a2f3c;color:#fff}
 .x-datepicker-disabled .x-datepicker-date{background-color:#0d1016}
 .x-datepicker-disabled div.x-datepicker-date:hover{background-color:#161a22}
-:root{--pwt-chart-primary: #333947;--pwt-gauge-default: #f0690f;--pwt-chart-grid-stroke: #242833;--pmt-chart-fill-opacity: 0.28;--pmt-chart-series: #f0690f, #94a3b8, #475569, #ffa35c}
+:root{--pwt-chart-primary: #333947;--pwt-gauge-default: #f0690f;--pwt-chart-grid-stroke: #242833;--pmt-chart-fill-opacity: 0.28;--pmt-chart-series: #f0690f, #94a3b8, #22d3ee, #ffa35c}
 *{scrollbar-width:thin;scrollbar-color:rgba(240,105,15,.55) rgba(0,0,0,0)}
 #versioninfo-body{color:#8790a1}
 .x-panel-default,.x-panel-default-framed{border-color:#242833}

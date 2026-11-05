@@ -3,7 +3,9 @@
   --pwt-gauge-default: #{$primary-color};
   --pwt-chart-grid-stroke: #{$border-color-alt};
   --pmt-chart-fill-opacity: #{if($mode == dark, 0.28, 0.22)};
-  --pmt-chart-series: #{$primary-color}, #{if($mode == dark, #94a3b8, #64748b)}, #{if($mode == dark, #475569, #cbd5e1)}, #{$highlighted-text};
+  // the third series is the ZFS ARC of a node and the host memory of a guest, drawn over
+  // the used memory: a hue no accent uses keeps it apart from the grey under it
+  --pmt-chart-series: #{$primary-color}, #{if($mode == dark, #94a3b8, #64748b)}, #{if($mode == dark, #22d3ee, #06b6d4)}, #{$highlighted-text};
 }
 
 * {
