@@ -103,6 +103,13 @@ const SCRIPTS = [
             backup: '/root/pve-default-language-<date>/',
             restarts: 'pveproxy',
         },
+        demo: {
+            file: 'default-language.webp',
+            alt: {
+                en: 'As shipped, the login page and the interface start in English; once the script set French as the default, both start in French',
+                fr: 'D’origine, la page de connexion et l’interface démarrent en anglais ; une fois le français réglé par le script, les deux démarrent en français',
+            },
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
@@ -183,6 +190,13 @@ const SCRIPTS = [
             en: 'Proxmox VE stays free software either way. A subscription funds its development and unlocks the enterprise repository. The mobile option only concerns Proxmox VE 9, whose mobile interface is a separate application, and it goes one step further than the web one: it changes what the API answers about the support level of the nodes. The script says all of this before touching anything, and refuses the option on Proxmox VE 8.',
             fr: 'Proxmox VE reste un logiciel libre dans tous les cas. Un abonnement finance son développement et donne accès au dépôt entreprise. L’option mobile ne concerne que Proxmox VE 9, dont l’interface mobile est une application distincte, et elle va un cran plus loin que celle du web : elle change ce que l’API répond sur le niveau de support des nœuds. Le script dit tout cela avant de toucher à quoi que ce soit, et refuse l’option sur Proxmox VE 8.',
         },
+        demo: {
+            file: 'subscription-notice.webp',
+            alt: {
+                en: 'As shipped, the No valid subscription window opens after every login; with the script, the login goes straight to the interface',
+                fr: 'D’origine, la fenêtre « No valid subscription » s’ouvre après chaque connexion ; avec le script, la connexion mène directement à l’interface',
+            },
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
@@ -259,6 +273,13 @@ const SCRIPTS = [
             ],
             backup: '/root/pve-console-newtab-patch-<date>/',
             restarts: 'pveproxy',
+        },
+        demo: {
+            file: 'console-newtab.webp',
+            alt: {
+                en: 'As shipped, a middle click on Console does nothing and a click opens a separate window; with the script, a middle click on Console or on a guest of the tree opens the console in a new tab',
+                fr: 'D’origine, un clic molette sur Console ne fait rien et un clic ouvre une fenêtre séparée ; avec le script, un clic molette sur Console ou sur une VM de l’arborescence ouvre la console dans un nouvel onglet',
+            },
         },
         terminal: {
             banner: 'proxmox',
@@ -573,6 +594,13 @@ const SCRIPTS = [
             en: 'A full console takes about 1 MB per 1000 lines in the browser at 80 columns (100000 lines: about 100 MB), per open tab. A value saved in a browser still wins over the one you pick. Updates of the pve-xtermjs package overwrite the patch: run the script again afterwards, unless the automatic re-apply is enabled.',
             fr: 'Une console pleine occupe environ 1 Mo par 1000 lignes dans le navigateur en 80 colonnes (100000 lignes : environ 100 Mo), par onglet ouvert. Une valeur enregistrée dans un navigateur reste prioritaire sur celle que vous choisissez. Les mises à jour du paquet pve-xtermjs écrasent le patch : relancez le script ensuite, sauf si la réapplication automatique est activée.',
         },
+        demo: {
+            file: 'xterm-scrollback.webp',
+            alt: {
+                en: '5000 numbered lines printed in a console: as shipped, scrolling up stops at line 3963; with the script, it goes back to line 1',
+                fr: '5000 lignes numérotées affichées dans une console : d’origine, on ne remonte que jusqu’à la ligne 3963 ; avec le script, jusqu’à la ligne 1',
+            },
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
@@ -649,6 +677,13 @@ const SCRIPTS = [
         note: {
             en: 'Open a new console tab after patching: a tab opened before keeps its title. Only xterm.js consoles are changed, not noVNC or SPICE. Updates of the pve-xtermjs package overwrite the patch: run the script again afterwards, unless the automatic re-apply is enabled.',
             fr: 'Ouvrez un nouvel onglet de console après le patch : un onglet ouvert avant garde son titre. Seules les consoles xterm.js sont modifiées, pas noVNC ni SPICE. Les mises à jour du paquet pve-xtermjs écrasent le patch : relancez le script ensuite, sauf si la réapplication automatique est activée.',
+        },
+        demo: {
+            file: 'xterm-tab-title.webp',
+            alt: {
+                en: 'As shipped, every console tab reads pve01 - Proxmox Console; with the script, each tab names its guest, for example 200 (pihole) · pve01 · PVE',
+                fr: 'D’origine, chaque onglet de console affiche pve01 - Proxmox Console ; avec le script, chaque onglet nomme sa machine, par exemple 200 (pihole) · pve01 · PVE',
+            },
         },
         terminal: {
             banner: 'proxmox',
