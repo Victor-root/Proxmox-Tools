@@ -612,8 +612,8 @@ const SCRIPTS = [
         },
         compat: 'PVE 8.x / 9.x',
         updated: {
-            en: 'New script. The xterm.js console tabs show ID (Name) · Node · PVE instead of the node name only.',
-            fr: 'Nouveau script. Les onglets des consoles xterm.js affichent ID (Nom) · Noeud · PVE au lieu du nom du noeud seul.',
+            en: 'Works again with pve-xtermjs 6.0.0-3, and can re-apply itself after updates.',
+            fr: 'Fonctionne à nouveau avec pve-xtermjs 6.0.0-3, et peut se réappliquer après les mises à jour.',
         },
         points: {
             en: [
@@ -651,7 +651,7 @@ const SCRIPTS = [
             panel: {
                 title: 'Patch status',
                 lines: [
-                    'Detected version: pve-xtermjs 6.0.0-2',
+                    'Detected version: pve-xtermjs 6.0.0-3',
                     'xterm.js tab title: ID (Name) · Node · PVE (patch active)',
                     'Automatic re-apply: enabled',
                 ],

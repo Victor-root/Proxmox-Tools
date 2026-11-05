@@ -339,7 +339,7 @@ Makes the browser tab of an **xterm.js** console show which guest it belongs to,
 
 * 🏷️ the tab reads **`ID (Name) · Node · PVE`**, for example `101 (web01) · pve02 · PVE`
 * 🖥️ applies to containers and VMs opened in xterm.js, and to the node shell, whose tab reads `Node · PVE`
-* 🎯 adds **two lines** (a comment and the title) to `/usr/share/pve-xtermjs/main.js`, right after a line the script matches exactly
+* 🎯 adds **two lines** (a comment and the title) to `/usr/share/pve-xtermjs/main.js`, right after the code that reads the console parameters, matched exactly
 * 🔎 refuses to touch a file that does not look exactly as expected
 * 🔁 safe to run twice: an already patched file is detected and left alone
 * 🔄 optional **automatic re-apply** after a `pve-xtermjs` update, through an APT hook
@@ -357,7 +357,14 @@ Makes the browser tab of an **xterm.js** console show which guest it belongs to,
 
 #### Version compatibility
 
-Checked against the official Proxmox sources: the line the patch matches is identical in the `pve-xtermjs` branch for Proxmox VE 8 (`5.5.0-2`, bookworm) and in the one for Proxmox VE 9 (`6.0.0-2`, trixie), and it has not changed in the upstream history since 2020. Both versions were checked by running the patch, the syntax of the result, and a restore that gives back the original byte for byte. The title was read in headless Chromium on the real console files, served locally, for both versions.
+Checked against the official Proxmox sources, on every published form of `main.js`:
+
+* **up to `6.0.0-2`** (Proxmox VE 8 with `5.5.0-2`, and Proxmox VE 9 until October 2026): the line the patch matches has not changed since 2020, and the patch is the same as in the first version of this script.
+* **from `6.0.0-3`**: Proxmox now reads and validates the console parameters in a block that stops the page on an invalid one, and decodes the guest name itself. The script recognises this form, puts the title after that block, and takes the name as it is, since decoding it a second time would break a name holding a `%`.
+
+Each form was checked by running the patch, the syntax of the result, and a restore that gives back the original byte for byte. The title was read in headless Chromium on the real console files of `5.5.0-3` and `6.0.0-3`, served locally, with names holding spaces, accents and `%`.
+
+If automatic re-apply was enabled with an earlier version of this script, run option 1 once after updating the script: it also refreshes the copy of the patch the APT hook uses, so that it knows the newer form.
 
 Not yet tested on a real Proxmox host.
 

@@ -360,29 +360,60 @@ show_warning_and_confirm() {
 
 # The xterm.js console page reads the guest name into vmname, but its title
 # only shows the node name from the template. The added lines set the title
-# after the cmdOpts line. The name is decoded because getQueryParameter returns
-# it percent-encoded. Patch and state check match these exact lines, so a file
-# that looks different is reported instead of patched blindly.
+# once the query parameters are read. Patch and state check match these exact
+# lines, so a file that looks different is reported instead of patched blindly.
 PATCH_PY="$(cat <<'PY'
 from pathlib import Path
 import os
 import sys
 
-ANCHOR = "var cmdOpts = getQueryParameter('cmd-opts');\n"
-ADDED = (
-    "// The name arrives percent-encoded in the URL, getQueryParameter does not decode it.\n"
-    "document.title = [vmid && vmid + (vmname ? ' (' + decodeURIComponent(vmname) + ')' : ''), nodename, 'PVE']"
-    ".filter(Boolean).join(' \\u00b7 ');\n"
-)
+TITLE = "document.title = [vmid && vmid + (vmname ? ' (' + {name} + ')' : ''), nodename, 'PVE'].filter(Boolean).join(' \\u00b7 ');\n"
+
+# Each published layout of main.js: the line the title goes after, and the
+# lines added there.
+FORMS = [
+    # Up to pve-xtermjs 6.0.0-2, getQueryParameter() splits the query by hand
+    # and returns the name still percent-encoded.
+    (
+        "var cmdOpts = getQueryParameter('cmd-opts');\n",
+        "// The name arrives percent-encoded in the URL, getQueryParameter does not decode it.\n"
+        + TITLE.format(name="decodeURIComponent(vmname)"),
+    ),
+    # From 6.0.0-3, the parameters are read and decoded by URLSearchParams in
+    # a block that stops the page on an invalid one, so the title goes after
+    # that block and takes the name as it is: decoding it again would turn a
+    # name holding a % into an error.
+    (
+        "    cmdOpts = getQueryParameter('cmd-opts');\n"
+        "} catch (error) {\n"
+        "    updateState(states.disconnected, error);\n"
+        "    // re-throwing here stops execution of the remaining code\n"
+        "    throw error;\n"
+        "}\n",
+        "// The parameters above are validated and already decoded.\n"
+        + TITLE.format(name="vmname"),
+    ),
+]
 
 
-# The anchor must occur exactly once, and the added lines must be exactly one
-# copy right after it. A file that already sets the title but not with these
-# lines (an earlier version of this script) is unknown: a second title line
-# would silently override the first.
+# The anchor of exactly one layout must occur exactly once, and the added
+# lines must be exactly one copy right after it. A file that already sets the
+# title but not with these lines is unknown: a second title line would
+# silently override the first.
+def find_form(text):
+    found = [form for form in FORMS if form[0] in text]
+    if len(found) != 1 or text.count(found[0][0]) != 1:
+        return None
+    return found[0]
+
+
 def state(text):
-    patched = text.count(ANCHOR + ADDED)
-    if text.count(ANCHOR) != 1 or patched > 1:
+    form = find_form(text)
+    if form is None:
+        return "unknown"
+    anchor, added = form
+    patched = text.count(anchor + added)
+    if patched > 1:
         return "unknown"
     if patched == 1:
         return "patched"
@@ -403,7 +434,8 @@ def main(command):
     # reapply runs after every package operation: it only acts on a stock file
     if current != "stock":
         return 0 if command == "reapply" else 1
-    path.write_text(text.replace(ANCHOR, ANCHOR + ADDED, 1), encoding="utf-8")
+    anchor, added = find_form(text)
+    path.write_text(text.replace(anchor, anchor + added, 1), encoding="utf-8")
     return 0
 
 
@@ -567,6 +599,7 @@ apply_patch() {
         stock) ;;
         patched)
             say_ok "$(tr_msg already_patched)"
+            refresh_hook_file
             return 0
             ;;
         *)
@@ -587,6 +620,7 @@ apply_patch() {
         return 1
     fi
 
+    refresh_hook_file
     echo
     say_ok "$(tr_msg patch_applied)"
     say_info "$(tr_msg reopen_console)"
