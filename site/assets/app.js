@@ -208,8 +208,9 @@
 
     /* Right side of a card: the script menu in its terminal, and when the card
        has a recording of the script at work, that recording first, with a
-       switch between the two. */
-    function side(script) {
+       switch between the two, then the blocks that would otherwise make the
+       left side much taller. */
+    function side(script, extra) {
         const term = termFrame(script.terminal.host, termScreen(script.terminal, true));
         if (!script.demo) return '<div class="term-side">' + term + '</div>';
 
@@ -219,15 +220,18 @@
             '<button type="button" class="side-tab" data-view="' + view + '" aria-pressed="' + on + '">' + icon(name) + '<span>' + esc(tr(label)) + '</span></button>';
         return [
             '<div class="term-side has-demo">',
-            '  <div class="side-tabs">' + tab('demo', 'player-play', UI.demoTab, true) + tab('menu', 'terminal', UI.menuTab, false) + '</div>',
-            '  <div class="side-view" data-view="demo">',
-            '    <button type="button" class="demo" data-zoom="' + esc(src) + '" data-alt="' + esc(alt) + '" title="' + esc(tr(UI.demoZoom)) + '">',
-            '      <img src="' + esc(src) + '" alt="' + esc(alt) + '" width="1280" height="800" loading="lazy" decoding="async">',
-            '      <span class="demo-zoom">' + icon('maximize') + '</span>',
-            '    </button>',
-            '    <p class="demo-note">' + icon('info') + '<span>' + esc(tr(UI.demoNote)) + '</span></p>',
+            '  <div class="viewer">',
+            '    <div class="side-tabs">' + tab('demo', 'player-play', UI.demoTab, true) + tab('menu', 'terminal', UI.menuTab, false) + '</div>',
+            '    <div class="side-view" data-view="demo">',
+            '      <button type="button" class="demo" data-zoom="' + esc(src) + '" data-alt="' + esc(alt) + '" title="' + esc(tr(UI.demoZoom)) + '">',
+            '        <img src="' + esc(src) + '" alt="' + esc(alt) + '" width="1280" height="800" loading="lazy" decoding="async">',
+            '        <span class="demo-zoom">' + icon('maximize') + '</span>',
+            '      </button>',
+            '      <p class="demo-note">' + icon('info') + '<span>' + esc(tr(UI.demoNote)) + '</span></p>',
+            '    </div>',
+            '    <div class="side-view" data-view="menu" hidden>' + term + '</div>',
             '  </div>',
-            '  <div class="side-view" data-view="menu" hidden>' + term + '</div>',
+            extra,
             '</div>',
         ].join('\n');
     }
@@ -245,7 +249,7 @@
             : '';
 
         return [
-            '<article class="card" id="' + esc(script.id) + '">',
+            '<article class="card' + (script.demo ? ' with-demo' : '') + '" id="' + esc(script.id) + '">',
             '  <div class="card-grid">',
             '    <div class="card-info">',
             '      <div class="card-top">',
@@ -255,8 +259,7 @@
             '      <p class="card-tagline">' + esc(tr(script.tagline)) + '</p>',
             '      <span class="runs-on">' + icon(TARGET_ICON[script.target] || 'server') + '<b>' + esc(tr(UI.cardRunOn)) + '</b> ' + esc(tr(script.runsOn)) + '</span>',
             '      <ul class="points">' + points + '</ul>',
-            touched(script),
-            note,
+            script.demo ? '' : touched(script) + note,
             '      <div class="run">',
             '        <span class="run-label">' + esc(tr(UI.cardCopyLabel)) + '</span>',
             '        <div class="run-box">',
@@ -271,7 +274,7 @@
             '        <button type="button" data-copy="' + esc(pageLink(script.id)) + '" data-toast="linkOk">' + icon('link') + esc(tr(UI.cardLink)) + '</button>',
             '      </div>',
             '    </div>',
-            side(script),
+            side(script, touched(script) + note),
             '  </div>',
             '</article>',
         ].join('\n');
