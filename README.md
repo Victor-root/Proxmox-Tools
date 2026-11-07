@@ -73,7 +73,7 @@ Adds a more convenient browser workflow for the Proxmox VE web interface:
 * 🖱️ **Middle click** on **noVNC** opens it in a **new tab**
 * 🖱️ **Middle click** on **xterm.js** opens it in a **new tab**
 * 🖱️ **Middle click** on **SPICE** behaves like a normal click, without opening a useless browser tab
-* 🌳 separate option: **middle click** on a **VM or container of the left tree** opens its console in a **new tab**, where that click did nothing before
+* 🌳 separate option: **middle click** on a **node, VM or container of the left tree** opens its console in a **new tab**, where that click did nothing before
 * 🔄 optional **automatic re-apply** after a `pve-manager` or `proxmox-widget-toolkit` update, through an APT hook: it puts back only the patches in place
 * 💾 automatic **backup** before patching
 * ♻️ built-in **restore** options
@@ -99,9 +99,9 @@ The automatic re-apply does exactly that after every package update: it puts bac
 
 #### About the resource tree
 
-Option 6 is a second, separate patch. It reuses the console Proxmox VE already opens when you double click a guest in the left tree, with the same viewer choice, and asks for it in a new tab instead of a window. The middle click has no function there in stock Proxmox VE, and the current selection is left untouched, so nothing that worked before changes.
+Option 6 is a second, separate patch. On a guest of the left tree, it reuses the console Proxmox VE already opens on a double click. On a node, it opens the same shell as the **Shell** button. The viewer choice stays the same, and the console comes in a new tab instead of a window. The middle click has no function there in stock Proxmox VE, and the current selection is left untouched, so nothing that worked before changes.
 
-It needs the main patch first, since that is what teaches the console how to open in a tab, and the script says so instead of touching a file for nothing. Templates, nodes and storages stay without effect, exactly like on a double click. The two code blocks it needs are identical in Proxmox VE 8 and 9.
+It needs the main patch first, since that is what teaches the console how to open in a tab, and the script says so instead of touching a file for nothing. Templates and storages stay without effect, and so does a node for an account without the `Sys.Console` right, the one the **Shell** button asks for. A double click on a node still does nothing. If you applied this option before it covered the nodes, run it again to add them. The two code blocks it needs are identical in Proxmox VE 8 and 9.
 
 #### Run it directly
 

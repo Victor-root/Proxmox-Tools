@@ -42,8 +42,8 @@ tr_msg() {
         fr:menu_backups) echo "Lister les backups" ;;
         en:menu_backups) echo "List backups" ;;
 
-        fr:menu_tree) echo "Ajouter le clic molette sur les VM/LXC de l'arborescence" ;;
-        en:menu_tree) echo "Add the middle click on the VM/LXC of the resource tree" ;;
+        fr:menu_tree) echo "Ajouter le clic molette sur les nœuds, VM et LXC de l'arborescence" ;;
+        en:menu_tree) echo "Add the middle click on the nodes, VM and LXC of the resource tree" ;;
 
         fr:menu_hook_enable) echo "Réappliquer automatiquement après une mise à jour" ;;
         en:menu_hook_enable) echo "Re-apply automatically after an update" ;;
@@ -168,14 +168,14 @@ tr_msg() {
         fr:tree_title) echo "CLIC MOLETTE DANS L'ARBORESCENCE" ;;
         en:tree_title) echo "MIDDLE CLICK IN THE RESOURCE TREE" ;;
 
-        fr:tree_body_1) echo "Ajoute le clic molette sur une VM ou un conteneur de la liste de gauche : la console s'ouvre dans un nouvel onglet." ;;
-        en:tree_body_1) echo "Adds the middle click on a VM or a container of the left list: its console opens in a new tab." ;;
+        fr:tree_body_1) echo "Ajoute le clic molette sur un nœud, une VM ou un conteneur de la liste de gauche : sa console s'ouvre dans un nouvel onglet." ;;
+        en:tree_body_1) echo "Adds the middle click on a node, a VM or a container of the left list: its console opens in a new tab." ;;
 
-        fr:tree_body_2) echo "C'est la console que Proxmox VE ouvre déjà sur un double clic, avec le même choix de visualiseur, mais dans un onglet plutôt que dans une fenêtre." ;;
-        en:tree_body_2) echo "This is the console Proxmox VE already opens on a double click, with the same viewer choice, but in a tab instead of a window." ;;
+        fr:tree_body_2) echo "Pour une VM ou un conteneur, c'est la console que Proxmox VE ouvre déjà sur un double clic, et pour un nœud celle du bouton Shell, avec le même choix de visualiseur, mais dans un onglet plutôt que dans une fenêtre." ;;
+        en:tree_body_2) echo "For a VM or a container this is the console Proxmox VE already opens on a double click, and for a node the one of the Shell button, with the same viewer choice, but in a tab instead of a window." ;;
 
-        fr:tree_body_3) echo "Le clic molette ne fait rien aujourd'hui dans cette liste, et la sélection en cours n'est pas modifiée. Les modèles, les nœuds et les stockages restent sans effet." ;;
-        en:tree_body_3) echo "The middle click does nothing in that list today, and the current selection is left alone. Templates, nodes and storages stay without effect." ;;
+        fr:tree_body_3) echo "Le clic molette ne fait rien aujourd'hui dans cette liste, et la sélection en cours n'est pas modifiée. Les modèles et les stockages restent sans effet, comme un nœud pour un compte sans le droit Sys.Console." ;;
+        en:tree_body_3) echo "The middle click does nothing in that list today, and the current selection is left alone. Templates and storages stay without effect, like a node for an account without the Sys.Console right." ;;
 
         fr:tree_needs_console) echo "Ce patch a besoin du patch principal, qui apporte l'ouverture en onglet. Utilisez l'option 1 d'abord." ;;
         en:tree_needs_console) echo "This patch needs the main patch, which brings the opening in a tab. Use option 1 first." ;;
@@ -447,6 +447,39 @@ PM_SIG_VNC = "openVNCViewer: function (vmtype, vmid, nodename, vmname, cmd, opts
 PX_SIG_XTERM = "openXtermJsViewer: function (vmtype, vmid, nodename, vmname, cmd, opts)"
 PM_SIG_TREE = "openTreeConsole: function (tree, record, item, index, e, consoleOpts)"
 TREE_CALL = "PVE.Utils.openTreeConsole(tree, record, td, rowIndex, ev, { newTab: true });"
+TREE_LXC_BRANCH = """            } else if (record.data.type === 'lxc' && !record.data.template) {
+                PVE.Utils.openDefaultConsoleWindow(
+                    true,
+                    'lxc',
+                    vmid,
+                    nodename,
+                    vmname,
+                    undefined,
+                    consoleOpts,
+                );
+"""
+# A double click reaches openTreeConsole too, with the options of the ExtJS
+# listener as last argument, and has to keep doing nothing on a node. The
+# values are the ones the Shell button of a node passes.
+TREE_NODE_BRANCH = """            } else if (
+                consoleOpts &&
+                consoleOpts.newTab &&
+                record.data.type === 'node' &&
+                Ext.state.Manager.get('GuiCap').nodes['Sys.Console']
+            ) {
+                PVE.Utils.openDefaultConsoleWindow(
+                    true,
+                    'shell',
+                    0,
+                    nodename,
+                    undefined,
+                    undefined,
+                    consoleOpts,
+                );
+"""
+TREE_CLOSE = """            }
+        },
+"""
 
 
 def pm_markers(text):
@@ -473,6 +506,7 @@ def tree_markers(text):
     return [
         ("PVE.Utils.openTreeConsole(consoleOpts)", PM_SIG_TREE in text),
         ("resource tree middle click", TREE_CALL in text),
+        ("resource tree node shell", TREE_LXC_BRANCH + TREE_NODE_BRANCH + TREE_CLOSE in text),
     ]
 
 
@@ -959,8 +993,11 @@ def patch_px(text):
 
 
 def patch_tree(text):
-    text = replace_once(
-        text,
+    # A host that took this option before it covered the nodes already has the
+    # guest part, so each change is only made when it is missing.
+    if PM_SIG_TREE not in text:
+        text = replace_once(
+            text,
 """        openTreeConsole: function (tree, record, item, index, e) {
             e.stopEvent();
             let nodename = record.data.node;
@@ -1010,25 +1047,14 @@ def patch_tree(text):
                         );
                     },
                 });
-            } else if (record.data.type === 'lxc' && !record.data.template) {
-                PVE.Utils.openDefaultConsoleWindow(
-                    true,
-                    'lxc',
-                    vmid,
-                    nodename,
-                    vmname,
-                    undefined,
-                    consoleOpts,
-                );
-            }
-        },
-""",
-        "openTreeConsole",
-        pm_path.name,
-    )
+""" + TREE_LXC_BRANCH + TREE_CLOSE,
+            "openTreeConsole",
+            pm_path.name,
+        )
 
-    return replace_once(
-        text,
+    if TREE_CALL not in text:
+        text = replace_once(
+            text,
 """                beforecellmousedown: function (tree, td, cellIndex, record, tr, rowIndex, ev) {
                     let sm = me.getSelectionModel();
                     // disable selection when right clicking except if the record is already selected
@@ -1049,7 +1075,15 @@ def patch_tree(text):
                     }
                 },
 """,
-        "resource tree middle click",
+            "resource tree middle click",
+            pm_path.name,
+        )
+
+    return replace_once(
+        text,
+        TREE_LXC_BRANCH + TREE_CLOSE,
+        TREE_LXC_BRANCH + TREE_NODE_BRANCH + TREE_CLOSE,
+        "resource tree node shell",
         pm_path.name,
     )
 
