@@ -289,13 +289,25 @@
 
     /* ---------- side rail ---------- */
 
+    let railPointed = null;
+
+    /* each line is shorter the further it is from the one under the mouse,
+       or from the current script when the mouse is elsewhere */
+    function paintRail() {
+        const rail = document.getElementById('rail');
+        const items = Array.from(rail.querySelectorAll('.rail-item'));
+        const at = items.indexOf(railPointed || rail.querySelector('[aria-current]'));
+        items.forEach((a, i) => a.style.setProperty('--away', at === -1 ? items.length : Math.abs(i - at)));
+    }
+
     function renderRail() {
         const rail = document.getElementById('rail');
+        railPointed = null;
         rail.setAttribute('aria-label', tr(UI.railLabel));
         rail.style.setProperty('--count', SCRIPTS.length);
         const items = SCRIPTS
-            .map((s, i) => [
-                '<a class="rail-item" href="#' + esc(s.id) + '" style="--i:' + i + '">',
+            .map((s) => [
+                '<a class="rail-item" href="#' + esc(s.id) + '">',
                 '  <span class="rail-tick"></span>',
                 '  <span class="rail-label">' + icon(s.icon || 'code') + '<span>' + esc(tr(s.name)) + '</span></span>',
                 '</a>',
@@ -327,6 +339,7 @@
             if (a === current) a.setAttribute('aria-current', 'location');
             else a.removeAttribute('aria-current');
         });
+        paintRail();
     }
 
     function initRail() {
@@ -341,6 +354,20 @@
         };
         window.addEventListener('scroll', queue, { passive: true });
         window.addEventListener('resize', queue);
+
+        const rail = document.getElementById('rail');
+        const point = (e) => {
+            railPointed = e.target.closest('.rail-item');
+            paintRail();
+        };
+        const release = () => {
+            railPointed = null;
+            paintRail();
+        };
+        rail.addEventListener('pointerover', point);
+        rail.addEventListener('focusin', point);
+        rail.addEventListener('pointerleave', release);
+        rail.addEventListener('focusout', release);
     }
 
     /* ---------- demos ---------- */

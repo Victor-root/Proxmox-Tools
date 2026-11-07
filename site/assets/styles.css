@@ -738,10 +738,9 @@ code {
 /* ---------- side rail ---------- */
 
 /* A tab on the left edge, whose hover opens the list of the scripts under it.
-   The tab has to stay under the mouse, so the bar hangs from a fixed height and
-   grows downwards. The whole bar is always laid out at its full width and
-   clipped, so opening it only animates the clip, and the clip also limits where
-   the mouse can reach it. */
+   The bar is always laid out at its full size and clipped down to the tab, so
+   nothing moves when it opens: only the clip animates, and the clip also limits
+   where the mouse can reach it. */
 .rail { display: none; }
 
 @media (min-width: 901px) and (hover: hover) {
@@ -754,7 +753,7 @@ code {
         display: block;
         position: fixed; left: 0; top: var(--top); z-index: 40;
         padding: 10px 10px 12px 0;
-        clip-path: inset(-50px calc(100% - var(--strip)) -50px 0 round 0);
+        clip-path: inset(-50px calc(100% - var(--strip)) calc(100% - 64px) 0 round 0);
         transition: clip-path .34s var(--ease);
     }
 
@@ -802,29 +801,32 @@ code {
         opacity: 0; transition: opacity .2s;
     }
 
-    .rail-list { padding-top: 0; transition: padding-top .3s var(--ease); }
+    .rail-list { padding-top: 12px; }
 
     .rail-item {
         display: flex; align-items: center; gap: 8px;
-        height: 0; padding-left: 10px;
+        height: var(--row); padding-left: 10px;
         color: var(--fg-dim); text-decoration: none; white-space: nowrap;
-        transition: height .34s var(--ease);
     }
     .rail-item:focus-visible { outline: none; }
 
     .rail-tick {
         flex: none; width: 22px; height: 2px; border-radius: 2px;
         background: var(--fg-faint);
-        opacity: 0; transform: scaleX(.3); transform-origin: left;
-        transition: transform .28s var(--ease), opacity .2s, background .2s, box-shadow .2s;
+        opacity: max(.3, 1 - var(--away) * .18);
+        transform: scaleX(max(.3, 1 - var(--away) * .18)); transform-origin: left;
+        transition: transform .2s ease-out, opacity .2s ease-out, background .2s;
+    }
+    .rail-item[aria-current] .rail-tick, .rail-item:hover .rail-tick, .rail-item:focus-visible .rail-tick {
+        background: linear-gradient(90deg, var(--orange-deep), var(--orange-bright));
     }
 
     .rail-label {
         display: flex; align-items: center; gap: 10px;
         max-width: 340px; padding: 5px 12px 5px 9px; border-radius: 10px;
         font-size: 0.87rem; font-weight: 550; line-height: 1.25;
-        opacity: 0; transform: translateX(-10px);
-        transition: opacity .18s, transform .34s var(--ease), background .16s, color .16s;
+        opacity: 0;
+        transition: opacity .18s, background .16s, color .16s;
     }
     .rail-label > span { overflow: hidden; text-overflow: ellipsis; }
     .rail-label .ico { width: 17px; height: 17px; opacity: .7; transition: opacity .16s, color .16s; }
@@ -835,29 +837,7 @@ code {
     }
     .rail:hover::before, .rail:has(:focus-visible)::before { opacity: 1; }
     .rail:hover .rail-title, .rail:has(:focus-visible) .rail-title { opacity: 1; }
-    .rail:hover .rail-list, .rail:has(:focus-visible) .rail-list { padding-top: 12px; }
-    .rail:hover .rail-item, .rail:has(:focus-visible) .rail-item { height: var(--row); }
-    .rail:hover .rail-tick, .rail:has(:focus-visible) .rail-tick {
-        opacity: .6; transform: scaleX(.6);
-        transition-delay: calc(var(--i) * 14ms);
-    }
-    .rail:hover .rail-item[aria-current] .rail-tick, .rail:has(:focus-visible) .rail-item[aria-current] .rail-tick {
-        background: linear-gradient(90deg, var(--orange-deep), var(--orange-bright));
-        box-shadow: 0 0 10px color-mix(in srgb, var(--orange) 70%, transparent);
-        opacity: 1; transform: none;
-    }
-    .rail:hover .rail-label, .rail:has(:focus-visible) .rail-label {
-        opacity: 1; transform: none;
-        transition-delay: calc(var(--i) * 16ms), calc(var(--i) * 16ms), 0s, 0s;
-    }
-
-    /* the lines around the mouse grow with it */
-    .rail .rail-item:hover .rail-tick, .rail .rail-item:focus-visible .rail-tick {
-        background: var(--orange); opacity: 1; transform: none; transition-delay: 0s;
-    }
-    .rail .rail-item:has(+ .rail-item:hover) .rail-tick, .rail .rail-item:hover + .rail-item .rail-tick {
-        opacity: .9; transform: scaleX(.8); transition-delay: 0s;
-    }
+    .rail:hover .rail-label, .rail:has(:focus-visible) .rail-label { opacity: 1; }
 
     .rail-item:hover .rail-label, .rail-item:focus-visible .rail-label {
         background: color-mix(in srgb, var(--orange) 13%, transparent); color: var(--fg);
