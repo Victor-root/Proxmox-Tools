@@ -737,22 +737,26 @@ code {
 
 /* ---------- side rail ---------- */
 
-/* One line per script against the left edge. The whole bar is always laid out
-   at its full width and clipped down to its lines, so opening it only animates
-   the clip, and the clip also limits where the mouse can reach it. */
+/* Three steps: a tab on the left edge, its hover unfolds one line per script
+   under it, and the hover of those lines opens the panel with their titles.
+   The tab keeps its place through all of them, so the bar hangs from a fixed
+   height and grows downwards. The whole bar is always laid out at its full
+   width and clipped, so opening it only animates the clip, and the clip also
+   limits where the mouse can reach it. */
 .rail { display: none; }
 
 @media (min-width: 901px) and (hover: hover) {
     .rail {
-        --strip: 36px;
-        --row: min(11px, calc((100vh - 200px) / var(--count)));
-        --row-open: min(38px, calc((100vh - 200px) / var(--count)));
+        --top: 30vh;
+        --strip: 58px;
+        --room: calc((100vh - var(--top) - 80px) / var(--count));
+        --row: min(11px, var(--room));
+        --row-open: min(38px, var(--room));
         --ease: cubic-bezier(.22, 1, .36, 1);
 
         display: block;
-        position: fixed; left: 0; top: 50%; z-index: 40;
-        padding: 14px 10px 14px 0;
-        transform: translateY(-50%);
+        position: fixed; left: 0; top: var(--top); z-index: 40;
+        padding: 10px 10px 12px 0;
         clip-path: inset(-50px calc(100% - var(--strip)) -50px 0 round 0);
         transition: clip-path .34s var(--ease);
     }
@@ -769,61 +773,96 @@ code {
         transition: opacity .22s;
     }
 
-    .rail-head {
-        height: 0; margin: 0 0 0 44px; overflow: hidden; opacity: 0;
-        font-size: 0.7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
-        color: var(--fg-faint); white-space: nowrap;
-        transition: height .34s var(--ease), opacity .2s;
+    .rail-head { display: flex; align-items: center; gap: 14px; margin: 0; white-space: nowrap; }
+
+    .rail-tab {
+        position: relative; flex: none;
+        display: grid; place-items: center;
+        width: 42px; height: 42px;
+        border-radius: 0 13px 13px 0;
+        background: linear-gradient(140deg, var(--orange-bright), var(--orange-deep));
+        color: #1a1206;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28);
+        transition: width .3s var(--ease);
     }
+    .rail-tab .ico { width: 21px; height: 21px; }
+    /* the glow breathes on its own layer, so it costs no repaint */
+    .rail-tab::after {
+        content: ""; position: absolute; inset: 0; border-radius: inherit;
+        box-shadow: 0 0 16px 2px color-mix(in srgb, var(--orange) 75%, transparent);
+        animation: rail-breathe 2.8s ease-in-out infinite;
+    }
+    @keyframes rail-breathe {
+        0%, 100% { opacity: .25; }
+        50% { opacity: 1; }
+    }
+    .rail:hover .rail-tab { width: 48px; }
+    .rail:hover .rail-tab::after { animation: none; opacity: .6; }
+
+    .rail-title {
+        font-size: 0.7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+        color: var(--fg-faint);
+        opacity: 0; transition: opacity .2s;
+    }
+
+    .rail-list { padding-top: 0; transition: padding-top .3s var(--ease); }
 
     .rail-item {
         display: flex; align-items: center; gap: 8px;
-        height: var(--row); padding-left: 8px;
+        height: 0; padding-left: 10px;
         color: var(--fg-dim); text-decoration: none; white-space: nowrap;
         transition: height .34s var(--ease);
     }
     .rail-item:focus-visible { outline: none; }
 
     .rail-tick {
-        flex: none; width: 20px; height: 2px; border-radius: 2px;
-        background: var(--fg-faint); opacity: .55;
-        transform: scaleX(.6); transform-origin: left;
+        flex: none; width: 22px; height: 2px; border-radius: 2px;
+        background: var(--fg-faint);
+        opacity: 0; transform: scaleX(.3); transform-origin: left;
         transition: transform .28s var(--ease), opacity .2s, background .2s, box-shadow .2s;
-    }
-    .rail-item[aria-current] .rail-tick {
-        background: linear-gradient(90deg, var(--orange-deep), var(--orange-bright));
-        box-shadow: 0 0 10px color-mix(in srgb, var(--orange) 70%, transparent);
-        opacity: 1; transform: none;
     }
 
     .rail-label {
         display: flex; align-items: center; gap: 10px;
         max-width: 340px; padding: 5px 12px 5px 9px; border-radius: 10px;
         font-size: 0.87rem; font-weight: 550; line-height: 1.25;
-        opacity: 0; transform: translateX(-10px);
+        opacity: 0; transform: translateX(-10px); pointer-events: none;
         transition: opacity .18s, transform .34s var(--ease), background .16s, color .16s;
     }
     .rail-label > span { overflow: hidden; text-overflow: ellipsis; }
     .rail-label .ico { width: 17px; height: 17px; opacity: .7; transition: opacity .16s, color .16s; }
 
-    /* open, for the mouse and for the keyboard */
-    .rail:hover, .rail:has(:focus-visible) {
+    /* step two, the lines */
+    .rail:hover .rail-list, .rail:has(:focus-visible) .rail-list { padding-top: 12px; }
+    .rail:hover .rail-item, .rail:has(:focus-visible) .rail-item { height: var(--row); }
+    .rail:hover .rail-tick, .rail:has(:focus-visible) .rail-tick {
+        opacity: .6; transform: scaleX(.6);
+        transition-delay: calc(var(--i) * 14ms);
+    }
+    .rail:hover .rail-item[aria-current] .rail-tick, .rail:has(:focus-visible) .rail-item[aria-current] .rail-tick {
+        background: linear-gradient(90deg, var(--orange-deep), var(--orange-bright));
+        box-shadow: 0 0 10px color-mix(in srgb, var(--orange) 70%, transparent);
+        opacity: 1; transform: none;
+    }
+
+    /* step three, the titles, for the mouse and for the keyboard */
+    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible) {
         clip-path: inset(-50px -70px -50px 0 round 0);
     }
-    .rail:hover::before, .rail:has(:focus-visible)::before { opacity: 1; }
-    .rail:hover .rail-head, .rail:has(:focus-visible) .rail-head { height: 28px; opacity: 1; }
-    .rail:hover .rail-item, .rail:has(:focus-visible) .rail-item { height: var(--row-open); }
-    .rail:hover .rail-label, .rail:has(:focus-visible) .rail-label {
-        opacity: 1; transform: none;
+    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible)::before { opacity: 1; }
+    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible) .rail-title { opacity: 1; }
+    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible) .rail-item { height: var(--row-open); }
+    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible) .rail-label {
+        opacity: 1; transform: none; pointer-events: auto;
         transition-delay: calc(var(--i) * 16ms), calc(var(--i) * 16ms), 0s, 0s;
     }
 
     /* the lines around the mouse grow with it */
-    .rail-item:hover .rail-tick, .rail-item:focus-visible .rail-tick {
-        background: var(--orange); opacity: 1; transform: none;
+    .rail .rail-item:hover .rail-tick, .rail .rail-item:focus-visible .rail-tick {
+        background: var(--orange); opacity: 1; transform: none; transition-delay: 0s;
     }
-    .rail-item:has(+ .rail-item:hover) .rail-tick, .rail-item:hover + .rail-item .rail-tick {
-        opacity: .9; transform: scaleX(.8);
+    .rail .rail-item:has(+ .rail-item:hover) .rail-tick, .rail .rail-item:hover + .rail-item .rail-tick {
+        opacity: .9; transform: scaleX(.8); transition-delay: 0s;
     }
 
     .rail-item:hover .rail-label, .rail-item:focus-visible .rail-label {

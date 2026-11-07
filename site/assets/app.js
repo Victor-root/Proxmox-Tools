@@ -293,7 +293,7 @@
         const rail = document.getElementById('rail');
         rail.setAttribute('aria-label', tr(UI.railLabel));
         rail.style.setProperty('--count', SCRIPTS.length);
-        rail.innerHTML = '<p class="rail-head">' + esc(tr(UI.railLabel)) + '</p>' + SCRIPTS
+        const items = SCRIPTS
             .map((s, i) => [
                 '<a class="rail-item" href="#' + esc(s.id) + '" style="--i:' + i + '">',
                 '  <span class="rail-tick"></span>',
@@ -301,6 +301,13 @@
                 '</a>',
             ].join(''))
             .join('');
+        rail.innerHTML = [
+            '<p class="rail-head">',
+            '  <span class="rail-tab">' + icon('list-details') + '</span>',
+            '  <span class="rail-title">' + esc(tr(UI.railLabel)) + '</span>',
+            '</p>',
+            '<div class="rail-list">' + items + '</div>',
+        ].join('');
         syncRail();
     }
 
