@@ -223,8 +223,8 @@ tr_msg() {
         fr:warning_title) echo "AVERTISSEMENT" ;;
         en:warning_title) echo "WARNING" ;;
 
-        fr:warning_body_1) echo "Ce script ajoute 15 fichiers de thème dans ${THEME_DIR} et modifie deux fichiers JavaScript fournis par Proxmox VE : proxmoxlib.js (thèmes dans le menu, couleurs des graphiques) et pvemanagerlib.js (bouton de repli du journal, panneau de statut des VM et conteneurs à la taille de son contenu)." ;;
-        en:warning_body_1) echo "This script adds 15 theme files to ${THEME_DIR} and modifies two JavaScript files provided by Proxmox VE: proxmoxlib.js (themes in the menu, chart colors) and pvemanagerlib.js (log panel collapse button, status panel of VMs and containers sized to its content)." ;;
+        fr:warning_body_1) echo "Ce script ajoute 18 fichiers de thème dans ${THEME_DIR} et modifie deux fichiers JavaScript fournis par Proxmox VE : proxmoxlib.js (thèmes dans le menu, couleurs des graphiques) et pvemanagerlib.js (bouton de repli du journal, panneau de statut des VM et conteneurs à la taille de son contenu)." ;;
+        en:warning_body_1) echo "This script adds 18 theme files to ${THEME_DIR} and modifies two JavaScript files provided by Proxmox VE: proxmoxlib.js (themes in the menu, chart colors) and pvemanagerlib.js (log panel collapse button, status panel of VMs and containers sized to its content)." ;;
 
         fr:warning_body_2) echo "Ceci est hors support. Les mises à jour des paquets proxmox-widget-toolkit et pve-manager écrasent ces modifications : les thèmes restent installés mais disparaissent du menu, sauf si la réapplication automatique est activée." ;;
         en:warning_body_2) echo "This is unsupported. Updates of the proxmox-widget-toolkit and pve-manager packages overwrite these changes: the themes stay installed but leave the menu, unless automatic re-apply is enabled." ;;
@@ -350,8 +350,8 @@ tr_msg() {
         fr:uninstall_title) echo "DÉSINSTALLATION" ;;
         en:uninstall_title) echo "UNINSTALL" ;;
 
-        fr:uninstall_body_1) echo "Les 15 fichiers de thème sont supprimés, les modifications du code de Proxmox sont retirées une à une (celles des autres scripts restent en place), le thème par défaut du serveur redevient celui d'origine et la réapplication automatique est désactivée." ;;
-        en:uninstall_body_1) echo "The 15 theme files are removed, the changes to the Proxmox code are taken out one by one (those of other scripts stay in place), the default theme of the server goes back to stock and automatic re-apply is disabled." ;;
+        fr:uninstall_body_1) echo "Les 18 fichiers de thème sont supprimés, les modifications du code de Proxmox sont retirées une à une (celles des autres scripts restent en place), le thème par défaut du serveur redevient celui d'origine et la réapplication automatique est désactivée." ;;
+        en:uninstall_body_1) echo "The 18 theme files are removed, the changes to the Proxmox code are taken out one by one (those of other scripts stay in place), the default theme of the server goes back to stock and automatic re-apply is disabled." ;;
 
         fr:uninstall_body_2) echo "Un navigateur qui utilisait un thème Modern affichera l'interface claire d'origine, même si l'ordinateur est en mode sombre, jusqu'à ce qu'un autre thème soit choisi dans « Thème de couleur »." ;;
         en:uninstall_body_2) echo "A browser that used a Modern theme shows the stock light interface, even if the computer is in dark mode, until another theme is picked in \"Color Theme\"." ;;
@@ -522,7 +522,7 @@ import re
 import sys
 from pathlib import Path
 
-ACCENTS = {"orange": "Orange", "blue": "Blue", "violet": "Violet", "green": "Green", "pink": "Pink"}
+ACCENTS = {"orange": "Orange", "blue": "Blue", "violet": "Violet", "green": "Green", "pink": "Pink", "red": "Red"}
 MODES = (("", "Auto"), ("-light", "Light"), ("-dark", "Dark"))
 
 SELECTOR_STOCK = (
@@ -531,10 +531,22 @@ SELECTOR_STOCK = (
     "            'proxmox-dark': 'Proxmox Dark',\n"
     "        },\n"
 )
-SELECTOR_PATCHED = SELECTOR_STOCK[:-len("        },\n")] + "".join(
-    f"            'modern-{accent}{suffix}': 'Modern {label} ({mode})',\n"
-    for accent, label in ACCENTS.items() for suffix, mode in MODES
-) + "        },\n"
+
+
+def selector_block(accents):
+    return SELECTOR_STOCK[:-len("        },\n")] + "".join(
+        f"            'modern-{accent}{suffix}': 'Modern {label} ({mode})',\n"
+        for accent, label in accents.items() for suffix, mode in MODES
+    ) + "        },\n"
+
+
+SELECTOR_PATCHED = selector_block(ACCENTS)
+
+# Patched forms of earlier versions of this script, recognised so that a host
+# patched by one of them can be brought up to date or cleaned.
+OLDER = {
+    "selector": (selector_block({a: label for a, label in ACCENTS.items() if a != "red"}),),
+}
 
 # RRDChart.checkThemeColors() already reads the background, text and grid
 # colours from CSS variables; the Modern themes also set the series colours
@@ -725,11 +737,19 @@ def patch_state(name):
     applied = text.count(patched)
     # an inserted block still contains the stock one
     pristine = text.count(stock) - applied * patched.count(stock)
-    if applied == 1 and pristine == 0:
+    older = sum(text.count(block) for block in OLDER.get(name, ()))
+    if applied == 1 and pristine == 0 and older == 0:
         return "patched"
-    if applied == 0 and pristine == 1:
+    if applied == 0 and pristine == 1 and older == 0:
         return "stock"
+    if applied == 0 and pristine == 0 and older == 1:
+        return "outdated"
     return "unknown"
+
+
+def older_block(name):
+    text = Path(os.environ[PATCHES[name][0]]).read_text(encoding="utf-8")
+    return next(block for block in OLDER[name] if block in text)
 
 
 def default_block(theme):
@@ -811,13 +831,15 @@ def main(argv):
     elif command in ("apply", "revert"):
         name = args[0]
         _, stock, patched = PATCHES[name]
-        expected = "stock" if command == "apply" else "patched"
-        if patch_state(name) != expected:
-            return 1
-        if command == "apply":
+        state = patch_state(name)
+        if state == "outdated":
+            swap(name, older_block(name), patched if command == "apply" else stock)
+        elif command == "apply" and state == "stock":
             swap(name, stock, patched)
-        else:
+        elif command == "revert" and state == "patched":
             swap(name, patched, stock)
+        else:
+            return 1
     elif command == "reapply":
         # exit status 3 tells the APT hook that pveproxy has to be restarted
         restart = False
@@ -1065,6 +1087,7 @@ state_label() {
     case "$1" in
         patched) echo "${PMX_GREEN}$(tr_msg state_applied)${RESET}" ;;
         stock) echo "${PMX_GREY}$(tr_msg state_stock)${RESET}" ;;
+        outdated) echo "${PMX_AMBER}$(tr_msg state_outdated)${RESET}" ;;
         *) echo "${PMX_RED}$(tr_msg state_unknown)${RESET}" ;;
     esac
 }
@@ -1141,7 +1164,8 @@ install_themes() {
 
     engine themes-write "$THEME_DIR" "$(theme_parts_dir)"
     for name in selector charts logs summary gap notes; do
-        if [[ "$(patch_state "$name")" == "stock" ]]; then
+        state="$(patch_state "$name")"
+        if [[ "$state" == "stock" || "$state" == "outdated" ]]; then
             engine apply "$name"
         fi
     done
@@ -1226,7 +1250,7 @@ choose_default_theme() {
         return 1
     fi
 
-    for accent in orange blue violet green pink; do
+    for accent in orange blue violet green pink red; do
         choices+=("modern-${accent}" "modern-${accent}-light" "modern-${accent}-dark")
     done
     choices+=("auto")
@@ -1328,7 +1352,7 @@ uninstall_all() {
     engine themes-remove "$THEME_DIR" "$(theme_parts_dir)"
     for name in selector charts logs summary gap notes storage console; do
         state="$(patch_state "$name")"
-        if [[ "$state" == "patched" ]]; then
+        if [[ "$state" == "patched" || "$state" == "outdated" ]]; then
             engine revert "$name"
         elif [[ "$state" == "unknown" ]]; then
             unknown+=("$name")
@@ -2324,6 +2348,37 @@ pink	light	rgba(226,89,11,.25)	rgba(219,39,119,.25)
 pink	light	rgba(226,89,11,.45)	rgba(219,39,119,.45)
 pink	light	rgba(226,89,11,.5)	rgba(219,39,119,.5)
 pink	light	rgba(226,89,11,.55)	rgba(219,39,119,.55)
+red	dark	#c65310	#dc2626
+red	dark	#e18484	rgb(235.1960784314, 173.8039215686, 173.8039215686)
+red	dark	#f0690f	#ef4444
+red	dark	#fa802e	#f87171
+red	dark	#ffa35c	#fca5a5
+red	dark	#ffc599	#fecaca
+red	dark	#ffcc66	rgb(255, 221.3333333333, 154)
+red	dark	rgb(232.8,101.85,14.55)	rgb(231.83,65.96,65.96)
+red	dark	rgb(37.5,145.5,217.5)	rgb(38.3,175.1,175.1)
+red	dark	rgb(87.4,49.7,28.3)	rgb(87.1,38.6,44.2)
+red	dark	rgba(240, 105, 15, 0.14)	rgba(239, 68, 68, 0.14)
+red	dark	rgba(240,105,15,.1)	rgba(239,68,68,.1)
+red	dark	rgba(240,105,15,.14)	rgba(239,68,68,.14)
+red	dark	rgba(240,105,15,.2)	rgba(239,68,68,.2)
+red	dark	rgba(240,105,15,.25)	rgba(239,68,68,.25)
+red	dark	rgba(240,105,15,.45)	rgba(239,68,68,.45)
+red	dark	rgba(240,105,15,.5)	rgba(239,68,68,.5)
+red	dark	rgba(240,105,15,.55)	rgba(239,68,68,.55)
+red	light	#9a3412	#991b1b
+red	light	#b8470a	#b91c1c
+red	light	#c2410c	#b91c1c
+red	light	#e2590b	#dc2626
+red	light	#f06d1d	#ef4444
+red	light	rgba(226, 89, 11, 0.1)	rgba(220, 38, 38, 0.1)
+red	light	rgba(226,89,11,.06)	rgba(220,38,38,.06)
+red	light	rgba(226,89,11,.1)	rgba(220,38,38,.1)
+red	light	rgba(226,89,11,.2)	rgba(220,38,38,.2)
+red	light	rgba(226,89,11,.25)	rgba(220,38,38,.25)
+red	light	rgba(226,89,11,.45)	rgba(220,38,38,.45)
+red	light	rgba(226,89,11,.5)	rgba(220,38,38,.5)
+red	light	rgba(226,89,11,.55)	rgba(220,38,38,.55)
 violet	dark	#c65310	#7c3aed
 violet	dark	#e18484	rgb(241.2745098039, 198.7254901961, 198.7254901961)
 violet	dark	#f0690f	#8b5cf6

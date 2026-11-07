@@ -385,7 +385,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 
 Adds modern themes to the Proxmox VE web interface, picked from the stock **Color Theme** menu:
 
-* 🎨 **5 accent colors** (orange, blue, violet, green, pink), each in **Auto**, **Light** and **Dark**: Auto follows the light or dark setting of the computer
+* 🎨 **6 accent colors** (orange, blue, violet, green, pink, red), each in **Auto**, **Light** and **Dark**: Auto follows the light or dark setting of the computer
 * ✨ rounded cards and windows, tinted title bars, pill shaped tabs, toggles and tags, colored checkboxes, accent hover and selection everywhere
 * 🖼️ about 75 icons redrawn with **Phosphor** icons (MIT license), and status dots (running, paused, error) instead of the small glyphs over the tree icons
 * 📈 chart curves in the accent color
@@ -404,7 +404,7 @@ Adds modern themes to the Proxmox VE web interface, picked from the stock **Colo
 #### Good to know
 
 * **Choosing a theme:** click your user name at the top right of the web interface, then **Color Theme**. The choice is stored per browser, like the stock dark theme. The default theme of the server applies to the browsers that made no choice, and to those that pick **Default** in that menu.
-* **What is changed:** 15 theme files are added to `/usr/share/javascript/proxmox-widget-toolkit/themes/`, `proxmoxlib.js` gets the theme entries of the menu and the chart colors, and `pvemanagerlib.js` gets the Logs panel button, the status panel fix (and the storage sizes option when enabled). The console option changes one block of `/usr/share/pve-xtermjs/style.css`.
+* **What is changed:** 18 theme files are added to `/usr/share/javascript/proxmox-widget-toolkit/themes/`, `proxmoxlib.js` gets the theme entries of the menu and the chart colors, and `pvemanagerlib.js` gets the Logs panel button, the status panel fix (and the storage sizes option when enabled). The console option changes one block of `/usr/share/pve-xtermjs/style.css`.
 * **No restart needed** for the themes: `pveproxy` reads these files on every request. Changing the **default theme of the server** edits one line of `/usr/share/perl5/PVE/Service/pveproxy.pm`, which is only read at startup: the script restarts `pveproxy` then, and the web interface is unreachable for a few seconds.
 * **The browser cache can hide the change.** Proxmox sends no expiry for these files, so a browser may keep the old copy of the menu. Check in a private window, then clear the site data in each browser you use.
 * **Package updates** of `proxmox-widget-toolkit` and `pve-manager` put their files back: the themes stay installed but leave the menu until the script runs again, unless the APT hook is enabled. The same goes for the console option and the `pve-xtermjs` package.

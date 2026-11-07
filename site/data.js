@@ -731,19 +731,19 @@ const SCRIPTS = [
         },
         compat: 'PVE 9.x',
         updated: {
-            en: 'New script. Modern themes in 5 colors, new icons, chart colors and fixes of the interface.',
-            fr: 'Nouveau script. Des thèmes modernes en 5 couleurs, de nouvelles icônes, des graphiques colorés et des corrections de l’interface.',
+            en: 'New red accent, and the dot of a focused radio button is centred again.',
+            fr: 'Nouvelle couleur rouge, et le point d’un bouton radio sélectionné au clavier est de nouveau centré.',
         },
         points: {
             en: [
-                'Orange, blue, violet, green and pink, each in Auto, Light and Dark',
+                'Orange, blue, violet, green, pink and red, each in Auto, Light and Dark',
                 'Rounded cards, tinted title bars, modern icons and status dots, colored charts',
                 'A default theme for the whole server, login page included',
                 'Status panel sized to its content; options: storage sizes in TiB like Windows, Start button of the console of a stopped guest',
                 'Blocks matched exactly, automatic backup, full uninstall that keeps the changes of other scripts',
             ],
             fr: [
-                'Orange, bleu, violet, vert et rose, chacun en Auto, Clair et Sombre',
+                'Orange, bleu, violet, vert, rose et rouge, chacun en Auto, Clair et Sombre',
                 'Cartes arrondies, barres de titre teintées, icônes modernes et pastilles d’état, graphiques colorés',
                 'Un thème par défaut pour tout le serveur, page de connexion comprise',
                 'Panneau de statut à la taille de son contenu ; en option, tailles des stockages en Tio comme Windows et bouton Démarrer de la console d’un invité arrêté',
@@ -752,7 +752,7 @@ const SCRIPTS = [
         },
         touches: {
             files: [
-                { path: '/usr/share/javascript/proxmox-widget-toolkit/themes/theme-modern-*.css', role: { en: '15 theme files added (5 colors, auto, light and dark)', fr: '15 fichiers de thème ajoutés (5 couleurs, auto, clair et sombre)' } },
+                { path: '/usr/share/javascript/proxmox-widget-toolkit/themes/theme-modern-*.css', role: { en: '18 theme files added (6 colors, auto, light and dark)', fr: '18 fichiers de thème ajoutés (6 couleurs, auto, clair et sombre)' } },
                 { path: '/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js', role: { en: 'theme entries of the Color Theme menu, chart colors read from the theme', fr: 'entrées du menu Thème de couleur, couleurs des graphiques lues dans le thème' } },
                 { path: '/usr/share/pve-manager/js/pvemanagerlib.js', role: { en: 'collapse button of the Logs panel, status panel sized to its content, storage sizes in TiB when enabled', fr: 'bouton de repli du panneau Journaux, panneau de statut à la taille de son contenu, tailles en Tio si activées' } },
                 { path: '/usr/share/pve-xtermjs/style.css', role: { en: 'Start button of the console of a stopped guest, when enabled', fr: 'bouton Démarrer de la console d’un invité arrêté, si activé' } },
