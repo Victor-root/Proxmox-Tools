@@ -813,10 +813,10 @@ code {
     .rail-item:focus-visible { outline: none; }
 
     /* the line sits in a box of fixed width, so the titles stay where they are */
-    .rail-tick { flex: none; width: 22px; }
+    .rail-tick { flex: none; width: 34px; }
     .rail-tick::before {
         content: ""; display: block; border-radius: 2px;
-        width: max(13px, 22px - var(--away) * 3px);
+        width: max(20px, 34px - var(--away) * 5px);
         height: max(2px, 4px - var(--away) * 1px);
         background: var(--fg-faint);
         opacity: max(.6, 1 - var(--away) * .13);
