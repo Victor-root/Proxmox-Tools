@@ -737,21 +737,18 @@ code {
 
 /* ---------- side rail ---------- */
 
-/* Three steps: a tab on the left edge, its hover unfolds one line per script
-   under it, and the hover of those lines opens the panel with their titles.
-   The tab keeps its place through all of them, so the bar hangs from a fixed
-   height and grows downwards. The whole bar is always laid out at its full
-   width and clipped, so opening it only animates the clip, and the clip also
-   limits where the mouse can reach it. */
+/* A tab on the left edge, whose hover opens the list of the scripts under it.
+   The tab has to stay under the mouse, so the bar hangs from a fixed height and
+   grows downwards. The whole bar is always laid out at its full width and
+   clipped, so opening it only animates the clip, and the clip also limits where
+   the mouse can reach it. */
 .rail { display: none; }
 
 @media (min-width: 901px) and (hover: hover) {
     .rail {
         --top: 30vh;
         --strip: 58px;
-        --room: calc((100vh - var(--top) - 80px) / var(--count));
-        --row: min(11px, var(--room));
-        --row-open: min(38px, var(--room));
+        --row: min(38px, calc((100vh - var(--top) - 80px) / var(--count)));
         --ease: cubic-bezier(.22, 1, .36, 1);
 
         display: block;
@@ -826,13 +823,18 @@ code {
         display: flex; align-items: center; gap: 10px;
         max-width: 340px; padding: 5px 12px 5px 9px; border-radius: 10px;
         font-size: 0.87rem; font-weight: 550; line-height: 1.25;
-        opacity: 0; transform: translateX(-10px); pointer-events: none;
+        opacity: 0; transform: translateX(-10px);
         transition: opacity .18s, transform .34s var(--ease), background .16s, color .16s;
     }
     .rail-label > span { overflow: hidden; text-overflow: ellipsis; }
     .rail-label .ico { width: 17px; height: 17px; opacity: .7; transition: opacity .16s, color .16s; }
 
-    /* step two, the lines */
+    /* open, for the mouse and for the keyboard */
+    .rail:hover, .rail:has(:focus-visible) {
+        clip-path: inset(-50px -70px -50px 0 round 0);
+    }
+    .rail:hover::before, .rail:has(:focus-visible)::before { opacity: 1; }
+    .rail:hover .rail-title, .rail:has(:focus-visible) .rail-title { opacity: 1; }
     .rail:hover .rail-list, .rail:has(:focus-visible) .rail-list { padding-top: 12px; }
     .rail:hover .rail-item, .rail:has(:focus-visible) .rail-item { height: var(--row); }
     .rail:hover .rail-tick, .rail:has(:focus-visible) .rail-tick {
@@ -844,16 +846,8 @@ code {
         box-shadow: 0 0 10px color-mix(in srgb, var(--orange) 70%, transparent);
         opacity: 1; transform: none;
     }
-
-    /* step three, the titles, for the mouse and for the keyboard */
-    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible) {
-        clip-path: inset(-50px -70px -50px 0 round 0);
-    }
-    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible)::before { opacity: 1; }
-    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible) .rail-title { opacity: 1; }
-    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible) .rail-item { height: var(--row-open); }
-    .rail:has(.rail-list:hover, .rail-title:hover, :focus-visible) .rail-label {
-        opacity: 1; transform: none; pointer-events: auto;
+    .rail:hover .rail-label, .rail:has(:focus-visible) .rail-label {
+        opacity: 1; transform: none;
         transition-delay: calc(var(--i) * 16ms), calc(var(--i) * 16ms), 0s, 0s;
     }
 

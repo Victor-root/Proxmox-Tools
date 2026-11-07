@@ -303,7 +303,7 @@
             .join('');
         rail.innerHTML = [
             '<p class="rail-head">',
-            '  <span class="rail-tab">' + icon('list-details') + '</span>',
+            '  <span class="rail-tab">' + icon('code') + '</span>',
             '  <span class="rail-title">' + esc(tr(UI.railLabel)) + '</span>',
             '</p>',
             '<div class="rail-list">' + items + '</div>',
