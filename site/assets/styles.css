@@ -817,7 +817,7 @@ code {
     .rail-tick::before {
         content: ""; display: block; border-radius: 2px;
         width: max(13px, 34px - var(--away) * 6px);
-        height: max(2px, 4px - var(--away) * 1px);
+        height: max(2px, 4px - var(--away) * 2px);
         background: var(--fg-faint);
         opacity: max(.6, 1 - var(--away) * .13);
         transition: width .2s ease-out, height .2s ease-out, opacity .2s ease-out;
