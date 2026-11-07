@@ -152,7 +152,8 @@ body > .x-mask {
   border-radius: 50%;
 }
 
-// the keyboard-mode focus rules of crisp move the sprite and would push the mark out of the box
+// the keyboard-mode focus rules of crisp move the sprite and would push the mark out of the box;
+// ExtJS puts x-form-checkbox-focus on radios too
 .x-form-cb-checked .x-form-checkbox-default,
 .x-keyboard-mode .x-form-cb-checked .x-form-checkbox-focus.x-form-checkbox-default,
 .x-grid-checkcolumn-checked::after,
@@ -163,13 +164,13 @@ body > .x-mask {
 }
 
 .x-form-cb-checked .x-form-radio-default,
-.x-keyboard-mode .x-form-cb-checked .x-form-radio-focus.x-form-radio-default {
+.x-keyboard-mode .x-form-cb-checked .x-form-checkbox-focus.x-form-radio-default {
   border-color: $primary-color;
   background: radial-gradient(circle, $primary-color 0 3.5px, $content-background-color 4px);
 }
 
 .x-form-checkbox-focus.x-form-checkbox-default,
-.x-form-radio-focus.x-form-radio-default {
+.x-form-checkbox-focus.x-form-radio-default {
   border-color: $primary-color;
 }
 
