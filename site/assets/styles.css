@@ -747,7 +747,9 @@ code {
     .rail {
         --top: 30vh;
         --strip: 58px;
-        --row: min(38px, calc((100vh - var(--top) - 80px) / var(--count)));
+        /* 40px is a whole number of screen pixels at the usual display scales,
+           so every line lands the same way on the pixel grid */
+        --row: min(40px, calc((100vh - var(--top) - 80px) / var(--count)));
         --ease: cubic-bezier(.22, 1, .36, 1);
 
         display: block;
@@ -810,14 +812,19 @@ code {
     }
     .rail-item:focus-visible { outline: none; }
 
-    .rail-tick {
-        flex: none; width: 22px; height: 2px; border-radius: 2px;
+    /* the line sits in a box of fixed width, so the titles stay where they are */
+    .rail-tick { flex: none; width: 22px; }
+    .rail-tick::before {
+        content: ""; display: block; border-radius: 2px;
+        width: max(13px, 22px - var(--away) * 3px);
+        height: max(2px, 4px - var(--away) * 1px);
         background: var(--fg-faint);
-        opacity: max(.3, 1 - var(--away) * .18);
-        transform: scaleX(max(.3, 1 - var(--away) * .18)); transform-origin: left;
-        transition: transform .2s ease-out, opacity .2s ease-out, background .2s;
+        opacity: max(.6, 1 - var(--away) * .13);
+        transition: width .2s ease-out, height .2s ease-out, opacity .2s ease-out;
     }
-    .rail-item[aria-current] .rail-tick, .rail-item:hover .rail-tick, .rail-item:focus-visible .rail-tick {
+    .rail-item[aria-current] .rail-tick::before,
+    .rail-item:hover .rail-tick::before,
+    .rail-item:focus-visible .rail-tick::before {
         background: linear-gradient(90deg, var(--orange-deep), var(--orange-bright));
     }
 
