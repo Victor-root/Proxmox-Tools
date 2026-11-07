@@ -433,7 +433,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 
 **Script:** `lxc-nginx-reverse-proxy.sh`
 
-Installs **Nginx** inside a Debian **LXC** and publishes your services in **HTTPS**, through an interactive menu:
+Installs **Nginx** inside a Debian/Ubuntu **LXC** and publishes your services in **HTTPS**, through an interactive menu:
 
 * 📦 installs Nginx if it is missing, and prepares the files every site shares
 * 🧩 takes over an **existing setup**: a file already there is never replaced
@@ -455,7 +455,7 @@ Installs **Nginx** inside a Debian **LXC** and publishes your services in **HTTP
 
 #### Version compatibility
 
-The install and the wizard were run with real traffic in clean systems on Debian 11 (Nginx 1.18), Debian 12 (Nginx 1.22) and Debian 13 (Nginx 1.26). Ubuntu ships the same packages but was not tested. The Let's Encrypt steps were run against a stand-in for certbot, not against the real service. On Nginx older than 1.19.4, unknown names are only refused on port 80. The script stops on a system without apt and systemd.
+The install and the wizard were run with real traffic in clean systems on Debian 11 (Nginx 1.18), Debian 12 (Nginx 1.22) Debian 13 (Nginx 1.26), Ubuntu 22.04 (Nginx 1.18) and Ubuntu 24.04 (Nginx 1.24). The Let's Encrypt steps were run against a stand-in for certbot, not against the real service. On Nginx older than 1.19.4, unknown names are only refused on port 80. The script stops on a system without apt and systemd.
 
 #### Run it directly
 

@@ -818,10 +818,10 @@ const SCRIPTS = [
             fr: 'Installe Nginx dans un LXC et publie vos services en HTTPS, depuis un simple menu.',
         },
         runsOn: {
-            en: 'Inside a Debian LXC, as root',
-            fr: 'Dans un LXC Debian, en root',
+            en: 'Inside a Debian or Ubuntu LXC, as root',
+            fr: 'Dans un LXC Debian ou Ubuntu, en root',
         },
-        compat: 'Debian 11 to 13 LXC',
+        compat: 'Debian / Ubuntu LXC',
         updated: {
             en: 'New script. Installs Nginx and manages its reverse proxies from a menu, certificates included.',
             fr: 'Nouveau script. Installe Nginx et gère ses reverse proxies depuis un menu, certificats compris.',
