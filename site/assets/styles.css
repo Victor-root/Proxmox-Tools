@@ -129,7 +129,7 @@ body {
     transition: background .2s, color .2s;
 }
 
-h1, h2, h3 { line-height: 1.15; margin: 0; letter-spacing: -0.02em; }
+h1, h2, h3, h4 { line-height: 1.15; margin: 0; letter-spacing: -0.02em; }
 p { margin: 0; }
 a { color: inherit; }
 
@@ -335,7 +335,36 @@ code {
 
 /* ---------- script cards ---------- */
 
-.cards { display: flex; flex-direction: column; gap: 28px; }
+/* --group is the accent of everything listed under a group */
+.cards { display: flex; flex-direction: column; gap: 64px; }
+.group { --group: var(--orange); display: flex; flex-direction: column; gap: 28px; }
+.group-lxc { --group: var(--ansi-cyan); }
+[data-theme="light"] .group-lxc { --group: #2b7f86; }
+
+.group-head {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 22px 16px 16px;
+    background: linear-gradient(100deg, color-mix(in srgb, var(--group) 15%, transparent), transparent 70%);
+    border: 1px solid color-mix(in srgb, var(--group) 32%, transparent);
+    border-radius: var(--radius);
+}
+.group-icon {
+    display: grid; place-items: center; flex: none;
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--group); color: #101318;
+}
+.group-icon .ico { width: 25px; height: 25px; stroke-width: 2.1; }
+.group-text { flex: 1 1 auto; min-width: 0; }
+.group-text h3 { font-size: 1.28rem; font-weight: 740; }
+.group-text p { margin-top: 3px; color: var(--fg-dim); font-size: 0.93rem; line-height: 1.45; }
+.group-count {
+    flex: none; display: grid; place-items: center;
+    min-width: 34px; height: 34px; padding: 0 9px; border-radius: 999px;
+    font-family: var(--mono); font-size: 0.9rem; font-weight: 700;
+    color: var(--group); background: color-mix(in srgb, var(--group) 14%, transparent);
+}
+.group-lxc .card { border-color: color-mix(in srgb, var(--group) 34%, var(--line-soft)); }
+.group-lxc .card:hover { border-color: color-mix(in srgb, var(--group) 60%, var(--line)); }
 
 .card {
     background: var(--panel);
@@ -353,7 +382,7 @@ code {
 
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .card-title { font-size: 1.34rem; font-weight: 730; display: flex; align-items: center; gap: 12px; }
-.card-title .ico { width: 26px; height: 26px; color: var(--orange); }
+.card-title .ico { width: 26px; height: 26px; color: var(--group); }
 .badge {
     flex-shrink: 0;
     font-family: var(--mono); font-size: 0.72rem;
@@ -364,7 +393,7 @@ code {
 /* the description is what people actually read: give it room and contrast */
 .card-tagline {
     color: var(--fg); font-size: 1.06rem; line-height: 1.55; font-weight: 500;
-    padding-left: 15px; border-left: 3px solid var(--orange);
+    padding-left: 15px; border-left: 3px solid var(--group);
 }
 
 .runs-on {
@@ -804,6 +833,15 @@ code {
     }
 
     .rail-list { padding-top: 12px; }
+
+    .rail-group {
+        display: flex; align-items: flex-end; gap: 7px;
+        height: var(--row); margin: 0 0 0 10px; padding-bottom: 7px;
+        font-size: 0.68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+        color: var(--fg-faint); white-space: nowrap;
+    }
+    .rail-group .ico { width: 15px; height: 15px; }
+    .rail-group + .rail-item ~ .rail-group { border-top: 1px solid var(--line); }
 
     .rail-item {
         display: flex; align-items: center; gap: 8px;

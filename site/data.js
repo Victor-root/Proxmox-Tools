@@ -13,7 +13,8 @@
  *   id        anchor used in the URL, lowercase, no spaces
  *   icon      Tabler icon key, see the sprite in index.html (browser, bell-off, …)
  *   file      exact file name inside scripts/, the run command is built from it
- *   target    "pve" (Proxmox host) or "lxc" (inside a container), picks the icon
+ *   target    "pve" (Proxmox host) or "lxc" (inside a container), picks the
+ *             group the card is listed in and its icon
  *   name      short title shown on the card
  *   tagline   one line, what it does
  *   runsOn    where the user must run it
@@ -915,6 +916,18 @@ const UI = {
     },
 
     scriptsTitle: { en: 'The scripts', fr: 'Les scripts' },
+    groupPve: { en: 'On the Proxmox VE host', fr: 'Sur l’hôte Proxmox VE' },
+    groupPveBody: {
+        en: 'Run these as root on the host itself: they change Proxmox VE.',
+        fr: 'À lancer en root sur l’hôte lui-même : ils modifient Proxmox VE.',
+    },
+    groupPveRail: 'Proxmox VE',
+    groupLxc: { en: 'Inside an LXC container', fr: 'Dans un conteneur LXC' },
+    groupLxcBody: {
+        en: 'Run these inside a container, not on the host: Proxmox VE itself is left untouched.',
+        fr: 'À lancer dans un conteneur, pas sur l’hôte : Proxmox VE lui-même n’est pas touché.',
+    },
+    groupLxcRail: 'LXC',
     scriptsLede: {
         en: 'Pick one, copy its line, paste it as root, on the Proxmox host or inside the LXC it targets. Each script opens a menu and waits for you: nothing runs on its own.',
         fr: 'Choisissez-en un, copiez sa ligne, collez-la en root, sur l’hôte Proxmox ou dans le LXC concerné. Chaque script ouvre un menu et vous attend : rien ne s’exécute tout seul.',

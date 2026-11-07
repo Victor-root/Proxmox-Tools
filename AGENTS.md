@@ -295,7 +295,7 @@ Append a block **at the end of the `SCRIPTS` array** (the first block is the one
         id: 'my-script',                       // URL anchor, lowercase, no spaces
         icon: 'history',                       // sprite symbol name without the i- prefix
         file: 'pve-my-script.sh',              // exact file name in scripts/
-        target: 'pve',                         // 'pve' (host) or 'lxc' (container), only picks an icon
+        target: 'pve',                         // 'pve' (host) or 'lxc' (container), picks the group of the card and its icon
         name: { en: 'What it is', fr: 'Ce que c’est' },
         tagline: { en: 'One line, what it does.', fr: 'Une ligne, ce que ça fait.' },
         runsOn: { en: 'Proxmox VE host, as root', fr: 'Sur l’hôte Proxmox VE, en root' },

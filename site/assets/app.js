@@ -15,6 +15,13 @@
     /* where a script runs, from the target field of data.js */
     const TARGET_ICON = { pve: 'server', lxc: 'box' };
 
+    /* the cards and the side rail list the scripts by where they run */
+    const GROUPS = [
+        { target: 'pve', title: 'groupPve', body: 'groupPveBody', rail: 'groupPveRail' },
+        { target: 'lxc', title: 'groupLxc', body: 'groupLxcBody', rail: 'groupLxcRail' },
+    ].map((g) => ({ ...g, scripts: SCRIPTS.filter((s) => s.target === g.target) }))
+        .filter((g) => g.scripts.length);
+
     let lang = 'en';
 
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
@@ -254,7 +261,7 @@
             '  <div class="card-grid">',
             '    <div class="card-info">',
             '      <div class="card-top">',
-            '        <h3 class="card-title">' + icon(script.icon || 'code') + '<span>' + esc(tr(script.name)) + '</span></h3>',
+            '        <h4 class="card-title">' + icon(script.icon || 'code') + '<span>' + esc(tr(script.name)) + '</span></h4>',
             '        <span class="badge">' + esc(tr(script.compat)) + '</span>',
             '      </div>',
             '      <p class="card-tagline">' + esc(tr(script.tagline)) + '</p>',
@@ -282,7 +289,21 @@
     }
 
     function renderCards() {
-        document.getElementById('cards').innerHTML = SCRIPTS.map(card).join('\n');
+        document.getElementById('cards').innerHTML = GROUPS
+            .map((g) => [
+                '<section class="group group-' + g.target + '">',
+                '  <header class="group-head">',
+                '    <span class="group-icon">' + icon(TARGET_ICON[g.target]) + '</span>',
+                '    <div class="group-text">',
+                '      <h3>' + esc(tr(UI[g.title])) + '</h3>',
+                '      <p>' + esc(tr(UI[g.body])) + '</p>',
+                '    </div>',
+                '    <span class="group-count">' + g.scripts.length + '</span>',
+                '  </header>',
+                g.scripts.map(card).join('\n'),
+                '</section>',
+            ].join('\n'))
+            .join('\n');
         wireCopy();
         wireDemos();
     }
@@ -304,14 +325,15 @@
         const rail = document.getElementById('rail');
         railPointed = null;
         rail.setAttribute('aria-label', tr(UI.railLabel));
-        rail.style.setProperty('--count', SCRIPTS.length);
-        const items = SCRIPTS
-            .map((s) => [
-                '<a class="rail-item" href="#' + esc(s.id) + '">',
-                '  <span class="rail-tick"></span>',
-                '  <span class="rail-label">' + icon(s.icon || 'code') + '<span>' + esc(tr(s.name)) + '</span></span>',
-                '</a>',
-            ].join(''))
+        rail.style.setProperty('--count', SCRIPTS.length + GROUPS.length);
+        const link = (s) => [
+            '<a class="rail-item" href="#' + esc(s.id) + '">',
+            '  <span class="rail-tick"></span>',
+            '  <span class="rail-label">' + icon(s.icon || 'code') + '<span>' + esc(tr(s.name)) + '</span></span>',
+            '</a>',
+        ].join('');
+        const items = GROUPS
+            .map((g) => '<p class="rail-group">' + icon(TARGET_ICON[g.target]) + esc(tr(UI[g.rail])) + '</p>' + g.scripts.map(link).join(''))
             .join('');
         rail.innerHTML = [
             '<p class="rail-head">',
