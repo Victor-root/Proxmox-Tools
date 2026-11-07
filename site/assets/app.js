@@ -100,6 +100,7 @@
         });
 
         renderCards();
+        renderRail();
         renderNews();
         renderFaq();
     }
@@ -286,6 +287,55 @@
         wireDemos();
     }
 
+    /* ---------- side rail ---------- */
+
+    function renderRail() {
+        const rail = document.getElementById('rail');
+        rail.setAttribute('aria-label', tr(UI.railLabel));
+        rail.style.setProperty('--count', SCRIPTS.length);
+        rail.innerHTML = '<p class="rail-head">' + esc(tr(UI.railLabel)) + '</p>' + SCRIPTS
+            .map((s, i) => [
+                '<a class="rail-item" href="#' + esc(s.id) + '" style="--i:' + i + '">',
+                '  <span class="rail-tick"></span>',
+                '  <span class="rail-label">' + icon(s.icon || 'code') + '<span>' + esc(tr(s.name)) + '</span></span>',
+                '</a>',
+            ].join(''))
+            .join('');
+        syncRail();
+    }
+
+    /* While the list of scripts fills the screen, the current line is the last
+       card whose top has passed the upper part of the screen. */
+    function syncRail() {
+        const rail = document.getElementById('rail');
+        const middle = window.innerHeight / 2;
+        const section = document.getElementById('scripts').getBoundingClientRect();
+        const items = Array.from(rail.querySelectorAll('.rail-item'));
+        const reached = items.filter((a) =>
+            document.getElementById(a.hash.slice(1)).getBoundingClientRect().top <= middle * 0.8);
+        const inList = section.top < middle && section.bottom > middle;
+        const current = inList ? reached[reached.length - 1] || items[0] : null;
+
+        items.forEach((a) => {
+            if (a === current) a.setAttribute('aria-current', 'location');
+            else a.removeAttribute('aria-current');
+        });
+    }
+
+    function initRail() {
+        let queued = false;
+        const queue = () => {
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(() => {
+                queued = false;
+                syncRail();
+            });
+        };
+        window.addEventListener('scroll', queue, { passive: true });
+        window.addEventListener('resize', queue);
+    }
+
     /* ---------- demos ---------- */
 
     function wireDemos() {
@@ -418,6 +468,7 @@
 
         initTheme();
         initLang();
+        initRail();
     }
 
     if (document.readyState === 'loading') {

@@ -877,6 +877,7 @@ const UI = {
     navHowto: { en: 'Get started', fr: 'Démarrer' },
     navScripts: { en: 'Scripts', fr: 'Les scripts' },
     navFaq: 'FAQ',
+    railLabel: { en: 'Jump to a script', fr: 'Aller à un script' },
 
     langLabel: { en: 'Language', fr: 'Langue' },
     themeLabel: { en: 'Theme', fr: 'Thème' },

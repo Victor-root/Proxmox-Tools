@@ -735,6 +735,106 @@ code {
 .credits a { color: var(--fg-dim); text-decoration: underline; text-underline-offset: 2px; }
 .credits a:hover { color: var(--orange); }
 
+/* ---------- side rail ---------- */
+
+/* One line per script against the left edge. The whole bar is always laid out
+   at its full width and clipped down to its lines, so opening it only animates
+   the clip, and the clip also limits where the mouse can reach it. */
+.rail { display: none; }
+
+@media (min-width: 901px) and (hover: hover) {
+    .rail {
+        --strip: 36px;
+        --row: min(11px, calc((100vh - 200px) / var(--count)));
+        --row-open: min(38px, calc((100vh - 200px) / var(--count)));
+        --ease: cubic-bezier(.22, 1, .36, 1);
+
+        display: block;
+        position: fixed; left: 0; top: 50%; z-index: 40;
+        padding: 14px 10px 14px 0;
+        transform: translateY(-50%);
+        clip-path: inset(-50px calc(100% - var(--strip)) -50px 0 round 0);
+        transition: clip-path .34s var(--ease);
+    }
+
+    /* The sheet behind the titles stays opaque: the clip of .rail would keep a
+       backdrop blur from reaching the page, and the text has to stay readable. */
+    .rail::before {
+        content: ""; position: absolute; inset: 0; z-index: -1;
+        background: linear-gradient(120deg, color-mix(in srgb, var(--orange) 9%, var(--panel)), var(--panel) 55%);
+        border: 1px solid var(--line); border-left: 0;
+        border-radius: 0 18px 18px 0;
+        box-shadow: var(--shadow), inset 0 1px 0 color-mix(in srgb, var(--fg) 6%, transparent);
+        opacity: 0;
+        transition: opacity .22s;
+    }
+
+    .rail-head {
+        height: 0; margin: 0 0 0 44px; overflow: hidden; opacity: 0;
+        font-size: 0.7rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+        color: var(--fg-faint); white-space: nowrap;
+        transition: height .34s var(--ease), opacity .2s;
+    }
+
+    .rail-item {
+        display: flex; align-items: center; gap: 8px;
+        height: var(--row); padding-left: 8px;
+        color: var(--fg-dim); text-decoration: none; white-space: nowrap;
+        transition: height .34s var(--ease);
+    }
+    .rail-item:focus-visible { outline: none; }
+
+    .rail-tick {
+        flex: none; width: 20px; height: 2px; border-radius: 2px;
+        background: var(--fg-faint); opacity: .55;
+        transform: scaleX(.6); transform-origin: left;
+        transition: transform .28s var(--ease), opacity .2s, background .2s, box-shadow .2s;
+    }
+    .rail-item[aria-current] .rail-tick {
+        background: linear-gradient(90deg, var(--orange-deep), var(--orange-bright));
+        box-shadow: 0 0 10px color-mix(in srgb, var(--orange) 70%, transparent);
+        opacity: 1; transform: none;
+    }
+
+    .rail-label {
+        display: flex; align-items: center; gap: 10px;
+        max-width: 340px; padding: 5px 12px 5px 9px; border-radius: 10px;
+        font-size: 0.87rem; font-weight: 550; line-height: 1.25;
+        opacity: 0; transform: translateX(-10px);
+        transition: opacity .18s, transform .34s var(--ease), background .16s, color .16s;
+    }
+    .rail-label > span { overflow: hidden; text-overflow: ellipsis; }
+    .rail-label .ico { width: 17px; height: 17px; opacity: .7; transition: opacity .16s, color .16s; }
+
+    /* open, for the mouse and for the keyboard */
+    .rail:hover, .rail:has(:focus-visible) {
+        clip-path: inset(-50px -70px -50px 0 round 0);
+    }
+    .rail:hover::before, .rail:has(:focus-visible)::before { opacity: 1; }
+    .rail:hover .rail-head, .rail:has(:focus-visible) .rail-head { height: 28px; opacity: 1; }
+    .rail:hover .rail-item, .rail:has(:focus-visible) .rail-item { height: var(--row-open); }
+    .rail:hover .rail-label, .rail:has(:focus-visible) .rail-label {
+        opacity: 1; transform: none;
+        transition-delay: calc(var(--i) * 16ms), calc(var(--i) * 16ms), 0s, 0s;
+    }
+
+    /* the lines around the mouse grow with it */
+    .rail-item:hover .rail-tick, .rail-item:focus-visible .rail-tick {
+        background: var(--orange); opacity: 1; transform: none;
+    }
+    .rail-item:has(+ .rail-item:hover) .rail-tick, .rail-item:hover + .rail-item .rail-tick {
+        opacity: .9; transform: scaleX(.8);
+    }
+
+    .rail-item:hover .rail-label, .rail-item:focus-visible .rail-label {
+        background: color-mix(in srgb, var(--orange) 13%, transparent); color: var(--fg);
+    }
+    .rail-item:hover .ico, .rail-item:focus-visible .ico { color: var(--orange); opacity: 1; }
+    .rail-item[aria-current] .rail-label { color: var(--orange); font-weight: 650; }
+    .rail-item[aria-current] .ico { opacity: 1; }
+    [data-theme="light"] .rail-item[aria-current] .rail-label { color: var(--orange-deep); }
+}
+
 /* ---------- toast ---------- */
 
 .toast {

@@ -11,7 +11,7 @@ site/
 ├── demos/            recordings of the scripts at work, made by sources/site-demos
 └── assets/
     ├── styles.css    look and feel, light and dark themes
-    └── app.js        builds the cards, handles language and theme
+    └── app.js        builds the cards and the side rail, handles language and theme
 ```
 
 Every text is bilingual, written as `{ en: '…', fr: '…' }`. A missing French
