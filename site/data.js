@@ -30,8 +30,8 @@
  * touches.backup   where the copy it keeps before changing anything goes
  * touches.restarts optional, the services it restarts
  *
- * terminal.banner   "proxmox" or "wireguard", the ASCII logo to draw
- * terminal.theme    "orange" (Proxmox scripts) or "red" (WireGuard script)
+ * terminal.banner   "proxmox", "wireguard" or "nginx", the ASCII logo to draw
+ * terminal.theme    "orange" (Proxmox scripts), "red" (WireGuard) or "green" (Nginx)
  * terminal.host     machine name in the window title and in the shell prompt
  * terminal.subtitle line printed under the logo, as printed by the script
  * terminal.panel    optional box: { title, lines: [] }
@@ -804,6 +804,83 @@ const SCRIPTS = [
             prompt: 'Choose an option [1-12]:',
         },
     },
+    {
+        id: 'nginx-reverse-proxy',
+        icon: 'route',
+        file: 'lxc-nginx-reverse-proxy.sh',
+        target: 'lxc',
+        name: {
+            en: 'Nginx reverse proxy',
+            fr: 'Reverse proxy Nginx',
+        },
+        tagline: {
+            en: 'Installs Nginx in an LXC and publishes your services in HTTPS, from a simple menu.',
+            fr: 'Installe Nginx dans un LXC et publie vos services en HTTPS, depuis un simple menu.',
+        },
+        runsOn: {
+            en: 'Inside a Debian or Ubuntu LXC, as root',
+            fr: 'Dans un LXC Debian ou Ubuntu, en root',
+        },
+        compat: 'Debian / Ubuntu LXC',
+        updated: {
+            en: 'New script. Installs Nginx and manages its reverse proxies from a menu, certificates included.',
+            fr: 'Nouveau script. Installe Nginx et gère ses reverse proxies depuis un menu, certificats compris.',
+        },
+        points: {
+            en: [
+                'Installs Nginx, or takes over an existing setup without replacing any of its files',
+                'Wizard for a new site, with its redirect from HTTP',
+                'Let’s Encrypt per site, your own certificate, or one already set up',
+                'Change a backend, read the logs, back up and restore',
+                'Every change is checked by nginx -t and taken back if it fails',
+            ],
+            fr: [
+                'Installe Nginx, ou reprend une configuration existante sans remplacer ses fichiers',
+                'Assistant pour un nouveau site, avec sa redirection depuis HTTP',
+                'Let’s Encrypt par site, votre propre certificat, ou celui déjà en place',
+                'Changer un backend, lire les logs, sauvegarder et restaurer',
+                'Chaque changement est vérifié par nginx -t et annulé en cas d’échec',
+            ],
+        },
+        touches: {
+            files: [
+                { path: '/etc/nginx/', role: { en: 'sites, shared snippets and the default vhost', fr: 'sites, fichiers communs et vhost par défaut' } },
+                { path: '/var/www/acme/', role: { en: 'created, answers the Let’s Encrypt checks', fr: 'créé, répond aux vérifications de Let’s Encrypt' } },
+                { path: '/etc/letsencrypt/renewal-hooks/deploy/reload-nginx', role: { en: 'created with Let’s Encrypt, reloads Nginx after a renewal', fr: 'créé avec Let’s Encrypt, recharge Nginx après un renouvellement' } },
+                { path: '/usr/local/sbin/nginx-proxy', role: { en: 'optional, starts the menu from anywhere', fr: 'optionnel, lance le menu de n’importe où' } },
+            ],
+            installs: 'nginx, openssl, curl, ca-certificates, certbot',
+            backup: '/root/nginx-manager-backups/',
+            restarts: 'nginx',
+        },
+        note: {
+            en: 'Run it inside the container, not on the Proxmox host. For Let’s Encrypt, the DNS of the name has to point to the container and port 80 has to reach it.',
+            fr: 'À lancer dans le conteneur, pas sur l’hôte Proxmox. Pour Let’s Encrypt, le DNS du nom doit pointer vers le conteneur et le port 80 doit l’atteindre.',
+        },
+        terminal: {
+            banner: 'nginx',
+            theme: 'green',
+            host: 'root@lxc-proxy',
+            subtitle: 'NGINX Reverse Proxy Manager',
+            panel: {
+                title: 'Nginx install and reverse proxy management',
+                lines: ['Host: lxc-proxy', 'Nginx: /etc/nginx', 'Detected language: English'],
+            },
+            menu: [
+                'Manage sites / reverse proxies',
+                'Add a reverse proxy with the wizard',
+                'Important files and snippets',
+                'Test the Nginx configuration',
+                'Reload Nginx',
+                'View logs',
+                'Nginx backups',
+                'Install the nginx-proxy command',
+                'Uninstall Nginx',
+                'Quit',
+            ],
+            prompt: 'Choose an option:',
+        },
+    },
 ];
 
 /* ASCII logos drawn at the top of each script. Add one here only if a new
@@ -824,6 +901,14 @@ const BANNERS = {
         '██║███╗██║██║██╔══██╗██╔══╝  ██║   ██║██║   ██║██╔══██║██╔══██╗██║  ██║',
         '╚███╔███╔╝██║██║  ██║███████╗╚██████╔╝╚██████╔╝██║  ██║██║  ██║██████╔╝',
         ' ╚══╝╚══╝ ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝',
+    ],
+    nginx: [
+        '███╗   ██╗ ██████╗ ██╗███╗   ██╗██╗  ██╗',
+        '████╗  ██║██╔════╝ ██║████╗  ██║╚██╗██╔╝',
+        '██╔██╗ ██║██║  ███╗██║██╔██╗ ██║ ╚███╔╝ ',
+        '██║╚██╗██║██║   ██║██║██║╚██╗██║ ██╔██╗ ',
+        '██║ ╚████║╚██████╔╝██║██║ ╚████║██╔╝ ██╗',
+        '╚═╝  ╚═══╝ ╚═════╝ ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝',
     ],
 };
 

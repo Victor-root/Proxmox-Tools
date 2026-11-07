@@ -319,8 +319,8 @@ Append a block **at the end of the `SCRIPTS` array** (the first block is the one
             alt: { en: 'What it shows, before and after.', fr: 'Ce qu’elle montre, avant et après.' },
         },
         terminal: {
-            banner: 'proxmox',                 // 'proxmox' or 'wireguard'
-            theme: 'orange',                   // 'orange' or 'red'
+            banner: 'proxmox',                 // 'proxmox', 'wireguard' or 'nginx'
+            theme: 'orange',                   // 'orange', 'red' or 'green'
             host: 'root@pve01',
             subtitle: 'Text printed under the logo, as the script prints it',
             panel: { title: 'Patch status', lines: ['Detected version: pve-x 1.2.3', '...'] },   // optional

@@ -428,6 +428,45 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 
 </details>
 
+<details>
+<summary><b>🔀 Nginx reverse proxy (LXC)</b></summary>
+
+**Script:** `lxc-nginx-reverse-proxy.sh`
+
+Installs **Nginx** inside a Debian/Ubuntu **LXC** and publishes your services in **HTTPS**, through an interactive menu:
+
+* 📦 installs Nginx if it is missing, and prepares the files every site shares
+* 🧩 takes over an **existing setup**: a file already there is never replaced
+* 🧙 **wizard** for a new site, with its redirect from HTTP and a preview before anything is written
+* 🔒 three certificate choices: **Let's Encrypt** for that name, **your own** certificate, or **one already set up** (a wildcard for example)
+* 🔁 change the address or the port of a backend, test it, enable, disable or archive a site
+* 🛑 unknown names are refused instead of landing on your first site
+* 📊 dashboard with the service, the configuration and the next certificate to expire
+* 🔎 every change goes through `nginx -t` and is **taken back** if it fails
+* 💾 full **backup / restore** of `/etc/nginx`, and a clean **uninstall**
+* 🌍 interface in **English or French**, following the system locale, English by default
+* 📋 interactive menu
+
+#### Good to know
+
+* **Let's Encrypt** needs the DNS of the name to point to the container and port 80 to reach it from the Internet. Wildcard certificates are not requested by the script: set yours up once with **your own certificate**, the next sites offer it.
+* **Backend certificates** are only checked if you say so, and then they have to come from an authority known to the system and match the address. Answer no for a self-signed one.
+* **Backups** hold `/etc/nginx` only. The certificates of Let's Encrypt stay in `/etc/letsencrypt`.
+
+#### Version compatibility
+
+The install and the wizard were run with real traffic in clean systems on Debian 11 (Nginx 1.18), Debian 12 (Nginx 1.22) and Debian 13 (Nginx 1.26). On Nginx older than 1.19.4, unknown names are only refused on port 80. The script stops on a system without apt and systemd.
+
+#### Run it directly
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/lxc-nginx-reverse-proxy.sh)
+```
+
+> ⚠️ Run it as **root inside the target LXC** (not on the Proxmox host).
+
+</details>
+
 ---
 
 ## 📂 Repository philosophy

@@ -25,6 +25,9 @@
     --wg-red-dark: #d70000;      /* 160 */
     --wg-red-soft: #ff87af;      /* 211 */
     --wg-blue: #87afff;          /* 111 */
+    --ngx-green: #00af00;        /* 34  */
+    --ngx-green-soft: #00d700;   /* 40  */
+    --ngx-green-dark: #008700;   /* 28  */
 
     --radius: 16px;
     --radius-sm: 10px;
@@ -633,15 +636,20 @@ code {
 
 .t-logo { color: var(--ansi-orange); }
 .t-logo.red { color: var(--wg-red); }
+.t-logo.green { color: var(--ngx-green); }
 .t-sub { color: var(--ansi-orange-soft); font-weight: 700; }
 .t-sub.red { color: var(--wg-red-soft); font-weight: 700; }
+.t-sub.green { color: var(--ngx-green-soft); font-weight: 700; }
 .t-by { color: var(--ansi-grey); }
 .t-rule { color: var(--ansi-orange-dark); }
 .t-rule.red { color: var(--wg-red-dark); }
+.t-rule.green { color: var(--ngx-green-dark); }
 .t-box { color: var(--ansi-blue); }
 .t-box.red { color: var(--wg-blue); }
+.t-box.green { color: var(--ngx-green-dark); }
 .t-num { color: var(--ansi-orange-soft); }
 .t-num.red { color: var(--wg-red-soft); }
+.t-num.green { color: var(--ngx-green-soft); }
 .t-q { color: var(--ansi-amber); }
 .t-cursor {
     display: inline-block; width: 7px; height: 1.05em; vertical-align: text-bottom;

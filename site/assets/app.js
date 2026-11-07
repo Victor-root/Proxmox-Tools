@@ -144,28 +144,28 @@
     /* The screen a script draws: logo, subtitle, optional box, menu, prompt.
        withPanel is false for the hero, which stays compact. */
     function termScreen(t, withPanel) {
-        const red = t.theme === 'red' ? ' red' : '';
+        const tint = t.theme === 'orange' ? '' : ' ' + t.theme;
         const logo = BANNERS[t.banner] || [];
         const width = Math.max(...logo.map((l) => l.length), t.subtitle.length + 20);
         const out = [];
 
-        out.push('<span class="t-logo' + red + '">' + esc(logo.join('\n')) + '</span>');
+        out.push('<span class="t-logo' + tint + '">' + esc(logo.join('\n')) + '</span>');
         out.push('');
-        out.push('  <span class="t-sub' + red + '">' + esc(t.subtitle) + '</span> <span class="t-by">· by ' + esc(SITE.author) + '</span>');
-        out.push('<span class="t-rule' + red + '">' + '─'.repeat(width) + '</span>');
+        out.push('  <span class="t-sub' + tint + '">' + esc(t.subtitle) + '</span> <span class="t-by">· by ' + esc(SITE.author) + '</span>');
+        out.push('<span class="t-rule' + tint + '">' + '─'.repeat(width) + '</span>');
 
         if (withPanel && t.panel) {
             out.push('');
-            out.push('<span class="t-box' + red + '">┌</span> <span class="t-box' + red + '">' + esc(t.panel.title) + '</span>');
+            out.push('<span class="t-box' + tint + '">┌</span> <span class="t-box' + tint + '">' + esc(t.panel.title) + '</span>');
             t.panel.lines.forEach((line) => {
-                out.push('<span class="t-box' + red + '">│</span> ' + esc(line));
+                out.push('<span class="t-box' + tint + '">│</span> ' + esc(line));
             });
-            out.push('<span class="t-box' + red + '">└</span>');
+            out.push('<span class="t-box' + tint + '">└</span>');
         }
 
         out.push('');
         t.menu.forEach((item, i) => {
-            out.push(' <span class="t-num' + red + '">' + (i + 1) + ')</span> ' + esc(item));
+            out.push(' <span class="t-num' + tint + '">' + (i + 1) + ')</span> ' + esc(item));
         });
         out.push('');
         out.push('<span class="t-q">?</span> ' + esc(t.prompt) + ' <span class="t-cursor"></span>');
