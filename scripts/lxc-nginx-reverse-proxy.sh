@@ -1059,7 +1059,8 @@ list_sites_array() {
 }
 
 site_summary() {
-    local name="$1" file="$SITES_AVAILABLE/$name" server_names proxy_passes state
+    local name="$1"
+    local file="$SITES_AVAILABLE/$name" server_names proxy_passes state
     [[ -f "$file" ]] || { say_err "$(tr_msg file_not_found): $file"; return 1; }
     server_names="$(awk '$1=="server_name" {sub(/;/, "", $0); $1=""; sub(/^[[:space:]]+/, "", $0); print; exit}' "$file" 2>/dev/null || true)"
     proxy_passes="$(awk '$1=="proxy_pass" {gsub(/;/, "", $2); print $2}' "$file" 2>/dev/null | paste -sd ', ' - || true)"
@@ -1074,7 +1075,8 @@ site_summary() {
 }
 
 enable_site() {
-    local name="$1" target="$SITES_AVAILABLE/$name" link="$SITES_ENABLED/$name"
+    local name="$1"
+    local target="$SITES_AVAILABLE/$name" link="$SITES_ENABLED/$name"
     [[ -f "$target" ]] || { say_err "$(tr_msg file_not_found): $target"; return 1; }
     mkdir -p "$SITES_ENABLED"
     if is_site_enabled "$name"; then
@@ -1092,7 +1094,8 @@ enable_site() {
 }
 
 disable_site() {
-    local name="$1" link="$SITES_ENABLED/$name" saved_target=""
+    local name="$1"
+    local link="$SITES_ENABLED/$name" saved_target=""
     if ! is_site_enabled "$name"; then
         say_info "$(tr_msg already_disabled)"
         return 0
@@ -1366,7 +1369,8 @@ change_backend_target() {
 }
 
 test_backend() {
-    local name="$1" file="$SITES_AVAILABLE/$name" url rc=0
+    local name="$1"
+    local file="$SITES_AVAILABLE/$name" url rc=0
     url="$(first_proxy_pass "$file")"
     [[ -n "$url" ]] || { say_warn "$(tr_msg site_no_backend)"; return 1; }
     say_info "$(tr_msg backend_testing): ${BOLD}${url}${RESET}"
@@ -1387,7 +1391,8 @@ test_backend() {
 }
 
 delete_site() {
-    local name="$1" file="$SITES_AVAILABLE/$name" answer stamp dir was_enabled="no" le_cert
+    local name="$1"
+    local file="$SITES_AVAILABLE/$name" answer stamp dir was_enabled="no" le_cert
     [[ -f "$file" ]] || return 1
     le_cert="$(sed -n "s|^[[:space:]]*ssl_certificate ${LE_LIVE}/\([^/]*\)/fullchain.pem;.*|\1|p" "$file" | head -n1)"
     is_site_enabled "$name" && was_enabled="yes" || true
