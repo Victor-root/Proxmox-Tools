@@ -901,8 +901,8 @@ const FAQ = [
             fr: 'Une mise à jour de Proxmox annule-t-elle les changements ?',
         },
         a: {
-            en: 'For the two scripts that patch the web interface, yes: an update rewrites those files. Run the script again, or turn on the automatic re-apply of the subscription one. The language manager is not affected, it only writes configuration files.',
-            fr: 'Pour les deux scripts qui patchent l’interface web, oui : une mise à jour réécrit ces fichiers. Relancez le script, ou activez la réapplication automatique de celui du popup. Le gestionnaire de langue n’est pas concerné, il n’écrit que des fichiers de configuration.',
+            en: 'For the scripts that patch the web interface, yes: an update of the package rewrites its files. Run the script again, or turn on its automatic re-apply, which every one of them offers. The language itself stays, it lives in configuration files; only its optional mobile setting is re-applied. Fastfetch and the two LXC scripts are not concerned.',
+            fr: 'Pour les scripts qui patchent l’interface web, oui : une mise à jour du paquet réécrit ses fichiers. Relancez le script, ou activez sa réapplication automatique, que chacun propose. La langue, elle, reste en place, elle vit dans des fichiers de configuration ; seul son réglage optionnel du mobile est réappliqué. Fastfetch et les deux scripts LXC ne sont pas concernés.',
         },
     },
     {
@@ -911,8 +911,8 @@ const FAQ = [
             fr: 'Comment revenir en arrière ?',
         },
         a: {
-            en: 'Every script keeps a copy before touching anything, and puts it back from its own menu, the restore entry. Nothing else to do. As a last resort, reinstalling the Proxmox package brings the original file back.',
-            fr: 'Chaque script garde une copie avant de toucher à quoi que ce soit, et la remet depuis son propre menu, l’entrée de restauration. Rien d’autre à faire. En dernier recours, réinstaller le paquet Proxmox remet le fichier d’origine.',
+            en: 'Every script keeps a copy before touching anything, and puts it back from its own menu, with its restore or removal entry. Nothing else to do. As a last resort, reinstalling the Proxmox package brings the original file back.',
+            fr: 'Chaque script garde une copie avant de toucher à quoi que ce soit, et la remet depuis son propre menu, avec son entrée de restauration ou de suppression. Rien d’autre à faire. En dernier recours, réinstaller le paquet Proxmox remet le fichier d’origine.',
         },
     },
     {
@@ -931,8 +931,8 @@ const FAQ = [
             fr: 'Et sur un cluster ?',
         },
         a: {
-            en: 'The interface patches apply to the node you run them on, so run them on each node. The web interface language is different: it lives in /etc/pve, shared by the whole cluster, so one run is enough. The shell locale stays per node.',
-            fr: 'Les patchs d’interface s’appliquent au nœud sur lequel vous les lancez, donc à repasser sur chaque nœud. La langue de l’interface web, elle, vit dans /etc/pve, partagé par tout le cluster : un seul passage suffit. La locale du shell reste propre à chaque nœud.',
+            en: 'The interface patches, the themes and Fastfetch apply to the node you run them on, so run them on each node. The web interface language is different: it lives in /etc/pve, shared by the whole cluster, so one run is enough. The shell locale stays per node.',
+            fr: 'Les patchs d’interface, les thèmes et Fastfetch s’appliquent au nœud sur lequel vous les lancez, donc à repasser sur chaque nœud. La langue de l’interface web, elle, vit dans /etc/pve, partagé par tout le cluster : un seul passage suffit. La locale du shell reste propre à chaque nœud.',
         },
     },
 ];
@@ -1025,8 +1025,8 @@ const UI = {
 
     howtoTitle: { en: 'Get started in three steps', fr: 'Démarrer en trois étapes' },
     howtoLede: {
-        en: 'No installer, no package to add, nothing left behind on your system.',
-        fr: 'Aucun installeur, aucun paquet à ajouter, rien qui traîne sur votre système.',
+        en: 'No installer and nothing to add first: the line runs the script, which only installs what it is about.',
+        fr: 'Aucun installeur, rien à ajouter avant : la ligne lance le script, qui n’installe que ce dont il s’occupe.',
     },
     step1Title: { en: 'Open a root shell', fr: 'Ouvrez un shell root' },
     step1Body: {
@@ -1044,8 +1044,8 @@ const UI = {
         fr: 'Les scripts qui modifient Proxmox demandent confirmation et gardent une copie avant. Le même menu la remet en place.',
     },
     howtoNote: {
-        en: 'Scripts that restart pveproxy can take up to a minute: Proxmox refreshes its cluster certificates on start. The web interface is unreachable meanwhile, it is expected.',
-        fr: 'Les scripts qui redémarrent pveproxy peuvent mettre jusqu’à une minute : Proxmox régénère ses certificats de cluster au démarrage. L’interface web est injoignable pendant ce temps, c’est normal.',
+        en: 'Scripts that restart pveproxy are usually done in a few seconds, but it can take a minute and a half when an old connection keeps it waiting before it stops. The web interface is unreachable meanwhile, it is expected.',
+        fr: 'Les scripts qui redémarrent pveproxy finissent en général en quelques secondes, mais cela peut prendre une minute et demie quand une ancienne connexion le fait attendre avant de s’arrêter. L’interface web est injoignable pendant ce temps, c’est normal.',
     },
 
     faqTitle: 'FAQ',
