@@ -282,7 +282,13 @@ class H(BaseHTTPRequestHandler):
                     return
                 text = data.decode(errors="replace")
                 if not line and text.endswith("\n") and ":" in text and not text.startswith(("0:", "1:", "2")):
-                    send("OK" + f"Linux {guest_name(path)} 6.17.2-1-pve x86_64\r\n\r\n" + prompt)
+                    # a variant can carry what the node prints when a root shell opens
+                    vd = self.variant_dir()
+                    motd = vd / "motd.ansi" if vd and "/qemu/" not in path and "/lxc/" not in path else None
+                    if motd and motd.is_file():
+                        send(b"OK" + motd.read_bytes().replace(b"\n", b"\r\n") + b"\r\n" + prompt.encode())
+                    else:
+                        send("OK" + f"Linux {guest_name(path)} 6.17.2-1-pve x86_64\r\n\r\n" + prompt)
                     continue
                 if not text.startswith("0:"):
                     continue

@@ -5,6 +5,7 @@ The animated pictures shown on the cards of the site (`site/demos/*.webp`) are r
 ## What is in here
 
 * `prepare.py`: downloads the official Proxmox VE packages the interface is made of (pinned versions, checked against their SHA256) into `work/root`, then builds `work/variants`: the same files patched by the scripts' own code (`ENGINE_PY` / `PATCH_PY` / the sed expression they apply), one directory per state a recording shows
+* `fastfetch.sh`: runs the real Fastfetch with the configuration of `pve-fastfetch-motd.sh` in namespaces filled with demo values, so the summary shown never comes from the machine that records it
 * `server.py`: serves those files with a fake API, a cookie picking the variant; it also answers the xterm.js consoles with a small shell
 * `static/host.html`: the browser frame the recordings run in (tabs, address bar, mouse pointer, the label showing which state is on screen)
 * `lib.js`: drives the interface with [Playwright](https://playwright.dev) and writes the frames
@@ -14,7 +15,7 @@ The animated pictures shown on the cards of the site (`site/demos/*.webp`) are r
 
 ## Record again
 
-Needs Python 3 with Pillow, `dpkg-deb`, Node.js and network access:
+Needs Python 3 with Pillow, `dpkg-deb`, Node.js and network access, and root for the namespaces of the Fastfetch summary:
 
 ```bash
 npm ci

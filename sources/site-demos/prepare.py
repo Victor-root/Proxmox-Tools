@@ -6,6 +6,7 @@ work/variants: the files the scripts of this repository patch, patched by
 those scripts' own code, one directory per state a recording shows.
 """
 import os
+import re
 import shutil
 import subprocess
 import urllib.request
@@ -27,6 +28,8 @@ PACKAGES = [
     (PVE + "fonts-font-logos_1.0.1-3_all.deb", "f689581c311a4f2316a57796f246b1f3612ba4893b6c8ffd7d47a14f1605e175"),
     (PVE + "pve-i18n_3.9.0_all.deb", "68155bfdf1ae99ea0c55690a541085ed1f35eabdfb83d9677307dda0bc6c5ef1"),
     (PVE + "pve-xtermjs_6.0.0-3_all.deb", "1989efdca9dcafeb53345833d8ed9e3a2ef7742770cd0223b8e5b9d7c5da95c4"),
+    ("https://github.com/fastfetch-cli/fastfetch/releases/download/2.71.0/fastfetch-linux-amd64.deb",
+     "6dc0b71c03e58f9f981a6b3c62b4fa3fb30b9d5ee9fa783302c91ea4c2a3600e"),
     (DEBIAN + "fonts-font-awesome_5.0.10+really4.7.0~dfsg-4.1_all.deb",
      "5f09e1adce26d59628a239c538882d53e58978b958233864fc617be9a510018e"),
 ]
@@ -67,6 +70,18 @@ def shell_value(path, var):
 def engine(path, var, env, *args):
     subprocess.run(["python3", "-c", shell_value(path, var), *args], env={**os.environ, **env}, check=True,
                    stdout=subprocess.DEVNULL)
+
+
+def script_functions(path, names):
+    """Functions of a script, whole even when a heredoc in them holds a closing brace."""
+    text = Path(path).read_text(encoding="utf-8")
+    out = []
+    for name in names:
+        start = text.index(f"\n{name}() {{\n") + 1
+        heredoc = re.search(r"<<'(EOF_[A-Z]+)'", text[start:text.index("\n}\n", start)])
+        end_mark = f"\n{heredoc.group(1)}\n}}\n" if heredoc else "\n}\n"
+        out.append(text[start:text.index(end_mark, start) + len(end_mark)])
+    return "\n".join(out)
 
 
 def variant(name, *files):
@@ -121,6 +136,20 @@ def build_variants():
 
     out = variant("tabtitle", "main.js")
     engine(script("pve-xterm-tab-title.sh"), "PATCH_PY", {"MAIN_FILE": str(out / "main.js")}, "apply")
+
+    # the summary as pve-fastfetch-motd.sh shows it, the namespaces need root
+    out = variant("fastfetch")
+    script_path = script("pve-fastfetch-motd.sh")
+    marker = next(line for line in Path(script_path).read_text(encoding="utf-8").splitlines()
+                  if line.startswith("MANAGED_MARKER="))
+    code = marker + "\n" + script_functions(
+        script_path, ["tr_msg", "detect_bridge", "cert_module_block", "config_template", "render_config"])
+    config = out / "config.jsonc"
+    config.write_text(subprocess.run(["bash", "-c", code + "\nAPP_LANG=en\nrender_config '' ''"], check=True,
+                                     capture_output=True, text=True).stdout)
+    motd = subprocess.run(["unshare", "--net", "--uts", "--mount", "--fork", "bash", str(HERE / "fastfetch.sh"),
+                           str(WORK / "root/usr/bin/fastfetch"), str(config)], check=True, capture_output=True).stdout
+    (out / "motd.ansi").write_bytes(motd)
 
     out = variant("scrollback", "util.js")
     engine(script("pve-xtermjs-scrollback.sh"), "PATCH_PY", {"UTIL_FILE": str(out / "util.js")}, "apply", "100000")

@@ -435,6 +435,13 @@ const SCRIPTS = [
             en: 'The certificate module is only added if you enter a FQDN, and it reads the public certificate presented over HTTPS, nothing else. Open a new root shell to see the result.',
             fr: 'Le module certificat n’est ajouté que si vous saisissez un FQDN, et il lit le certificat public présenté en HTTPS, rien d’autre. Ouvrez un nouveau shell root pour voir le résultat.',
         },
+        demo: {
+            file: 'fastfetch-motd.webp',
+            alt: {
+                en: 'The summary printed when the root shell of a node opens in the web interface, with demo values',
+                fr: 'Le résumé affiché à l’ouverture du shell root d’un nœud dans l’interface web, avec des valeurs de démonstration',
+            },
+        },
         terminal: {
             banner: 'proxmox',
             theme: 'orange',
