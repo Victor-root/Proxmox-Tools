@@ -274,9 +274,12 @@
        left side much taller. */
     function side(script, extra) {
         const t = script.terminal;
-        const term = t.screen
-            ? termFrame(t.host, '<pre class="t-screen" data-screen="' + esc(t.screen) + '" data-host="' + esc(t.host) + '"></pre>', 'term-screen')
-            : termFrame(t.host, termScreen(t, true));
+        if (t.screen) {
+            // only as tall as the output, the blocks under it fill the rest of the column
+            const screen = '<pre class="t-screen" data-screen="' + esc(t.screen) + '" data-host="' + esc(t.host) + '"></pre>';
+            return '<div class="term-side has-demo"><div class="viewer">' + termFrame(t.host, screen, 'term-screen') + '</div>' + extra + '</div>';
+        }
+        const term = termFrame(t.host, termScreen(t, true));
         if (!script.demo) return '<div class="term-side">' + term + '</div>';
 
         const src = 'demos/' + script.demo.file;
@@ -324,7 +327,7 @@
             '      <p class="card-tagline">' + esc(tr(script.tagline)) + '</p>',
             '      <span class="runs-on">' + icon(TARGET_ICON[script.target] || 'server') + '<b>' + esc(tr(UI.cardRunOn)) + '</b> ' + esc(tr(script.runsOn)) + '</span>',
             '      <ul class="points">' + points + '</ul>',
-            script.demo ? '' : touched(script) + note,
+            script.demo || script.terminal.screen ? '' : touched(script) + note,
             '      <div class="run">',
             '        <span class="run-label">' + esc(tr(UI.cardCopyLabel)) + '</span>',
             '        <div class="run-box">',
