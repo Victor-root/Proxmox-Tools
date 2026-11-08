@@ -137,8 +137,9 @@ def build_variants():
     out = variant("tabtitle", "main.js")
     engine(script("pve-xterm-tab-title.sh"), "PATCH_PY", {"MAIN_FILE": str(out / "main.js")}, "apply")
 
-    # the summary as pve-fastfetch-motd.sh shows it, the namespaces need root
-    out = variant("fastfetch")
+    # the summary as pve-fastfetch-motd.sh prints it, drawn in its card; the namespaces need root
+    out = WORK / "fastfetch"
+    out.mkdir(exist_ok=True)
     script_path = script("pve-fastfetch-motd.sh")
     marker = next(line for line in Path(script_path).read_text(encoding="utf-8").splitlines()
                   if line.startswith("MANAGED_MARKER="))
@@ -149,7 +150,7 @@ def build_variants():
                                      capture_output=True, text=True).stdout)
     motd = subprocess.run(["unshare", "--net", "--uts", "--mount", "--fork", "bash", str(HERE / "fastfetch.sh"),
                            str(WORK / "root/usr/bin/fastfetch"), str(config)], check=True, capture_output=True).stdout
-    (out / "motd.ansi").write_bytes(motd)
+    (REPO / "site/demos/fastfetch-motd.ansi").write_bytes(motd)
 
     out = variant("scrollback", "util.js")
     engine(script("pve-xtermjs-scrollback.sh"), "PATCH_PY", {"UTIL_FILE": str(out / "util.js")}, "apply", "100000")

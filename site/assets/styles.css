@@ -557,6 +557,10 @@ code {
 .term-body::-webkit-scrollbar { height: 6px; }
 .term-body::-webkit-scrollbar-thumb { background: #262e39; border-radius: 3px; }
 .term-body pre { margin: 0; font: inherit; }
+/* a recorded output keeps its columns: the text shrinks with the terminal
+   instead of wrapping, the widest one being about 116 columns */
+.term-screen .term-body { container-type: inline-size; overflow: hidden; }
+.term-screen .t-screen { font-size: calc(100cqw / 74); line-height: 1.35; }
 
 @media (max-width: 1100px) { .term-body { font-size: 10px; } }
 @media (max-width: 620px) { .term-body { font-size: 8.5px; } }

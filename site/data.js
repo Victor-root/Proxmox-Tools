@@ -37,6 +37,8 @@
  * terminal.panel    optional box: { title, lines: [] }
  * terminal.menu     the menu entries, in order
  * terminal.prompt   the question printed at the bottom
+ * terminal.screen   instead of the fields above: a file of site/demos/ holding the
+ *                   output of the script, with its colours, drawn as it is
  *
  * The terminal shows the script exactly as it runs, so its text is NOT
  * translated: every script speaks the locale of the server, English by default,
@@ -435,38 +437,9 @@ const SCRIPTS = [
             en: 'The certificate module is only added if you enter a FQDN, and it reads the public certificate presented over HTTPS, nothing else. Open a new root shell to see the result.',
             fr: 'Le module certificat n’est ajouté que si vous saisissez un FQDN, et il lit le certificat public présenté en HTTPS, rien d’autre. Ouvrez un nouveau shell root pour voir le résultat.',
         },
-        demo: {
-            file: 'fastfetch-motd.webp',
-            alt: {
-                en: 'The summary printed when the root shell of a node opens in the web interface, with demo values',
-                fr: 'Le résumé affiché à l’ouverture du shell root d’un nœud dans l’interface web, avec des valeurs de démonstration',
-            },
-        },
         terminal: {
-            banner: 'proxmox',
-            theme: 'orange',
             host: 'root@pve01',
-            subtitle: 'Fastfetch MOTD',
-            panel: {
-                title: 'Status',
-                lines: [
-                    'Fastfetch: installed 2.67.1',
-                    'Configuration: managed by this script',
-                    'Login display: enabled',
-                    'Old Debian MOTD: disabled',
-                ],
-            },
-            menu: [
-                'Install / update Fastfetch and the login display',
-                'Configure the HTTPS certificate module (FQDN)',
-                'Use my own configuration (paste it)',
-                'Preview the Fastfetch output',
-                'Show status',
-                'Disable the display on every shell session (keep Fastfetch)',
-                'Remove everything (display, configuration and Fastfetch)',
-                'Quit',
-            ],
-            prompt: 'Choose an option [1-8]:',
+            screen: 'fastfetch-motd.ansi',
         },
     },
     {

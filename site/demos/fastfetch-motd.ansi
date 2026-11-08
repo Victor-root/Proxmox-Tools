@@ -1,0 +1,23 @@
+[m                                                  [m[37m[1m[38;5;202mroot[m@[1m[38;5;202mpve01[m
+                                                  [m[37m[48;5;208m[30m HYPERVISOR INFO       [0m[m
+[1m[38;5;208m  [38;5;208m         .://:`              `://:.[m             [m[1m[38;5;208m  🐧  System        [m[m ➜ [m[37mDebian GNU/Linux 13.7 (trixie) x86_64
+[1m[38;5;208m         `hMMMMMMd/          /dMMMMMMh`[m           [m[1m[38;5;208m  💎  PVE Version   [m[m ➜ [m[37m9.2.24
+[1m[38;5;208m          `sMMMMMMMd:      :mMMMMMMMs`[m            [m[1m[38;5;208m  💻  Machine       [m[m ➜ [m[37mMini PC
+[1m[38;5;208m  [38;5;214m`-/+oo+/:[38;5;208m`.yMMMMMMMh-  -hMMMMMMMy.`[38;5;214m:/+oo+/-`[m    [m[1m[38;5;208m  ⚙️  Kernel        [m[m ➜ [m[37mLinux 7.0.14-28-pve
+[1m[38;5;214m  `:oooooooo/[38;5;208m`-hMMMMMMMyyMMMMMMMh-`[38;5;214m/oooooooo:`[m    [m[1m[38;5;208m  ⏱️  Uptime        [m[m ➜ [m[37m14 days, 2 mins
+[1m[38;5;214m    `/oooooooo:[38;5;208m`:mMMMMMMMMMMMMm:`[38;5;214m:oooooooo/`[m      
+[1m[38;5;214m      ./ooooooo+-[38;5;208m +NMMMMMMMMN+ [38;5;214m-+ooooooo/.[m        [m[37m[48;5;208m[30m PHYSICAL RESOURCES    [0m[m
+[1m[38;5;214m        .+ooooooo+-[38;5;208m`oNMMMMNo`[38;5;214m-+ooooooo+.[m          [m[1m[38;5;208m  🧠  CPU           [m[m ➜ [m[37m12th Gen Intel(R) Core(TM) i5-12500 (12) @ 3.00 GHz
+[1m[38;5;214m          -+ooooooo/.[38;5;208m`sMMs`[38;5;214m./ooooooo+-[m            [m[1m[38;5;208m  💾  RAM           [m[m ➜ [m[37m23.24 GiB / 62.57 GiB ([32m37%[m[37m)
+[1m[38;5;214m            :oooooooo/[38;5;208m`..`[38;5;214m/oooooooo:[m              [m[1m[38;5;208m  🔄  Swap          [m[m ➜ [m[37m0 B / 8.00 GiB ([32m0%[m[37m)
+[1m[38;5;214m            :oooooooo/`[38;5;208m..[38;5;214m`/oooooooo:[m              [m[1m[38;5;208m  💽  Storage       [m[m ➜ [m[37m182.89 GiB / 294.73 GiB ([93m62%[m[37m) - ext4
+[1m[38;5;214m          -+ooooooo/.`[38;5;208msMMs[38;5;214m`./ooooooo+-[m            [m[1m[38;5;208m  📈  CPU Usage     [m[m ➜ [m[37m8.6%
+[1m[38;5;214m        .+ooooooo+-`[38;5;208moNMMMMNo[38;5;214m`-+ooooooo+.[m          [m[1m[38;5;208m  🧬  ZFS Health    [m[m ➜ [m[37mrpool=ONLINE
+[1m[38;5;214m      ./ooooooo+-[38;5;208m +NMMMMMMMMN+ [38;5;214m-+ooooooo/.[m        
+[1m[38;5;214m    `/oooooooo:`[38;5;208m:mMMMMMMMMMMMMm:[38;5;214m`:oooooooo/`[m      [m[37m[48;5;208m[30m NETWORK AND ACCESS    [0m[m
+[1m[38;5;214m  `:oooooooo/`[38;5;208m-hMMMMMMMyyMMMMMMMh-[38;5;214m`/oooooooo:`[m    [m[1m[38;5;208m  🌐  Admin IP      [m[m ➜ [m[37m192.168.1.10/24
+[1m[38;5;214m  `-/+oo+/:`[38;5;208m.yMMMMMMMh-  -hMMMMMMMy.[38;5;214m`:/+oo+/-`[m    [m[1m[38;5;208m  🔍  DNS           [m[m ➜ [m[37m192.168.1.1
+[1m[38;5;214m  [38;5;208m        `sMMMMMMMm:      :dMMMMMMMs`[m            [m[1m[38;5;208m  🌉  vmbr0         [m[m ➜ [m[37mUP | STP=off | physical ports=1
+[1m[38;5;208m         `hMMMMMMd/          /dMMMMMMh`[m           [m[1m[38;5;208m  🌍  Public IP     [m[m ➜ [m[37m203.0.113.42
+[1m[38;5;208m           `://:`              `://:`[m             [m[1m[38;5;208m  🛡️  Fail2ban      [m[m ➜ [m[37mproxmox=0 sshd=1(7)
+[m

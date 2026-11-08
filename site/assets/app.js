@@ -173,6 +173,60 @@
         return '<pre>' + out.join('\n') + '</pre>';
     }
 
+    /* What a script printed, kept with its colours: only the SGR sequences of
+       a terminal, which a recorded output is made of. */
+    const ANSI_16 = ['#1d232c', '#ff5f5f', '#5faf00', '#ffaf00', '#5f87af', '#d787d7', '#5fafaf', '#c9d4e2',
+        '#6f7c8f', '#ff8787', '#87d700', '#ffd75f', '#87afd7', '#ffafff', '#87d7d7', '#ffffff'];
+
+    function ansiColor(n) {
+        if (n < 16) return ANSI_16[n];
+        if (n < 232) {
+            const level = (v) => (v ? 55 + v * 40 : 0);
+            n -= 16;
+            return 'rgb(' + level(Math.floor(n / 36)) + ',' + level(Math.floor(n / 6) % 6) + ',' + level(n % 6) + ')';
+        }
+        const grey = 8 + (n - 232) * 10;
+        return 'rgb(' + grey + ',' + grey + ',' + grey + ')';
+    }
+
+    function ansiToHtml(text) {
+        let fg = null, bg = null, bold = false;
+        return text.split(/\x1b\[([0-9;]*)m/).map((part, i) => {
+            if (i % 2 === 0) {
+                if (!part) return '';
+                const style = (fg ? 'color:' + fg + ';' : '') + (bg ? 'background:' + bg + ';' : '') + (bold ? 'font-weight:700;' : '');
+                return style ? '<span style="' + style + '">' + esc(part) + '</span>' : esc(part);
+            }
+            const codes = part === '' ? [0] : part.split(';').map(Number);
+            for (let k = 0; k < codes.length; k++) {
+                const c = codes[k];
+                if (c === 0) { fg = null; bg = null; bold = false; }
+                else if (c === 1) bold = true;
+                else if (c >= 30 && c <= 37) fg = ansiColor(c - 30);
+                else if (c >= 90 && c <= 97) fg = ansiColor(c - 82);
+                else if (c >= 40 && c <= 47) bg = ansiColor(c - 40);
+                else if ((c === 38 || c === 48) && codes[k + 1] === 5) {
+                    if (c === 38) fg = ansiColor(codes[k + 2]); else bg = ansiColor(codes[k + 2]);
+                    k += 2;
+                }
+            }
+            return '';
+        }).join('');
+    }
+
+    const screens = {};
+
+    /* A terminal holding a recorded output is filled once its file has loaded. */
+    function fillScreens() {
+        document.querySelectorAll('[data-screen]').forEach((el) => {
+            const file = el.dataset.screen;
+            screens[file] = screens[file] || fetch('demos/' + file).then((r) => r.text());
+            screens[file].then((text) => {
+                el.innerHTML = ansiToHtml(text) + '\n<span class="t-user">' + esc(el.dataset.host) + ':~#</span> <span class="t-cursor"></span>';
+            });
+        });
+    }
+
     /* Hero: the first script of data.js, shown from the pasted line onwards. */
     function renderHero() {
         const script = SCRIPTS[0];
@@ -219,7 +273,10 @@
        switch between the two, then the blocks that would otherwise make the
        left side much taller. */
     function side(script, extra) {
-        const term = termFrame(script.terminal.host, termScreen(script.terminal, true));
+        const t = script.terminal;
+        const term = t.screen
+            ? termFrame(t.host, '<pre class="t-screen" data-screen="' + esc(t.screen) + '" data-host="' + esc(t.host) + '"></pre>', 'term-screen')
+            : termFrame(t.host, termScreen(t, true));
         if (!script.demo) return '<div class="term-side">' + term + '</div>';
 
         const src = 'demos/' + script.demo.file;
@@ -306,6 +363,7 @@
             .join('\n');
         wireCopy();
         wireDemos();
+        fillScreens();
     }
 
     /* ---------- side rail ---------- */
