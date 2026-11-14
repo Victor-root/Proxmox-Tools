@@ -174,7 +174,8 @@ def api(path, qs):
     if re.search(r"/(qemu|lxc)/\d+/config$", p):
         vmid = int(p.split("/")[-2])
         g = next((x for x in GUESTS if x[0] == vmid), GUESTS[0])
-        return {"name": g[2], "hostname": g[2], "memory": g[6] * 1024, "cores": 4, "sockets": 1, "ostype": "l26",
+        return {"name": g[2], "hostname": g[2], "memory": g[6] * 1024, "cores": 4, "sockets": 1,
+                "ostype": "debian" if g[1] == "lxc" else "l26",
                 "net0": "virtio=BC:24:11:00:00:01,bridge=vmbr0", "scsi0": "local-lvm:vm-%d-disk-0,size=32G" % vmid,
                 "boot": "order=scsi0", "tags": g[8], "digest": "x",
                 "description": "Pi-hole, DNS of the home network\n\nAdmin page: http://192.168.1.60/admin" if vmid == 200 else ""}

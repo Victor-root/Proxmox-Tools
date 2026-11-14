@@ -96,6 +96,12 @@ $on-title: $highlighted-text-alt;
   clip-path: inset(0 round $radius);
 }
 
+// The guest status panel keeps a padding on its right as the gap to the notes panel: its header
+// and body draw the card, clipped inside that padding
+.x-panel-default[id^="pveGuestStatus"] {
+  clip-path: inset(0 round $radius) content-box;
+}
+
 // The content panel title ("Container 100 (name) on node ...") is a toolbar, not a header
 .x-toolbar-default:has(> .x-box-inner .x-panel-header-text-default) {
   @extend %title-bar;
