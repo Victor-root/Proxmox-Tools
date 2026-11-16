@@ -52,8 +52,7 @@
 }
 
 .pmx-rrd-chart,
-.x-panel-default.x-box-item[id^="proxmoxRRDChart"],
-.x-panel-default[id^="pveNodeStatus"] {
+.x-panel-default.x-box-item[id^="proxmoxRRDChart"] {
   border-radius: $radius;
   overflow: hidden;
   border: 1px solid $border-color-alt;

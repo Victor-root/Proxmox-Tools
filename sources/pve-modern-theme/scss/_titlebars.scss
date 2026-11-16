@@ -96,8 +96,9 @@ $on-title: $highlighted-text-alt;
   clip-path: inset(0 round $radius);
 }
 
-// The guest status panel keeps a padding on its right as the gap to the notes panel: its header
+// The node and guest status panels keep a padding as the gap to their neighbours: their header
 // and body draw the card, clipped inside that padding
+.x-panel-default[id^="pveNodeStatus"],
 .x-panel-default[id^="pveGuestStatus"] {
   clip-path: inset(0 round $radius) content-box;
 }
