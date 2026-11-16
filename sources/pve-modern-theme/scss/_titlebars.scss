@@ -96,11 +96,11 @@ $on-title: $highlighted-text-alt;
   clip-path: inset(0 round $radius);
 }
 
-// The node and guest status panels keep a padding as the gap to their neighbours: their header
-// and body draw the card, clipped inside that padding
-.x-panel-default[id^="pveNodeStatus"],
-.x-panel-default[id^="pveGuestStatus"] {
-  clip-path: inset(0 round $radius) content-box;
+// Panels set apart by a padding (summaries, charts, dashboards) draw their card inside it, where the
+// clip of the panel does not round it: the header takes the top corners, the last item the bottom ones
+.x-panel-default:has(> .x-panel-header-default) > .x-panel-bodyWrap > :last-child {
+  border-bottom-left-radius: $radius;
+  border-bottom-right-radius: $radius;
 }
 
 // The content panel title ("Container 100 (name) on node ...") is a toolbar, not a header

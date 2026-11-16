@@ -2181,7 +2181,7 @@ body>.x-mask{background-color:rgba(16,24,40,.25);backdrop-filter:blur(3px)}
 .x-panel-header-default{border-radius:10px 10px 0 0}
 .x-window-header-default{border-radius:9px 9px 0 0}
 .x-panel-default:has(>.x-panel-header-default){border-radius:10px;clip-path:inset(0 round 10px)}
-.x-panel-default[id^=pveNodeStatus],.x-panel-default[id^=pveGuestStatus]{clip-path:inset(0 round 10px) content-box}
+.x-panel-default:has(>.x-panel-header-default)>.x-panel-bodyWrap>:last-child{border-bottom-left-radius:10px;border-bottom-right-radius:10px}
 .x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default){border-radius:10px 10px 0 0}
 .x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default) .x-panel-header-text-default{color:#9a3412}
 .x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default) .x-btn.x-btn-default-toolbar-small,.x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default) .x-btn.x-btn-default-toolbar-small.x-btn-focus,.x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default) .x-btn.x-btn-default-toolbar-small.x-btn-pressed{background-color:rgba(226,89,11,.1);border-color:rgba(0,0,0,0);box-shadow:none}
@@ -2240,7 +2240,7 @@ body>.x-mask{background-color:rgba(5,7,12,.55);backdrop-filter:blur(3px)}
 .x-panel-header-default{border-radius:10px 10px 0 0}
 .x-window-header-default{border-radius:9px 9px 0 0}
 .x-panel-default:has(>.x-panel-header-default){border-radius:10px;clip-path:inset(0 round 10px)}
-.x-panel-default[id^=pveNodeStatus],.x-panel-default[id^=pveGuestStatus]{clip-path:inset(0 round 10px) content-box}
+.x-panel-default:has(>.x-panel-header-default)>.x-panel-bodyWrap>:last-child{border-bottom-left-radius:10px;border-bottom-right-radius:10px}
 .x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default){border-radius:10px 10px 0 0}
 .x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default) .x-panel-header-text-default{color:#ffc599}
 .x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default) .x-btn.x-btn-default-toolbar-small,.x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default) .x-btn.x-btn-default-toolbar-small.x-btn-focus,.x-toolbar-default:has(>.x-box-inner .x-panel-header-text-default) .x-btn.x-btn-default-toolbar-small.x-btn-pressed{background-color:rgba(240,105,15,.1);border-color:rgba(0,0,0,0);box-shadow:none}
