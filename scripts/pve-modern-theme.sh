@@ -1672,6 +1672,8 @@ a,.x-form-display-field a{color:#c2410c}
 .x-tab-default-top.x-tab-over:not(.x-tab-active){background-color:rgba(226,89,11,.06)}
 .x-progress-default{border-radius:999px;border:none;background-color:#eef1f5;overflow:hidden}
 .x-progress-default .x-progress-bar-default{border-radius:999px;background:linear-gradient(90deg, #b8470a, #f06d1d)}
+.x-progress-default .x-progress-text{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.x-progress-default .x-progress-text-back{color:#1e2330;text-shadow:none}
 .x-window-default,.x-menu-default,.x-boundlist{border-radius:10px;box-shadow:0 20px 50px rgba(16,24,40,.18);overflow:hidden}
 .x-window-header-default{background-color:#fff}
 .x-splitter{background-color:rgba(0,0,0,0)}
@@ -1973,6 +1975,8 @@ div.monitor{border-color:#333947}
 .x-tab-default-top.x-tab-over:not(.x-tab-active){background-color:rgba(240,105,15,.1)}
 .x-progress-default{border-radius:999px;border:none;background-color:#1f232e;overflow:hidden}
 .x-progress-default .x-progress-bar-default{border-radius:999px;background:linear-gradient(90deg, #c65310, #fa802e)}
+.x-progress-default .x-progress-text{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.x-progress-default .x-progress-text-back{color:#e0e4eb;text-shadow:none}
 .x-window-default,.x-menu-default,.x-boundlist{border-radius:10px;box-shadow:0 20px 50px rgba(0,0,0,.55);overflow:hidden}
 .x-window-header-default{background-color:#161a22}
 .x-splitter{background-color:rgba(0,0,0,0)}

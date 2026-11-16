@@ -300,6 +300,19 @@
   background: linear-gradient(90deg, $primary-dark, $primary-light);
 }
 
+// The stock grey of the numbers is made for a pale bar: over the accent they read in white, past the
+// end of the bar (the back text, which shares the class) in the text colour
+.x-progress-default .x-progress-text {
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.x-progress-default .x-progress-text-back {
+  color: $text-color;
+  text-shadow: none;
+}
+
 // Windows and menus
 .x-window-default,
 .x-menu-default,
