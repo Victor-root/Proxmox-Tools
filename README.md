@@ -62,6 +62,8 @@ This repository is meant to grow over time with more Proxmox-oriented utilities.
 
 Click a script to unfold what it does, what it supports and the line to run it.
 
+> 💡 To run them all from **one menu**, or set everything up in one go, use the **dashboard** at the end of the list.
+
 <details>
 <summary><b>🖱️ Open Proxmox consoles in new tabs</b></summary>
 
@@ -464,6 +466,49 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 ```
 
 > ⚠️ Run it as **root inside the target LXC** (not on the Proxmox host).
+
+</details>
+
+<details>
+<summary><b>🧭 Dashboard: every script in one menu</b></summary>
+
+**Script:** `pve-tools-dashboard.sh`
+
+One menu for all the Proxmox VE host scripts of this repository, instead of running them one by one:
+
+* 📊 shows each script with its **state** at a glance: in place or not, and whether it is **re-applied after updates**
+* 🚀 **Recommended by Victor-root**: sets everything up in one go, then shows a summary of what worked
+  * 🌍 default language (you choose the language, the locale and the time zone), mobile interface included
+  * 🔕 subscription notice removed on desktop and on mobile
+  * 🖱️ consoles in a new tab, with the middle click in the resource tree
+  * 🌳 nodes opened in the resource tree, and the Logs panel collapsed
+  * 🖥️ console scrollback of 100000 lines and console tab titles
+  * 🎨 modern themes with the TiB sizes and the Start button options, then you choose the default theme
+* 🔄 asks once whether all of it is **re-applied automatically after every update**
+* 🔁 two entries turn the automatic re-apply **on for everything in place**, or **off everywhere**
+* 📋 every script stays one entry away: it opens its usual menu, with its restore options
+* ⏱️ the services that need it are restarted **once** at the end, not by every script
+
+#### Good to know
+
+* **Nothing is patched by the dashboard itself.** It downloads the scripts of this repository from `main` at every start, so it always runs their latest version, and lets each of them do its own work: its own checks, its own **backup** before every change, its own restore options.
+* **Confirmations are asked once.** The recommended set shows what it will do and asks you to type `yes`, then the scripts run without asking again. The choices only you can make are still asked: the language, the locale, the time zone and the default theme.
+* **A step that fails does not stop the others.** The summary marks it, and the messages of the script above it say why. Run that script from the dashboard menu to sort it out.
+* **No reboot is done.** The language script offers one when it runs on its own; here it only reminds you to open a new session.
+* The LXC scripts (WireGuard, Nginx) are not in the dashboard: they run inside a container, not on the host. Fastfetch is in the menu but not in the recommended set.
+* To try a branch before it is merged, set `PVE_TOOLS_REF` to its name: the dashboard then downloads the scripts from that branch.
+
+#### Version compatibility
+
+Each script keeps its own compatibility and its own checks. The ones that do not support Proxmox VE 8 (the modern theme, the two mobile steps) refuse there as they do on their own, and the summary marks them as failed; this was not run against Proxmox VE 8 files. The whole recommended set, the automatic re-apply entries and the script menus were run against copies of the files of Proxmox VE 9.2 (`pve-manager` 9.2.24, `proxmox-widget-toolkit` 5.2.10, `pve-xtermjs` 6.0.0-3, `pve-yew-mobile-gui` 0.8.0), in English and French, run twice in a row, with every backup checked against the stock files.
+
+Not yet tested on a real Proxmox host.
+
+#### Run it directly
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/main/scripts/pve-tools-dashboard.sh)
+```
 
 </details>
 

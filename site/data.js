@@ -861,6 +861,84 @@ const SCRIPTS = [
             prompt: 'Choose an option:',
         },
     },
+    {
+        id: 'dashboard',
+        icon: 'layout-dashboard',
+        file: 'pve-tools-dashboard.sh',
+        target: 'pve',
+        name: {
+            en: 'Dashboard',
+            fr: 'Tableau de bord',
+        },
+        tagline: {
+            en: 'Every host script in one menu, with their state, and the recommended set applied in one go.',
+            fr: 'Tous les scripts de l’hôte dans un seul menu, avec leur état, et la sélection recommandée appliquée d’un coup.',
+        },
+        runsOn: {
+            en: 'Proxmox VE host, as root',
+            fr: 'Sur l’hôte Proxmox VE, en root',
+        },
+        compat: 'PVE 9.x',
+        updated: {
+            en: 'New script. Runs every host script from one menu, and sets up the recommended set in one go.',
+            fr: 'Nouveau script. Lance tous les scripts de l’hôte depuis un seul menu, et met en place la sélection recommandée d’un coup.',
+        },
+        points: {
+            en: [
+                'Each script with its state: in place or not, re-applied after updates or not',
+                'Recommended by Victor-root: language, subscription notice, consoles, panels and theme in one go',
+                'Asks once whether everything is re-applied after updates, and turns it on or off for all',
+                'Each script keeps its own checks, backups and restore options, one entry away',
+                'The services are restarted once at the end, with a summary of every step',
+            ],
+            fr: [
+                'Chaque script avec son état : en place ou non, réappliqué après les mises à jour ou non',
+                'Recommandé par Victor-root : langue, popup d’abonnement, consoles, panneaux et thème d’un coup',
+                'Demande une fois s’il faut tout réappliquer après les mises à jour, et l’active ou le coupe partout',
+                'Chaque script garde ses vérifications, ses backups et sa restauration, à une entrée du menu',
+                'Les services sont redémarrés une seule fois à la fin, avec un résumé de chaque étape',
+            ],
+        },
+        touches: {
+            files: [
+                { path: '/tmp/tmp.*/', role: { en: 'the scripts downloaded from main, deleted when the dashboard exits. Nothing else: each script it runs writes what its own card lists', fr: 'les scripts téléchargés depuis main, supprimés quand le tableau de bord se ferme. Rien d’autre : chaque script lancé écrit ce que liste sa propre carte' } },
+            ],
+            backup: '/root/<script>-<date>/',
+            restarts: 'pveproxy pvedaemon',
+        },
+        note: {
+            en: 'Confirmations are asked once, then the scripts run without asking again; the language, the locale, the time zone and the default theme are still yours to choose. The modern theme and the mobile steps need Proxmox VE 9: elsewhere their script refuses and the summary says so.',
+            fr: 'Les confirmations sont demandées une seule fois, puis les scripts s’enchaînent sans redemander ; la langue, la locale, le fuseau horaire et le thème par défaut restent à votre choix. Le thème moderne et les étapes mobiles demandent Proxmox VE 9 : ailleurs leur script refuse et le résumé l’indique.',
+        },
+        terminal: {
+            banner: 'proxmox',
+            theme: 'orange',
+            host: 'root@pve01',
+            subtitle: 'Proxmox-Tools Dashboard',
+            panel: {
+                title: 'Every Proxmox-Tools script in one place',
+                lines: [
+                    'Host: pve01',
+                    'Detected language: English',
+                ],
+            },
+            menu: [
+                'Recommended by Victor-root (set everything up at once)',
+                'Default language               in place · re-applied after updates',
+                'Subscription notice            in place · re-applied after updates',
+                'Console in a new tab           in place · re-applied after updates',
+                'Panel layout                   in place · re-applied after updates',
+                'Console scrollback             in place · re-applied after updates',
+                'Console tab title              in place · re-applied after updates',
+                'Modern theme                   in place · re-applied after updates',
+                'Fastfetch at login             not in place',
+                'Re-apply everything in place automatically after an update',
+                'Stop re-applying anything automatically',
+                'Quit',
+            ],
+            prompt: 'Choose an option [1-12]:',
+        },
+    },
 ];
 
 /* ASCII logos drawn at the top of each script. Add one here only if a new

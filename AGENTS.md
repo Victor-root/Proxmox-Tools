@@ -215,6 +215,18 @@ Required behaviours of the apply action:
 
 Follow `pve-fastfetch-motd.sh`: check you are on a Proxmox host when relevant, download only from the official source of the tool, detect the CPU architecture instead of assuming one, verify what you downloaded before using it, keep the original state before overwriting it so a removal can restore it, make re running safe, and offer removal at two levels when it makes sense (stop the feature, or remove everything).
 
+### 7.5 The dashboard entry point
+
+`pve-tools-dashboard.sh` downloads every Proxmox host script and drives it through arguments. A host script therefore also runs without its menu when it gets arguments, following the pattern of the existing ones (`run_actions`, at the end of the file):
+
+* `state` prints one line, `<applied|outdated|stock|unknown> <on|off|none>`: is the script's main change in place, and is its automatic re-apply on (`none` when it has none)
+* every other argument is an action run in order, mapped to the function of the matching menu entry (`apply`, `hook-on`, `hook-off`, plus the script's own ones); an unknown one prints `invalid_action` and exits 2, a failed one exits 1
+* `AUTO_YES=1` answers `confirm_yes` and skips `pause`; choices only the user can make (a value, a list) are still asked
+* `--restart-file FILE`, accepted first by every script that has actions: the restart functions append the service names to that file instead of restarting, so the dashboard restarts each service once
+* without arguments, the menu runs exactly as before
+
+Then add the script to `TOOLS` in `pve-tools-dashboard.sh`, with its `tool_<id>` label in both languages. Only add it to `RECOMMENDED` if the maintainer asks for it.
+
 ## 8. Phase 4: test, for real
 
 You usually cannot run a Proxmox host. That is no excuse for not testing: reproduce the situation from the real sources.
@@ -371,6 +383,7 @@ Before you report, go through this list and fix what fails. Every box must be ti
 - [ ] Backup with `INFO.txt` and `SHA256SUMS.txt`, restore latest and restore chosen, version mismatch warning on restore
 - [ ] Result verified after writing, success only reported after that
 - [ ] Menu goes through `menu_action`, numbering and prompt range are consistent
+- [ ] Host script: `state`, the actions and `--restart-file` work without the menu (section 7.5), and it is listed in the dashboard
 - [ ] User input validated, base 10 forced, no `eval`, variables quoted
 - [ ] Every key exists in `en` and `fr`, none unused, no em dash
 - [ ] Comments only explain the why, no dead code, no leftover
