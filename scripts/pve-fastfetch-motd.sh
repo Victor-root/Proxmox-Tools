@@ -438,6 +438,9 @@ tr_msg() {
         fr:cfg_date_fmt) echo "+%d/%m/%Y %H:%M" ;;
         en:cfg_date_fmt) echo "+%Y-%m-%d %H:%M" ;;
 
+        fr:invalid_action) echo "Action inconnue" ;;
+        en:invalid_action) echo "Unknown action" ;;
+
         * ) echo "$key" ;;
     esac
 }
@@ -1524,7 +1527,33 @@ main_menu() {
 CERT_HOST=""
 CERT_PORT=""
 
+# One line for pve-tools-dashboard.sh: whether the login display is in place,
+# then "none", as nothing here needs re-applying after an update.
+print_state() {
+    if profile_is_managed; then
+        echo "applied none"
+    else
+        echo "stock none"
+    fi
+}
+
+# Non interactive entry point, used by pve-tools-dashboard.sh, which only reads
+# the state of this script and opens its menu for everything else.
+run_actions() {
+    case "$*" in
+        state) print_state ;;
+        *)
+            say_err "$(tr_msg invalid_action): $*"
+            return 2
+            ;;
+    esac
+}
+
 require_root
 require_pve
 require_tools
-main_menu
+if (($#)); then
+    run_actions "$@"
+else
+    main_menu
+fi

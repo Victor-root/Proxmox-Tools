@@ -6,6 +6,10 @@ MAIN_FILE="/usr/share/pve-xtermjs/main.js"
 HELPER_DIR="/usr/local/lib/pve-xterm-tab-title"
 APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-xterm-tab-title"
 
+# Set by run_actions, the non interactive entry point used by
+# pve-tools-dashboard.sh.
+AUTO_YES=0
+
 # ------------------------------------------------------------
 # Language detection (EN default, FR if system locale starts with fr)
 # ------------------------------------------------------------
@@ -212,6 +216,9 @@ tr_msg() {
         fr:repo_hint) echo "Titre des onglets xterm.js : ID (Nom) · Noeud · PVE" ;;
         en:repo_hint) echo "xterm.js console tab titles: ID (Name) · Node · PVE" ;;
 
+        fr:invalid_action) echo "Action inconnue" ;;
+        en:invalid_action) echo "Unknown action" ;;
+
         * ) echo "$key" ;;
     esac
 }
@@ -317,11 +324,17 @@ show_banner() {
 }
 
 pause() {
+    if [[ "$AUTO_YES" -eq 1 ]]; then
+        return 0
+    fi
     echo
     read -r -p "$(tr_msg press_enter)" _ || true
 }
 
 confirm_yes() {
+    if [[ "$AUTO_YES" -eq 1 ]]; then
+        return 0
+    fi
     echo
     printf "%b?%b %b%s%b : " "${PMX_AMBER}" "${RESET}" "${BOLD}" "$(tr_msg type_yes)" "${RESET}"
     read -r answer
@@ -469,9 +482,15 @@ list_backups_raw() {
 }
 
 create_backup() {
-    local ts dir
+    local ts dir n=1
     ts="$(date +%F-%H%M%S)"
     dir="${PATCH_PREFIX}-${ts}"
+    # Two backups made within the same second, as the dashboard does, must
+    # not share a directory: the second one would overwrite the first.
+    while [[ -e "$dir" ]]; do
+        n=$((n + 1))
+        dir="$(printf '%s-%s-%02d' "$PATCH_PREFIX" "$ts" "$n")"
+    done
     mkdir -p "$dir"
 
     cp -av "$MAIN_FILE" "$dir/" >/dev/null
@@ -784,6 +803,53 @@ main_menu() {
     done
 }
 
+# One line for pve-tools-dashboard.sh: patch state, then automatic re-apply.
+print_state() {
+    local state hook=off
+    case "$(get_state)" in
+        patched) state=applied ;;
+        stock) state=stock ;;
+        *) state=unknown ;;
+    esac
+    if hook_is_enabled; then
+        hook=on
+    fi
+    echo "${state} ${hook}"
+}
+
+# Non interactive entry point, used by pve-tools-dashboard.sh. Each argument
+# is an action run in order, confirmations are answered yes and pauses are
+# skipped; choices that only the user can make are still asked. The
+# --restart-file option every script takes is accepted and left unused:
+# nothing this script changes needs a service restart.
+run_actions() {
+    local action
+    AUTO_YES=1
+    if [[ "${1:-}" == "--restart-file" ]]; then
+        if [[ -z "${2:-}" ]]; then
+            say_err "$(tr_msg invalid_action): --restart-file"
+            return 2
+        fi
+        shift 2
+    fi
+    for action in "$@"; do
+        case "$action" in
+            state) print_state ;;
+            apply) apply_patch ;;
+            hook-on) enable_hook ;;
+            hook-off) disable_hook ;;
+            *)
+                say_err "$(tr_msg invalid_action): ${action}"
+                return 2
+                ;;
+        esac || return 1
+    done
+}
+
 require_root
 require_files
-main_menu
+if (($#)); then
+    run_actions "$@"
+else
+    main_menu
+fi
