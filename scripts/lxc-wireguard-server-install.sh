@@ -825,8 +825,8 @@ en|client_paste_title|Paste the configuration
 fr|client_paste_title|Collez la configuration
 en|client_paste_l1|Paste the whole .conf of the client, from [Interface] to the end of [Peer].
 fr|client_paste_l1|Collez tout le .conf du client, de [Interface] jusqu'à la fin de [Peer].
-en|client_paste_l2|Then type EOF on a line of its own and press Enter (or press Ctrl+D).
-fr|client_paste_l2|Tapez ensuite EOF seul sur une ligne puis Entrée (ou faites Ctrl+D).
+en|client_paste_l2|Nothing to type afterwards: the reading stops by itself at the end of the configuration.
+fr|client_paste_l2|Rien à taper ensuite : la lecture s'arrête toute seule à la fin de la configuration.
 en|client_paste_empty|Nothing was pasted, nothing changed.
 fr|client_paste_empty|Rien n'a été collé, rien n'a changé.
 en|client_paste_ignored|Lines ignored because they are not part of a WireGuard configuration: %s
@@ -877,6 +877,10 @@ en|client_step_write|Writing %s
 fr|client_step_write|Écriture de %s
 en|client_step_start|Starting the tunnel %s
 fr|client_step_start|Démarrage du tunnel %s
+en|client_step_dns|Installing openresolv for the DNS of the tunnel
+fr|client_step_dns|Installation d'openresolv pour le DNS du tunnel
+en|client_journal|What the tunnel reported:
+fr|client_journal|Ce que le tunnel a signalé :
 en|client_err_packages|Installing the packages failed.
 fr|client_err_packages|L'installation des paquets a échoué.
 en|client_err_start|The tunnel did not start, see the messages above. Nothing was kept.
@@ -2965,15 +2969,37 @@ show_theory_summary() {
 
 # ── Client mode ───────────────────────────────────────────────────────────────
 
+# True once the [Peer] part holds what a tunnel needs, so the paste can end.
+client_paste_complete() {
+  local conf="$1" key
+  grep -qiF "[Peer]" "$conf" || return 1
+  for key in PublicKey Endpoint AllowedIPs; do
+    [[ -n "$(conf_value "$conf" "$key")" ]] || return 1
+  done
+}
+
 # Reads the pasted configuration into $1 and keeps only what can be part of a
 # WireGuard file, so the separators shown around it by the server, copied by
 # mistake, do not end up in it. Prints the number of ignored lines.
+# A paste reaches the terminal at once: once the configuration is complete,
+# one second without a new line ends it, nothing has to be typed. EOF on its
+# own line or Ctrl+D still end it earlier.
 read_pasted_client_conf() {
-  local out="$1" line ignored=0
+  local out="$1" line rc ignored=0
 
-  # Ctrl+D right after the last character ends the read without a newline:
-  # the test on $line keeps that last line.
-  while IFS= read -r line || [[ -n "$line" ]]; do
+  while true; do
+    line=""
+    rc=0
+    if client_paste_complete "$out"; then
+      IFS= read -r -t 1 line || rc=$?
+    else
+      IFS= read -r line || rc=$?
+    fi
+    # On Ctrl+D right after the last character, or a timeout, $line still
+    # holds what was typed: keep it.
+    if ((rc != 0)) && [[ -z "$line" ]]; then
+      break
+    fi
     line="${line%$'\r'}"
     [[ "$line" == "EOF" ]] && break
     if [[ "$line" =~ ^[[:space:]]*(\[[A-Za-z]+\]|[A-Za-z]+[[:space:]]*=.*|#.*)?[[:space:]]*$ ]]; then
@@ -2981,6 +3007,7 @@ read_pasted_client_conf() {
     else
       ignored=$((ignored + 1))
     fi
+    ((rc == 0)) || break
   done
   echo "$ignored"
 }
@@ -3075,7 +3102,7 @@ install_client_packages() {
   need apt-get
   export DEBIAN_FRONTEND=noninteractive
   apt-get update
-  apt-get install -y wireguard-tools iproute2 iputils-ping "$@"
+  apt-get install -y "$@"
 }
 
 # Seconds since the last handshake, empty when there was none.
@@ -3130,6 +3157,11 @@ connect_client() {
     return 0
   fi
 
+  # curl is needed now, to find the public address of this network.
+  step "$(tr_msg client_step_packages)" install_client_packages wireguard-tools iproute2 iputils-ping curl ca-certificates \
+    || { rm -f "$tmp"; die "$(tr_msg client_err_packages)"; }
+  echo
+
   offer_local_endpoint "$tmp"
 
   dns_choice="$(choose_client_dns "$tmp")"
@@ -3160,12 +3192,19 @@ connect_client() {
   fi
 
   echo
-  step "$(tr_msg client_step_packages)" install_client_packages "${extra[@]}" || { rm -f "$tmp"; die "$(tr_msg client_err_packages)"; }
+  if ((${#extra[@]})); then
+    step "$(tr_msg client_step_dns)" install_client_packages "${extra[@]}" || { rm -f "$tmp"; die "$(tr_msg client_err_packages)"; }
+  fi
   mkdir -p "$WG_DIR"
   systemctl stop "wg-quick@${CLIENT_IF}" >/dev/null 2>&1 || true
   if ! step "$(tr_fmt client_step_write "$CLIENT_CONF")" install -m 600 "$tmp" "$CLIENT_CONF" ||
     ! step "$(tr_fmt client_step_start "$CLIENT_IF")" systemctl enable --now "wg-quick@${CLIENT_IF}"; then
     rm -f "$tmp"
+    if have journalctl; then
+      echo
+      error "$(tr_msg client_journal)"
+      journalctl -u "wg-quick@${CLIENT_IF}" -n 15 --no-pager -o cat 2>/dev/null | sed 's/^/  /' >&2 || true
+    fi
     restore_previous_client "$backup"
     return 1
   fi
