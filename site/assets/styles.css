@@ -21,9 +21,9 @@
     --ansi-cyan: #5fafaf;        /* 73  */
     --ansi-blue: #5f87af;        /* 67  */
     --ansi-grey: #808080;        /* 244 */
-    --wg-red: #ff5f5f;           /* 203 */
-    --wg-red-dark: #d70000;      /* 160 */
-    --wg-red-soft: #ff87af;      /* 211 */
+    --wg-red: #ff0000;           /* 196 */
+    --wg-red-dark: #af0000;      /* 124 */
+    --wg-red-soft: #d70000;      /* 160 */
     --wg-blue: #87afff;          /* 111 */
     --ngx-green: #00af00;        /* 34  */
     --ngx-green-soft: #00d700;   /* 40  */
