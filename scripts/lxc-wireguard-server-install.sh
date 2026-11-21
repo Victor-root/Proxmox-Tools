@@ -1502,7 +1502,10 @@ configure_sysctl() {
 net.ipv4.ip_forward=1
 EOF
 
-  sysctl --system >/dev/null
+  # Only this file: sysctl --system also loads the defaults of the system,
+  # and an unprivileged LXC refuses their kernel wide keys (kernel.pid_max,
+  # vm.max_map_count...), which failed the whole step.
+  sysctl -p /etc/sysctl.d/99-wireguard-server.conf >/dev/null
 }
 
 # ── Installation serveur ──────────────────────────────────────────────────────
