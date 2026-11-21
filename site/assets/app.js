@@ -15,12 +15,19 @@
     /* where a script runs, from the target field of data.js */
     const TARGET_ICON = { pve: 'server', lxc: 'box' };
 
-    /* the cards and the side rail list the scripts by where they run */
+    /* the script to start with: drawn in the hero terminal, first of its group */
+    const FEATURED = SCRIPTS.find((s) => s.featured) || SCRIPTS[0];
+
+    /* the cards and the side rail list the scripts by where they run, the
+       featured one first */
     const GROUPS = [
         { target: 'pve', title: 'groupPve', body: 'groupPveBody', rail: 'groupPveRail' },
         { target: 'lxc', title: 'groupLxc', body: 'groupLxcBody', rail: 'groupLxcRail' },
-    ].map((g) => ({ ...g, scripts: SCRIPTS.filter((s) => s.target === g.target) }))
-        .filter((g) => g.scripts.length);
+    ].map((g) => ({
+        ...g,
+        scripts: SCRIPTS.filter((s) => s.target === g.target)
+            .sort((a, b) => (b === FEATURED) - (a === FEATURED)),
+    })).filter((g) => g.scripts.length);
 
     let lang = 'en';
 
@@ -227,9 +234,9 @@
         });
     }
 
-    /* Hero: the first script of data.js, shown from the pasted line onwards. */
+    /* Hero: the featured script, shown from the pasted line onwards. */
     function renderHero() {
-        const script = SCRIPTS[0];
+        const script = FEATURED;
         const slot = document.getElementById('hero-demo');
         if (!script || !slot) return;
 
@@ -322,7 +329,10 @@
             '    <div class="card-info">',
             '      <div class="card-top">',
             '        <h4 class="card-title">' + icon(script.icon || 'code') + '<span>' + esc(tr(script.name)) + '</span></h4>',
-            '        <span class="badge">' + esc(tr(script.compat)) + '</span>',
+            '        <span class="card-badges">',
+            script === FEATURED ? '          <span class="badge badge-start">' + icon('bolt') + esc(tr(UI.cardStart)) + '</span>' : '',
+            '          <span class="badge">' + esc(tr(script.compat)) + '</span>',
+            '        </span>',
             '      </div>',
             '      <p class="card-tagline">' + esc(tr(script.tagline)) + '</p>',
             '      <span class="runs-on">' + icon(TARGET_ICON[script.target] || 'server') + '<b>' + esc(tr(UI.cardRunOn)) + '</b> ' + esc(tr(script.runsOn)) + '</span>',

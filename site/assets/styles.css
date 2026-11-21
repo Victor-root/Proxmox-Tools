@@ -393,6 +393,13 @@ code {
     border: 1px solid color-mix(in srgb, var(--ansi-amber) 34%, transparent);
     padding: 5px 10px; border-radius: 999px; white-space: nowrap;
 }
+.card-badges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.badge-start {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: #15181d; background: linear-gradient(140deg, var(--orange-bright), var(--orange-deep));
+    border-color: transparent; font-weight: 700;
+}
+.badge-start .ico { width: 13px; height: 13px; }
 /* the description is what people actually read: give it room and contrast */
 .card-tagline {
     color: var(--fg); font-size: 1.06rem; line-height: 1.55; font-weight: 500;

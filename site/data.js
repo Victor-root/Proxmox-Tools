@@ -15,6 +15,8 @@
  *   file      exact file name inside scripts/, the run command is built from it
  *   target    "pve" (Proxmox host) or "lxc" (inside a container), picks the
  *             group the card is listed in and its icon
+ *   featured  optional, true on one script only: the one to start with, drawn
+ *             in the hero terminal, listed first in its group with a badge
  *   name      short title shown on the card
  *   tagline   one line, what it does
  *   runsOn    where the user must run it
@@ -43,7 +45,7 @@
  * The terminal shows the script exactly as it runs, so its text is NOT
  * translated: every script speaks the locale of the server, English by default,
  * and that default is what the preview shows.
- * The first script of the list is also the one shown in the hero terminal.
+ * The hero terminal shows the featured script, or the first one without it.
  * ==========================================================================*/
 
 const SITE = {
@@ -863,6 +865,7 @@ const SCRIPTS = [
     },
     {
         id: 'dashboard',
+        featured: true,
         icon: 'layout-dashboard',
         file: 'pve-tools-dashboard.sh',
         target: 'pve',
@@ -1076,6 +1079,7 @@ const UI = {
         fr: 'Choisissez-en un, copiez sa ligne, collez-la en root, sur l’hôte Proxmox ou dans le LXC concerné. Chaque script ouvre un menu et vous attend : rien ne s’exécute tout seul.',
     },
     cardRunOn: { en: 'Runs on', fr: 'S’exécute sur' },
+    cardStart: { en: 'Start here', fr: 'Commencer ici' },
     cardCopyLabel: { en: 'Copy this line into your shell', fr: 'Copiez cette ligne dans votre shell' },
     cardCopy: { en: 'Copy the command', fr: 'Copier la commande' },
     cardCopied: { en: 'Copied', fr: 'Copié' },

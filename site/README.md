@@ -87,8 +87,9 @@ the block people read before running something as root, so it has to be exact.
 `target` only picks the icon shown next to "Runs on": a server for the Proxmox
 host, a container for a script that runs inside an LXC.
 
-The first script of the list is also the one drawn in the hero terminal, under
-the pasted command line. Move a block to the top to feature it there.
+The script marked `featured: true` is drawn in the hero terminal, under the
+pasted command line, and listed first in its group with a "Start here" badge.
+Without one, the first script of the list is drawn there.
 
 ## Change a script that already exists
 

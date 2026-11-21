@@ -300,7 +300,7 @@ Edit `site/data.js` (and `site/index.html` only to add an icon). Never edit `sit
 
 ### 10.1 The block
 
-Append a block **at the end of the `SCRIPTS` array** (the first block is the one drawn in the hero terminal, do not reorder). The run command, the "read the source" link and the history link are built from `file`, never write a URL.
+Append a block **at the end of the `SCRIPTS` array** (do not reorder: the order drives "What's new", and the hero terminal shows the block marked `featured: true`). The run command, the "read the source" link and the history link are built from `file`, never write a URL.
 
 ```js
     {
