@@ -15,6 +15,11 @@ STATE_FILE="${WG_DIR}/wg-server.env"
 NFT_FILE="${WG_DIR}/wg-server.nft"
 NFT_UNIT="/etc/systemd/system/wg-server-nft.service"
 
+# Client mode: this machine joins a WireGuard server with a pasted config.
+# Its own interface name, so it never collides with a server on wg0.
+CLIENT_IF="wg-client"
+CLIENT_CONF="${WG_DIR}/${CLIENT_IF}.conf"
+
 DEFAULT_PORT="51820"
 DEFAULT_WG_CIDR="192.168.2.0/24"
 DEFAULT_CLIENT_RANGE_START="100"
@@ -800,6 +805,114 @@ en|menu_8|Backup and restore of the configuration
 fr|menu_8|Sauvegarde / restauration de la configuration
 en|menu_9|Uninstall the WireGuard server
 fr|menu_9|Désinstaller le serveur WireGuard
+en|menu_client|Client: connect this machine to a WireGuard server
+fr|menu_client|Client : connecter cette machine à un serveur WireGuard
+en|client_menu_title|WireGuard client
+fr|client_menu_title|Client WireGuard
+en|client_menu_l1|Turns this machine into a client of a WireGuard server, for example an LXC that must reach the other devices of the tunnel.
+fr|client_menu_l1|Fait de cette machine un client d'un serveur WireGuard, par exemple un LXC qui doit joindre les autres appareils du tunnel.
+en|client_menu_l2|On the server, create the client (option 2) or show it (option 4), then paste its configuration here.
+fr|client_menu_l2|Sur le serveur, créez le client (option 2) ou affichez-le (option 4), puis collez sa configuration ici.
+en|client_menu_connect|Connect: paste the configuration of the client
+fr|client_menu_connect|Connecter : coller la configuration du client
+en|client_menu_status|State of the connection
+fr|client_menu_status|État de la connexion
+en|client_menu_remove|Disconnect and remove the client configuration
+fr|client_menu_remove|Déconnecter et supprimer la configuration client
+en|client_menu_back|Back to the main menu
+fr|client_menu_back|Retour au menu principal
+en|client_paste_title|Paste the configuration
+fr|client_paste_title|Collez la configuration
+en|client_paste_l1|Paste the whole .conf of the client, from [Interface] to the end of [Peer].
+fr|client_paste_l1|Collez tout le .conf du client, de [Interface] jusqu'à la fin de [Peer].
+en|client_paste_l2|Then type EOF on a line of its own and press Enter (or press Ctrl+D).
+fr|client_paste_l2|Tapez ensuite EOF seul sur une ligne puis Entrée (ou faites Ctrl+D).
+en|client_paste_empty|Nothing was pasted, nothing changed.
+fr|client_paste_empty|Rien n'a été collé, rien n'a changé.
+en|client_paste_ignored|Lines ignored because they are not part of a WireGuard configuration: %s
+fr|client_paste_ignored|Lignes ignorées car elles ne font pas partie d'une configuration WireGuard : %s
+en|client_conf_missing|The configuration is incomplete, %s is missing. Nothing changed.
+fr|client_conf_missing|La configuration est incomplète, il manque %s. Rien n'a changé.
+en|client_conf_endpoint|The Endpoint line must be host:port, got: %s. Nothing changed.
+fr|client_conf_endpoint|La ligne Endpoint doit être de la forme hôte:port, reçu : %s. Rien n'a changé.
+en|client_same_net_title|Server on the same network
+fr|client_same_net_title|Serveur sur le même réseau
+en|client_same_net_l1|%s leads to the public address of this network: the server is behind the same box as this machine.
+fr|client_same_net_l1|%s mène à l'adresse publique de ce réseau : le serveur est derrière la même box que cette machine.
+en|client_same_net_l2|Many boxes cannot send traffic back to their own network (NAT loopback), and the tunnel would never come up.
+fr|client_same_net_l2|Beaucoup de box ne savent pas renvoyer le trafic vers leur propre réseau (NAT loopback), et le tunnel ne monterait jamais.
+en|client_same_net_l3|Give the local address of the server (its LXC) to connect directly, or leave empty to keep %s.
+fr|client_same_net_l3|Donnez l'adresse locale du serveur (son LXC) pour s'y connecter en direct, ou laissez vide pour garder %s.
+en|client_same_net_prompt|Local IP of the WireGuard server (empty = keep)
+fr|client_same_net_prompt|IP locale du serveur WireGuard (vide = garder)
+en|client_same_net_invalid|Not an IPv4 address, the endpoint is kept as it is.
+fr|client_same_net_invalid|Ce n'est pas une adresse IPv4, l'endpoint est gardé tel quel.
+en|client_endpoint_changed|Endpoint changed to %s.
+fr|client_endpoint_changed|Endpoint remplacé par %s.
+en|client_dns_title|DNS servers in the configuration
+fr|client_dns_title|Serveurs DNS dans la configuration
+en|client_dns_l1|The configuration sets DNS servers: %s.
+fr|client_dns_l1|La configuration impose des serveurs DNS : %s.
+en|client_dns_l2|Using them replaces the DNS of this machine while the tunnel is up, and installs openresolv for it.
+fr|client_dns_l2|Les utiliser remplace le DNS de cette machine tant que le tunnel est actif, et installe openresolv pour cela.
+en|client_dns_l3|For a server or an LXC, keeping its own DNS is usually what you want.
+fr|client_dns_l3|Pour un serveur ou un LXC, garder son propre DNS est en général le bon choix.
+en|client_dns_confirm|Use the DNS servers of the configuration?
+fr|client_dns_confirm|Utiliser les serveurs DNS de la configuration ?
+en|client_dns_removed|DNS line left out: this machine keeps its own DNS.
+fr|client_dns_removed|Ligne DNS retirée : cette machine garde son propre DNS.
+en|client_full_title|Full tunnel
+fr|client_full_title|Full tunnel
+en|client_full_l1|AllowedIPs contains 0.0.0.0/0: ALL the Internet traffic of this machine will go through the server.
+fr|client_full_l1|AllowedIPs contient 0.0.0.0/0 : TOUT le trafic Internet de cette machine passera par le serveur.
+en|client_full_l2|The local network stays reachable, but this machine depends on the tunnel to reach the Internet.
+fr|client_full_l2|Le réseau local reste joignable, mais cette machine dépend du tunnel pour sortir sur Internet.
+en|client_full_confirm|Continue with a full tunnel?
+fr|client_full_confirm|Continuer avec un full tunnel ?
+en|client_replace_confirm|A client configuration already exists on this machine. Replace it?
+fr|client_replace_confirm|Une configuration client existe déjà sur cette machine. La remplacer ?
+en|client_step_packages|Installing the WireGuard tools
+fr|client_step_packages|Installation des outils WireGuard
+en|client_step_write|Writing %s
+fr|client_step_write|Écriture de %s
+en|client_step_start|Starting the tunnel %s
+fr|client_step_start|Démarrage du tunnel %s
+en|client_err_packages|Installing the packages failed.
+fr|client_err_packages|L'installation des paquets a échoué.
+en|client_err_start|The tunnel did not start, see the messages above. Nothing was kept.
+fr|client_err_start|Le tunnel n'a pas démarré, voir les messages ci-dessus. Rien n'a été gardé.
+en|client_err_start_restored|The tunnel did not start, see the messages above. The previous configuration is back.
+fr|client_err_start_restored|Le tunnel n'a pas démarré, voir les messages ci-dessus. L'ancienne configuration est remise.
+en|client_waiting|Waiting for the first exchange with the server (up to 20 s)...
+fr|client_waiting|Attente du premier échange avec le serveur (jusqu'à 20 s)...
+en|client_connected|Connected: the server answered %s ago.
+fr|client_connected|Connecté : le serveur a répondu il y a %s.
+en|client_no_handshake|The tunnel is up, but the server has not answered yet.
+fr|client_no_handshake|Le tunnel est monté, mais le serveur n'a pas encore répondu.
+en|client_hint_l1|Check that the client still exists on the server and that this is its latest configuration.
+fr|client_hint_l1|Vérifiez que le client existe toujours sur le serveur et que c'est bien sa dernière configuration.
+en|client_hint_l2|Check the port forwarding of the box, or use the local address of the server if it is on the same network.
+fr|client_hint_l2|Vérifiez la redirection de port de la box, ou utilisez l'adresse locale du serveur s'il est sur le même réseau.
+en|client_hint_l3|The state entry of the client menu shows again whether it answers.
+fr|client_hint_l3|L'entrée « État » du menu client montre de nouveau s'il répond.
+en|client_not_configured|No client configuration on this machine.
+fr|client_not_configured|Aucune configuration client sur cette machine.
+en|client_service_active|Tunnel %s: active
+fr|client_service_active|Tunnel %s : actif
+en|client_service_inactive|Tunnel %s: stopped
+fr|client_service_inactive|Tunnel %s : arrêté
+en|client_last_handshake|Last exchange with the server: %s ago
+fr|client_last_handshake|Dernier échange avec le serveur : il y a %s
+en|client_never_handshake|No exchange with the server yet
+fr|client_never_handshake|Aucun échange avec le serveur pour l'instant
+en|client_remove_confirm|Stop the tunnel and remove its configuration?
+fr|client_remove_confirm|Arrêter le tunnel et supprimer sa configuration ?
+en|client_removed|Tunnel stopped, configuration removed. The WireGuard tools stay installed.
+fr|client_removed|Tunnel arrêté, configuration supprimée. Les outils WireGuard restent installés.
+en|client_cancelled|Cancelled, nothing changed.
+fr|client_cancelled|Annulé, rien n'a changé.
+en|client_back_menu|Back to the client menu?
+fr|client_back_menu|Revenir au menu client ?
 en|menu_language|Français (passer ce script en français)
 en|menu_quit|Quit
 fr|menu_language|English (switch this script to English)
@@ -2850,6 +2963,310 @@ show_theory_summary() {
     "$(tr_msg modes_3)"
 }
 
+# ── Client mode ───────────────────────────────────────────────────────────────
+
+# Reads the pasted configuration into $1 and keeps only what can be part of a
+# WireGuard file, so the separators shown around it by the server, copied by
+# mistake, do not end up in it. Prints the number of ignored lines.
+read_pasted_client_conf() {
+  local out="$1" line ignored=0
+
+  # Ctrl+D right after the last character ends the read without a newline:
+  # the test on $line keeps that last line.
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%$'\r'}"
+    [[ "$line" == "EOF" ]] && break
+    if [[ "$line" =~ ^[[:space:]]*(\[[A-Za-z]+\]|[A-Za-z]+[[:space:]]*=.*|#.*)?[[:space:]]*$ ]]; then
+      printf '%s\n' "$line" >>"$out"
+    else
+      ignored=$((ignored + 1))
+    fi
+  done
+  echo "$ignored"
+}
+
+# First value of a key in a WireGuard file, keys being case insensitive.
+conf_value() {
+  awk -v key="${2,,}" -F= '
+    { k = tolower($1); gsub(/[[:space:]]/, "", k) }
+    k == key { sub(/^[^=]*=[[:space:]]*/, ""); sub(/[[:space:]]*$/, ""); print; exit }
+  ' "$1"
+}
+
+client_conf_is_complete() {
+  local conf="$1" key endpoint
+
+  for key in "[Interface]" "[Peer]"; do
+    if ! grep -qiF "$key" "$conf"; then
+      error "$(tr_fmt client_conf_missing "$key")"
+      return 1
+    fi
+  done
+  for key in PrivateKey Address PublicKey Endpoint AllowedIPs; do
+    if [[ -z "$(conf_value "$conf" "$key")" ]]; then
+      error "$(tr_fmt client_conf_missing "$key")"
+      return 1
+    fi
+  done
+
+  endpoint="$(conf_value "$conf" Endpoint)"
+  if ! [[ "$endpoint" =~ ^[^:]+:[0-9]{1,5}$ ]]; then
+    error "$(tr_fmt client_conf_endpoint "$endpoint")"
+    return 1
+  fi
+}
+
+# When the endpoint leads to the public address of this very network, the
+# server is behind the same box, which often cannot loop traffic back:
+# offer the local address of the server instead.
+offer_local_endpoint() {
+  local conf="$1" endpoint host port target public local_ip
+
+  endpoint="$(conf_value "$conf" Endpoint)"
+  host="${endpoint%:*}"
+  port="${endpoint##*:}"
+
+  if validate_ipv4 "$host"; then
+    target="$host"
+  else
+    target="$(getent ahostsv4 "$host" 2>/dev/null | awk 'NR == 1 { print $1 }')"
+  fi
+  public="$(detect_public_ip)"
+  [[ -n "$target" && "$target" == "$public" ]] || return 0
+
+  panel "$AMBER" "$(tr_msg client_same_net_title)" \
+    "$(tr_fmt client_same_net_l1 "${BOLD}${host}${RESET}")" \
+    "$(tr_msg client_same_net_l2)" \
+    "$(tr_fmt client_same_net_l3 "${BOLD}${host}${RESET}")"
+  echo
+  local_ip="$(prompt_free "$(tr_msg client_same_net_prompt)")"
+  [[ -n "$local_ip" ]] || return 0
+
+  if ! validate_ipv4 "$local_ip"; then
+    warn "$(tr_msg client_same_net_invalid)"
+    return 0
+  fi
+
+  sed -i -E "s|^([[:space:]]*[Ee]ndpoint[[:space:]]*=[[:space:]]*).*$|\1${local_ip}:${port}|" "$conf"
+  success "$(tr_fmt client_endpoint_changed "${local_ip}:${port}")"
+}
+
+# Prints "keep" when the DNS line stays, which needs resolvconf.
+choose_client_dns() {
+  local conf="$1" dns
+
+  dns="$(conf_value "$conf" DNS)"
+  [[ -n "$dns" ]] || return 0
+
+  panel "$AMBER" "$(tr_msg client_dns_title)" \
+    "$(tr_fmt client_dns_l1 "${BOLD}${dns}${RESET}")" \
+    "$(tr_msg client_dns_l2)" \
+    "$(tr_msg client_dns_l3)" >&2
+  echo >&2
+  if confirm_default_no "$(tr_msg client_dns_confirm)"; then
+    echo "keep"
+  else
+    sed -i -E '/^[[:space:]]*[Dd][Nn][Ss][[:space:]]*=/d' "$conf"
+    success "$(tr_msg client_dns_removed)" >&2
+  fi
+}
+
+install_client_packages() {
+  need apt-get
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update
+  apt-get install -y wireguard-tools iproute2 iputils-ping "$@"
+}
+
+# Seconds since the last handshake, empty when there was none.
+client_handshake_age() {
+  local last
+  last="$(wg show "$CLIENT_IF" latest-handshakes 2>/dev/null | awk 'NR == 1 { print $2 }')"
+  if [[ "$last" =~ ^[0-9]+$ ]] && ((last > 0)); then
+    echo "$(($(date +%s) - last))"
+  fi
+}
+
+# A tunnel that does not start leaves nothing behind: the previous
+# configuration comes back and runs again, or there is none at all.
+restore_previous_client() {
+  local backup="$1"
+
+  systemctl disable --now "wg-quick@${CLIENT_IF}" >/dev/null 2>&1 || true
+  if [[ -n "$backup" ]]; then
+    mv -f "$backup" "$CLIENT_CONF"
+    systemctl enable --now "wg-quick@${CLIENT_IF}" >/dev/null 2>&1 || true
+    error "$(tr_msg client_err_start_restored)"
+  else
+    rm -f "$CLIENT_CONF"
+    error "$(tr_msg client_err_start)"
+  fi
+}
+
+connect_client() {
+  require_root
+  banner
+
+  panel "$RED" "$(tr_msg client_paste_title)" \
+    "$(tr_msg client_paste_l1)" \
+    "$(tr_msg client_paste_l2)"
+  echo
+
+  local tmp ignored dns_choice extra=() backup="" age i
+  tmp="$(mktemp)"
+  ignored="$(read_pasted_client_conf "$tmp")"
+  echo
+
+  if ! grep -q '[^[:space:]]' "$tmp"; then
+    rm -f "$tmp"
+    info "$(tr_msg client_paste_empty)"
+    return 0
+  fi
+  if ((ignored > 0)); then
+    warn "$(tr_fmt client_paste_ignored "$ignored")"
+  fi
+  if ! client_conf_is_complete "$tmp"; then
+    rm -f "$tmp"
+    return 0
+  fi
+
+  offer_local_endpoint "$tmp"
+
+  dns_choice="$(choose_client_dns "$tmp")"
+  if [[ "$dns_choice" == "keep" ]]; then
+    extra+=(openresolv)
+  fi
+
+  if grep -qE '^[[:space:]]*[Aa]llowed[Ii][Pp]s[[:space:]]*=.*0\.0\.0\.0/0' "$tmp"; then
+    panel "$AMBER" "$(tr_msg client_full_title)" \
+      "$(tr_msg client_full_l1)" \
+      "$(tr_msg client_full_l2)"
+    echo
+    if ! confirm_default_yes "$(tr_msg client_full_confirm)"; then
+      rm -f "$tmp"
+      warn "$(tr_msg client_cancelled)"
+      return 0
+    fi
+  fi
+
+  if [[ -f "$CLIENT_CONF" ]]; then
+    if ! confirm_default_yes "$(tr_msg client_replace_confirm)"; then
+      rm -f "$tmp"
+      warn "$(tr_msg client_cancelled)"
+      return 0
+    fi
+    backup="${CLIENT_CONF}.bak.$(date +%F_%H%M%S)"
+    cp -a "$CLIENT_CONF" "$backup"
+  fi
+
+  echo
+  step "$(tr_msg client_step_packages)" install_client_packages "${extra[@]}" || { rm -f "$tmp"; die "$(tr_msg client_err_packages)"; }
+  mkdir -p "$WG_DIR"
+  systemctl stop "wg-quick@${CLIENT_IF}" >/dev/null 2>&1 || true
+  if ! step "$(tr_fmt client_step_write "$CLIENT_CONF")" install -m 600 "$tmp" "$CLIENT_CONF" ||
+    ! step "$(tr_fmt client_step_start "$CLIENT_IF")" systemctl enable --now "wg-quick@${CLIENT_IF}"; then
+    rm -f "$tmp"
+    restore_previous_client "$backup"
+    return 1
+  fi
+  rm -f "$tmp"
+
+  echo
+  info "$(tr_msg client_waiting)"
+  for i in $(seq 20); do
+    age="$(client_handshake_age)"
+    [[ -n "$age" ]] && break
+    sleep 1
+  done
+
+  if [[ -n "$age" ]]; then
+    success "$(tr_fmt client_connected "$(human_since "$age")")"
+  else
+    warn "$(tr_msg client_no_handshake)"
+    panel "$AMBER" "$(tr_msg client_no_handshake)" \
+      "$(tr_msg client_hint_l1)" \
+      "$(tr_msg client_hint_l2)" \
+      "$(tr_msg client_hint_l3)"
+  fi
+}
+
+client_status() {
+  require_root
+  banner
+
+  if [[ ! -f "$CLIENT_CONF" ]]; then
+    info "$(tr_msg client_not_configured)"
+    return 0
+  fi
+
+  local age lines=()
+  if systemctl is-active --quiet "wg-quick@${CLIENT_IF}"; then
+    lines+=("${GREEN}$(tr_fmt client_service_active "$CLIENT_IF")${RESET}")
+  else
+    lines+=("${RED}$(tr_fmt client_service_inactive "$CLIENT_IF")${RESET}")
+  fi
+  age="$(client_handshake_age)"
+  if [[ -n "$age" ]]; then
+    lines+=("$(tr_fmt client_last_handshake "$(human_since "$age")")")
+  else
+    lines+=("$(tr_msg client_never_handshake)")
+  fi
+
+  panel "$RED" "$(tr_msg client_menu_title)" "${lines[@]}"
+  if have wg && ip link show "$CLIENT_IF" >/dev/null 2>&1; then
+    echo
+    wg show "$CLIENT_IF"
+  fi
+}
+
+remove_client_conf() {
+  require_root
+  banner
+
+  if [[ ! -f "$CLIENT_CONF" ]]; then
+    info "$(tr_msg client_not_configured)"
+    return 0
+  fi
+  if ! confirm_default_no "$(tr_msg client_remove_confirm)"; then
+    warn "$(tr_msg client_cancelled)"
+    return 0
+  fi
+
+  systemctl disable --now "wg-quick@${CLIENT_IF}" >/dev/null 2>&1 || true
+  rm -f "$CLIENT_CONF"
+  success "$(tr_msg client_removed)"
+}
+
+client_menu() {
+  local choice
+  while true; do
+    banner
+    panel "$BLUE" "$(tr_msg client_menu_title)" \
+      "$(tr_msg client_menu_l1)" \
+      "$(tr_msg client_menu_l2)"
+    echo
+    printf "%b1%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg client_menu_connect)"
+    printf "%b2%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg client_menu_status)"
+    printf "%b3%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg client_menu_remove)"
+    printf "%b4%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg client_menu_back)"
+    echo
+
+    choice="$(prompt_default "$(tr_msg prompt_choice)" "1")"
+    case "$choice" in
+      1) connect_client || true ;;
+      2) client_status ;;
+      3) remove_client_conf ;;
+      4) return 0 ;;
+      *) warn "$(tr_msg warn_invalid_choice)" ;;
+    esac
+
+    echo
+    if ! confirm_default_yes "$(tr_msg client_back_menu)"; then
+      exit 0
+    fi
+  done
+}
+
 # English and French swap, and the choice is saved for the next runs and for
 # the other scripts.
 switch_language() {
@@ -2880,8 +3297,9 @@ main_menu() {
     printf "%b7%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_7)"
     printf "%b8%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_8)"
     printf "%b9%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_9)"
-    printf "%b10%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_language)"
-    printf "%b11%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+    printf "%b10%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_client)"
+    printf "%b11%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_language)"
+    printf "%b12%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
     echo
 
     local choice
@@ -2897,8 +3315,9 @@ main_menu() {
       7) banner; show_port_forwarding_help ;;
       8) manage_backup ;;
       9) uninstall_server ;;
-      10) switch_language; continue ;;
-      11) echo; success "$(tr_msg bye)"; exit 0 ;;
+      10) client_menu; continue ;;
+      11) switch_language; continue ;;
+      12) echo; success "$(tr_msg bye)"; exit 0 ;;
       *) warn "$(tr_msg warn_invalid_choice)" ;;
     esac
 

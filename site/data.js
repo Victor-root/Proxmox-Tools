@@ -331,32 +331,34 @@ const SCRIPTS = [
         },
         compat: 'Debian / Ubuntu LXC',
         updated: {
-            en: 'Client list now follows the order of wg0.conf, and the config is remembered after the first run.',
-            fr: 'La liste des clients suit l’ordre du wg0.conf, et la configuration est mémorisée après le premier lancement.',
+            en: 'New client mode: another LXC joins the server by pasting the config of its client.',
+            fr: 'Nouveau mode client : un autre LXC rejoint le serveur en collant la configuration de son client.',
         },
         points: {
             en: [
                 'Guided install with three clear network modes',
                 'Add, list, show and revoke clients, QR code included',
                 'Diagnostic that checks the service, the port, routing and the firewall',
+                'Client mode: paste the config of a client to connect this machine to the server',
                 'Built-in backup and restore, and a clean uninstall',
             ],
             fr: [
                 'Installation guidée avec trois modes réseau clairs',
                 'Ajouter, lister, afficher et révoquer des clients, QR code compris',
                 'Diagnostic qui vérifie le service, le port, le routage et le pare-feu',
+                'Mode client : collez la configuration d’un client pour connecter cette machine au serveur',
                 'Sauvegarde et restauration intégrées, et désinstallation propre',
             ],
         },
         touches: {
             files: [
-                { path: '/etc/wireguard/', role: { en: 'server config, keys and clients', fr: 'configuration du serveur, clés et clients' } },
+                { path: '/etc/wireguard/', role: { en: 'server config, keys and clients, or wg-client.conf in client mode', fr: 'configuration du serveur, clés et clients, ou wg-client.conf en mode client' } },
                 { path: '/etc/systemd/system/wg-server-nft.service', role: { en: 'created, loads the firewall rules at boot', fr: 'créé, charge les règles de pare-feu au démarrage' } },
                 { path: '/etc/sysctl.d/99-wireguard-server.conf', role: { en: 'created, turns on IPv4 forwarding', fr: 'créé, active le routage IPv4' } },
             ],
             installs: 'wireguard-tools, nftables, qrencode, iproute2, iputils-ping, curl, ca-certificates',
             backup: '/etc/wireguard/wg0.conf.bak.<date>',
-            restarts: 'wg-quick@wg0, wg-server-nft',
+            restarts: 'wg-quick@wg0, wg-server-nft, wg-quick@wg-client in client mode',
         },
         note: {
             en: 'Run it inside the container, not on the Proxmox host. On an unprivileged LXC the script tells you the exact pct commands to run first.',
@@ -385,6 +387,7 @@ const SCRIPTS = [
                 'Port forwarding help',
                 'Backup and restore of the configuration',
                 'Uninstall the WireGuard server',
+                'Client: connect this machine to a WireGuard server',
                 'Français (passer ce script en français)',
                 'Quit',
             ],

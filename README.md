@@ -205,6 +205,7 @@ Installs and manages a native **WireGuard VPN server** inside a Debian/Ubuntu **
 * 🌐 endpoint by **public IP or domain**, with a **CGNAT** warning and a check that the domain points to the server
 * 🧱 automatic **nftables** rules and IPv4 forwarding for LAN / full-tunnel modes
 * 🔧 per-client tunables: AllowedIPs, DNS, PersistentKeepalive, **MTU** (default 1420)
+* 🔗 **client mode**: on another LXC, paste the config of one of its clients and that machine joins the server, as `wg-client`, with a check that the server answers
 * 🧠 remembers your settings (endpoint, port, network) after the first run
 * 🌍 interface in **English or French**, following the system locale, English by default
 * 💾 built-in **backup / restore** of the whole configuration
@@ -218,6 +219,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/Victor-root/Proxmox-Tools/ma
 ```
 
 > ⚠️ Run it as **root inside the target LXC** (not on the Proxmox host). On an **unprivileged** container, WireGuard needs `/dev/net/tun` passed through: the script detects this and shows the exact `pct set` commands to run on the host if needed.
+
+> ℹ️ **Client mode** on a machine behind the same box as the server: the domain of the server leads back to your own public address, which many boxes cannot loop back. The script detects it and offers to use the local address of the server instead. DNS servers set in the pasted config are left out unless you keep them (openresolv is then installed).
 
 </details>
 
