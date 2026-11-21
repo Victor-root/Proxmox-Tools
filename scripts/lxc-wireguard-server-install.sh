@@ -27,8 +27,15 @@ DEFAULT_MTU="1420"
 # mechanism as the other scripts of the repository: the locale decides, and
 # English is the fallback for an unknown locale as well as for a missing key.
 
+# The language picked from the menu, saved for every Proxmox-Tools script on
+# this machine. It wins over the locale, which is often English on a server.
+LANG_CHOICE_FILE="/root/.config/proxmox-tools/language"
+
 detect_lang() {
   local raw="${LC_ALL:-${LC_MESSAGES:-${LANG:-en}}}"
+  if [[ -r "$LANG_CHOICE_FILE" ]]; then
+    raw="$(<"$LANG_CHOICE_FILE")"
+  fi
   raw="${raw,,}"
   case "$raw" in
     fr* ) APP_LANG="fr" ;;
@@ -793,8 +800,10 @@ en|menu_8|Backup and restore of the configuration
 fr|menu_8|Sauvegarde / restauration de la configuration
 en|menu_9|Uninstall the WireGuard server
 fr|menu_9|Désinstaller le serveur WireGuard
-en|menu_10|Quit
-fr|menu_10|Quitter
+en|menu_language|Français (passer ce script en français)
+en|menu_quit|Quit
+fr|menu_language|English (switch this script to English)
+fr|menu_quit|Quitter
 en|bye|Goodbye.
 fr|bye|Au revoir.
 en|confirm_back_menu|Back to the main menu?
@@ -2838,6 +2847,19 @@ show_theory_summary() {
     "$(tr_msg modes_3)"
 }
 
+# English and French swap, and the choice is saved for the next runs and for
+# the other scripts.
+switch_language() {
+  if [[ "$APP_LANG" == "fr" ]]; then
+    APP_LANG="en"
+  else
+    APP_LANG="fr"
+  fi
+  mkdir -p "$(dirname "$LANG_CHOICE_FILE")"
+  echo "$APP_LANG" >"$LANG_CHOICE_FILE"
+  APP_NAME="$(tr_msg app_name)"
+}
+
 main_menu() {
   require_root
 
@@ -2855,7 +2877,8 @@ main_menu() {
     printf "%b7%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_7)"
     printf "%b8%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_8)"
     printf "%b9%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_9)"
-    printf "%b10%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_10)"
+    printf "%b10%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_language)"
+    printf "%b11%b) %s\n" "${RED_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
     echo
 
     local choice
@@ -2871,7 +2894,8 @@ main_menu() {
       7) banner; show_port_forwarding_help ;;
       8) manage_backup ;;
       9) uninstall_server ;;
-      10) echo; success "$(tr_msg bye)"; exit 0 ;;
+      10) switch_language; continue ;;
+      11) echo; success "$(tr_msg bye)"; exit 0 ;;
       *) warn "$(tr_msg warn_invalid_choice)" ;;
     esac
 

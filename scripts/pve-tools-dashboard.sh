@@ -51,8 +51,15 @@ trap cleanup EXIT
 # Language detection (EN default, FR if system locale starts with fr)
 # ------------------------------------------------------------
 
+# The language picked from the menu, saved for every Proxmox-Tools script on
+# this machine. It wins over the locale, which is often English on a server.
+LANG_CHOICE_FILE="/root/.config/proxmox-tools/language"
+
 detect_lang() {
     local raw="${LC_ALL:-${LC_MESSAGES:-${LANG:-en}}}"
+    if [[ -r "$LANG_CHOICE_FILE" ]]; then
+        raw="$(<"$LANG_CHOICE_FILE")"
+    fi
     raw="${raw,,}"
     case "$raw" in
         fr* ) APP_LANG="fr" ;;
@@ -75,6 +82,9 @@ tr_msg() {
 
         fr:menu_hooks_off) echo "Ne plus rien réappliquer automatiquement" ;;
         en:menu_hooks_off) echo "Stop re-applying anything automatically" ;;
+
+        fr:menu_language) echo "English (switch the scripts to English)" ;;
+        en:menu_language) echo "Français (passer les scripts en français)" ;;
 
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
@@ -609,9 +619,22 @@ set_all_hooks() {
     fi
 }
 
+# English and French swap, and the choice is saved for the next runs and for
+# every script the dashboard opens.
+switch_language() {
+    if [[ "$APP_LANG" == "fr" ]]; then
+        APP_LANG="en"
+    else
+        APP_LANG="fr"
+    fi
+    mkdir -p "$(dirname "$LANG_CHOICE_FILE")"
+    echo "$APP_LANG" >"$LANG_CHOICE_FILE"
+    APP_NAME="$(tr_msg banner_subtitle)"
+}
+
 main_menu() {
     local entry tool i choice states=() count="${#TOOLS[@]}"
-    local hooks_on=$((count + 2)) hooks_off=$((count + 3)) quit=$((count + 4))
+    local hooks_on=$((count + 2)) hooks_off=$((count + 3)) language=$((count + 4)) quit=$((count + 5))
 
     while true; do
         states=()
@@ -633,6 +656,7 @@ main_menu() {
         echo
         printf " %b%2d)%b %s\n" "${PMX_ORANGE_SOFT}" "$hooks_on" "${RESET}" "$(tr_msg menu_hooks_on)"
         printf " %b%2d)%b %s\n" "${PMX_ORANGE_SOFT}" "$hooks_off" "${RESET}" "$(tr_msg menu_hooks_off)"
+        printf " %b%2d)%b %s\n" "${PMX_ORANGE_SOFT}" "$language" "${RESET}" "$(tr_msg menu_language)"
         printf " %b%2d)%b %s\n" "${PMX_ORANGE_SOFT}" "$quit" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
@@ -658,6 +682,8 @@ main_menu() {
         elif ((choice == hooks_off)); then
             set_all_hooks off
             pause
+        elif ((choice == language)); then
+            switch_language
         elif ((choice == quit)); then
             say_info "$(tr_msg bye)"
             exit 0

@@ -25,8 +25,15 @@ trap cleanup_tmp EXIT
 # Language detection (EN default, FR if system locale starts with fr)
 # ------------------------------------------------------------
 
+# The language picked from the menu, saved for every Proxmox-Tools script on
+# this machine. It wins over the locale, which is often English on a server.
+LANG_CHOICE_FILE="/root/.config/proxmox-tools/language"
+
 detect_lang() {
     local raw="${LC_ALL:-${LC_MESSAGES:-${LANG:-en}}}"
+    if [[ -r "$LANG_CHOICE_FILE" ]]; then
+        raw="$(<"$LANG_CHOICE_FILE")"
+    fi
     raw="${raw,,}"
     case "$raw" in
         fr* ) APP_LANG="fr" ;;
@@ -61,6 +68,9 @@ tr_msg() {
 
         fr:menu_remove_all) echo "Tout supprimer (affichage, configuration et Fastfetch)" ;;
         en:menu_remove_all) echo "Remove everything (display, configuration and Fastfetch)" ;;
+
+        fr:menu_language) echo "English (switch this script to English)" ;;
+        en:menu_language) echo "Français (passer ce script en français)" ;;
 
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
@@ -1467,6 +1477,19 @@ menu_action() {
     "$@" || true
 }
 
+# English and French swap, and the choice is saved for the next runs and for
+# the other scripts.
+switch_language() {
+    if [[ "$APP_LANG" == "fr" ]]; then
+        APP_LANG="en"
+    else
+        APP_LANG="fr"
+    fi
+    mkdir -p "$(dirname "$LANG_CHOICE_FILE")"
+    echo "$APP_LANG" >"$LANG_CHOICE_FILE"
+    APP_NAME="$(tr_msg banner_subtitle)"
+}
+
 main_menu() {
     while true; do
         show_banner
@@ -1477,10 +1500,11 @@ main_menu() {
         printf " %b5)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_status)"
         printf " %b6)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_disable_login)"
         printf " %b7)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_remove_all)"
-        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_language)"
+        printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
-        read -r -p "$(tr_msg choose_option) [1-8]: " choice
+        read -r -p "$(tr_msg choose_option) [1-9]: " choice
         echo
 
         case "$choice" in
@@ -1513,6 +1537,9 @@ main_menu() {
                 pause
                 ;;
             8)
+                switch_language
+                ;;
+            9)
                 say_info "$(tr_msg bye)"
                 exit 0
                 ;;

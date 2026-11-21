@@ -53,6 +53,7 @@ The goal is simple:
 * 🔎 keep behavior **clear and predictable**
 * 💾 always prefer **safe changes with backup/restore when possible**
 * 📦 build a reusable **toolbox / hub** instead of one giant script
+* 🌍 every script speaks **English or French**: it follows the server, and an entry of its menu switches the language for all the scripts
 
 This repository is meant to grow over time with more Proxmox-oriented utilities.
 

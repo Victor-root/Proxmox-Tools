@@ -29,8 +29,15 @@ COMMAND_PATH="/usr/local/sbin/nginx-proxy"
 
 # ── Language ──────────────────────────────────────────────────────────────────
 
+# The language picked from the menu, saved for every Proxmox-Tools script on
+# this machine. It wins over the locale, which is often English on a server.
+LANG_CHOICE_FILE="/root/.config/proxmox-tools/language"
+
 detect_lang() {
     local raw="${LC_ALL:-${LC_MESSAGES:-${LANG:-en}}}"
+    if [[ -r "$LANG_CHOICE_FILE" ]]; then
+        raw="$(<"$LANG_CHOICE_FILE")"
+    fi
     raw="${raw,,}"
     case "$raw" in
         fr*) APP_LANG="fr" ;;
@@ -104,6 +111,8 @@ tr_msg() {
         fr:menu_backup) echo "Sauvegardes Nginx" ;;
         en:menu_backup) echo "Nginx backups" ;;
 
+        fr:menu_language) echo "English (switch this script to English)" ;;
+        en:menu_language) echo "Français (passer ce script en français)" ;;
         fr:menu_quit) echo "Quitter" ;;
         en:menu_quit) echo "Quit" ;;
 
@@ -1981,6 +1990,18 @@ menu_action() {
     "$@" || true
 }
 
+# English and French swap, and the choice is saved for the next runs and for
+# the other scripts.
+switch_language() {
+    if [[ "$APP_LANG" == "fr" ]]; then
+        APP_LANG="en"
+    else
+        APP_LANG="fr"
+    fi
+    mkdir -p "$(dirname "$LANG_CHOICE_FILE")"
+    echo "$APP_LANG" >"$LANG_CHOICE_FILE"
+}
+
 main_menu() {
     local choice
     while true; do
@@ -1996,7 +2017,8 @@ main_menu() {
         printf ' %b7)%b %s\n' "$NGX_GREEN_SOFT" "$RESET" "$(tr_msg menu_backup)"
         printf ' %b8)%b %s\n' "$NGX_GREEN_SOFT" "$RESET" "$(tr_msg menu_install_cmd)"
         printf ' %b9)%b %s\n' "$NGX_RED" "$RESET" "$(tr_msg menu_uninstall)"
-        printf ' %b10)%b %s\n' "$NGX_GREY" "$RESET" "$(tr_msg menu_quit)"
+        printf ' %b10)%b %s\n' "$NGX_GREEN_SOFT" "$RESET" "$(tr_msg menu_language)"
+        printf ' %b11)%b %s\n' "$NGX_GREY" "$RESET" "$(tr_msg menu_quit)"
         echo
         choice="$(prompt_free "$(tr_msg choose_option)")"
         case "$choice" in
@@ -2009,7 +2031,8 @@ main_menu() {
             7) menu_action backups_menu ;;
             8) menu_action install_command; pause ;;
             9) menu_action uninstall_nginx; pause ;;
-            10) echo; say_info "$(tr_msg bye)"; exit 0 ;;
+            10) switch_language ;;
+            11) echo; say_info "$(tr_msg bye)"; exit 0 ;;
             *) say_err "$(tr_msg invalid_choice)"; pause ;;
         esac
     done

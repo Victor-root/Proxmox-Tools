@@ -12,6 +12,10 @@ MOBILE_INDEX_TPL="/usr/share/pve-yew-mobile-gui/index.html.tpl"
 HELPER_DIR="/usr/local/lib/pve-default-language"
 APT_HOOK_FILE="/etc/apt/apt.conf.d/99-pve-default-language"
 
+# The language picked from the menu, saved for every Proxmox-Tools script on
+# this machine. It wins over the locale, which is often English on a server.
+LANG_CHOICE_FILE="/root/.config/proxmox-tools/language"
+
 # Set by run_actions, the non interactive entry point used by
 # pve-tools-dashboard.sh.
 AUTO_YES=0
@@ -431,6 +435,8 @@ en|menu_restore_select|Restore from selected backup
 en|menu_status|Show current status
 en|menu_languages|List supported languages
 en|menu_backups|List backups
+en|menu_script_language|Language of this script (langue du script)
+en|choose_script_language|Language code for the menus of this script
 en|menu_quit|Quit
 en|choose_option|Choose an option
 en|press_enter|Press Enter to continue...
@@ -820,6 +826,8 @@ fr|menu_restore_select|Restaurer depuis un backup choisi
 fr|menu_status|Afficher l'état actuel
 fr|menu_languages|Lister les langues supportées
 fr|menu_backups|Lister les backups
+fr|menu_script_language|Langue de ce script (script language)
+fr|choose_script_language|Code langue pour les menus de ce script
 fr|menu_quit|Quitter
 fr|choose_option|Choisissez une option
 fr|press_enter|Appuyez sur Entrée pour continuer...
@@ -2948,7 +2956,11 @@ APP_LANG="en"
 detect_lang() {
     local raw code
 
-    raw="$(read_server_lang_raw)"
+    if [[ -r "$LANG_CHOICE_FILE" ]]; then
+        raw="$(<"$LANG_CHOICE_FILE")"
+    else
+        raw="$(read_server_lang_raw)"
+    fi
     code="$(normalize_locale_to_code "$raw")"
 
     if is_supported_code "$code" && [[ -n "${I18N["$code:script_title"]:-}" ]]; then
@@ -3931,6 +3943,26 @@ remove_mobile_language() {
     say_info "$(tr_msg mobile_reload_hint)"
 }
 
+# Only changes the menus of the scripts, not the system: the choice is saved
+# for the next runs and for the other scripts, which fall back to English
+# when they do not speak it.
+choose_script_language() {
+    local code
+
+    show_languages
+    echo
+    code="$(prompt_default "$(tr_msg choose_script_language)" "$APP_LANG")"
+
+    if ! is_supported_code "$code" || [[ -z "${I18N["$code:script_title"]:-}" ]]; then
+        say_err "$(tr_msg unsupported_language): $code"
+        pause
+        return
+    fi
+
+    mkdir -p "$(dirname "$LANG_CHOICE_FILE")"
+    echo "$code" >"$LANG_CHOICE_FILE"
+}
+
 main_menu() {
     while true; do
         detect_lang
@@ -3946,11 +3978,12 @@ main_menu() {
         printf " %b8)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_remove)"
         printf " %b9)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_hook_enable)"
         printf " %b10)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_mobile_hook_disable)"
-        printf " %b11)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
+        printf " %b11)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_script_language)"
+        printf " %b12)%b %s\n" "${PMX_ORANGE_SOFT}" "${RESET}" "$(tr_msg menu_quit)"
         echo
 
         local choice
-        read -r -p "$(tr_msg choose_option) [1-11]: " choice
+        read -r -p "$(tr_msg choose_option) [1-12]: " choice
         echo
 
         case "$choice" in
@@ -3964,7 +3997,8 @@ main_menu() {
             8) remove_mobile_language || true; pause ;;
             9) enable_hook; pause ;;
             10) disable_hook; pause ;;
-            11) say_info "$(tr_msg bye)"; exit 0 ;;
+            11) choose_script_language ;;
+            12) say_info "$(tr_msg bye)"; exit 0 ;;
             *) say_err "$(tr_msg invalid_choice)"; pause ;;
         esac
     done
