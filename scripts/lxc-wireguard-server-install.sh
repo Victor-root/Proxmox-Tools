@@ -2969,6 +2969,19 @@ show_theory_summary() {
 
 # ── Client mode ───────────────────────────────────────────────────────────────
 
+# Terminals copy a trailing space as a non breaking one, or add invisible
+# bytes such as the bracketed paste markers, which WireGuard refuses
+# ("Persistent keepalive interval is neither..."). Every value of the file is
+# plain ASCII: outside comments, terminal sequences go, non breaking spaces
+# become spaces and anything else unprintable goes.
+clean_pasted_line() {
+  if [[ "$1" =~ ^[[:space:]]*# ]]; then
+    printf '%s' "$1"
+  else
+    printf '%s' "$1" | LC_ALL=C sed 's/\x1b\[[0-9;?]*[~A-Za-z]//g; s/\xc2\xa0/ /g; s/[^\t -~]//g'
+  fi
+}
+
 # True once the [Peer] part holds what a tunnel needs, so the paste can end.
 client_paste_complete() {
   local conf="$1" key
@@ -3000,7 +3013,7 @@ read_pasted_client_conf() {
     if ((rc != 0)) && [[ -z "$line" ]]; then
       break
     fi
-    line="${line%$'\r'}"
+    line="$(clean_pasted_line "$line")"
     [[ "$line" == "EOF" ]] && break
     if [[ "$line" =~ ^[[:space:]]*(\[[A-Za-z]+\]|[A-Za-z]+[[:space:]]*=.*|#.*)?[[:space:]]*$ ]]; then
       printf '%s\n' "$line" >>"$out"
