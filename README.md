@@ -395,6 +395,7 @@ Adds modern themes to the Proxmox VE web interface, picked from the stock **Colo
 * ✨ rounded cards and windows, tinted title bars, pill shaped tabs, toggles and tags, colored checkboxes, accent hover and selection everywhere
 * 🖼️ about 75 icons redrawn with **Phosphor** icons (MIT license), and status dots (running, paused, error) instead of the small glyphs over the tree icons
 * 📈 chart curves in the accent color
+* 🏷️ tags edited in **one rounded bar**: the pills keep their color with a small cross to remove them, round add, cancel and save buttons, and a clean list of suggestions
 * ⬇️ a collapse button at the top right of the bottom **Logs** panel, instead of the small arrow on its splitter
 * 📐 the status panel of a VM or container grows with its content, so the IP list and its **More** button are never cut, with the same space under the last row as above the first one; long **notes** scroll instead of stretching the row
 * 🖥️ a **default theme for the whole server**, chosen from the menu: every browser that has not picked a theme gets it, the **login page** included

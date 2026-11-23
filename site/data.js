@@ -723,8 +723,8 @@ const SCRIPTS = [
         },
         compat: 'PVE 9.x',
         updated: {
-            en: 'New red accent, and the dot of a focused radio button is centred again.',
-            fr: 'Nouvelle couleur rouge, et le point d’un bouton radio sélectionné au clavier est de nouveau centré.',
+            en: 'Tags are edited in one rounded bar: real pills with a small cross, round buttons and a cleaner list of suggestions.',
+            fr: 'Les tags se modifient dans une seule barre arrondie : de vraies pastilles avec une petite croix, des boutons ronds et une liste de suggestions plus nette.',
         },
         points: {
             en: [

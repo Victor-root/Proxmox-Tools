@@ -145,6 +145,20 @@ $on-title: $highlighted-text-alt;
       color: $primary-color;
     }
   }
+
+  // except the round buttons of the tag editor, drawn in _extras
+  .x-box-target:has(> .pve-tag-inline-button) > .x-btn.x-btn-default-toolbar-small {
+    &,
+    &.x-btn-focus,
+    &.x-btn-pressed {
+      background-color: transparent;
+    }
+
+    &.x-btn-over,
+    &.x-btn-focus.x-btn-over {
+      background-color: $accent-soft;
+    }
+  }
 }
 
 // The bottom log panel has no header: its tab bar takes the title bar look
