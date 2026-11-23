@@ -192,24 +192,35 @@ body > .x-mask {
 // Tag editor of the guest and node headers. ExtJS places its items itself, at
 // the widths it measured, so everything here is drawn without changing a size
 // it does not measure: pseudo elements, clips and inner rings.
-// In edit mode the pencil is hidden, the only state the container exposes.
-$tag-editing: '.x-container:has(> .x-box-inner > .x-box-target > .pve-tag-inline-button[style*="display: none"])';
+// Every :has() here stays two levels down at most and never reads the style
+// attribute: either one is checked again on each of the many inline style
+// changes of ExtJS, and made the whole interface many times slower to restyle
+// (measured in Chromium).
+
 // the create wizards show the same editor in a fieldset, without the pencil
 $tag-actions: '.x-box-target:has(> .pve-tag-inline-button) > .x-btn, .proxmox-tag-fieldset .x-btn';
 
-#{$tag-editing} {
-  isolation: isolate;
+// one rounded bar behind the tags and their actions while they are edited.
+// The bar goes a little past the container of the tags, which a :has() three
+// levels deep could only open up at the cost above: containers placed in a
+// toolbar never draw past their box anyway, so they all stay open.
+.x-toolbar-item.x-box-layout-ct,
+.x-box-inner:has(> .x-box-target > .pve-edit-tag.editable) {
   overflow: visible;
+}
 
-  > .x-box-inner {
-    overflow: visible;
-  }
+.x-box-target:has(> .pve-edit-tag.editable) {
+  isolation: isolate;
 
-  // one rounded bar behind the tags and their actions
   &::before {
     content: "";
     position: absolute;
-    inset: -1px -6px;
+    // the target has no height of its own: the bar fits the 26px buttons
+    top: -2px;
+    right: -6px;
+    left: -6px;
+    height: 30px;
+    box-sizing: border-box;
     z-index: -1;
     background-color: $content-background-color;
     border: 1px solid $border-color;
