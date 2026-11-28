@@ -1742,10 +1742,15 @@ a,.x-form-display-field a{color:#c2410c}
 .x-progress-default .x-progress-bar-default{border-radius:999px;background:linear-gradient(90deg, #b8470a, #f06d1d)}
 .x-progress-default .x-progress-text{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .x-progress-default .x-progress-text-back{color:#1e2330;text-shadow:none}
-.x-window-default,.x-menu-default,.x-boundlist{border-radius:10px;box-shadow:0 20px 50px rgba(16,24,40,.18);overflow:hidden}
+.x-window-default,.x-menu-default,.x-boundlist{border-radius:10px;box-shadow:0 20px 50px rgba(16,24,40,.18)}
+.x-menu-default,.x-boundlist{overflow:hidden}
+.x-window-default{overflow:visible}
+.x-window-default>.x-window-header{border-radius:10px 10px 0 0}
+.x-window-default>.x-window-bodyWrap>.x-window-body:last-child,.x-window-default>.x-window-bodyWrap>.x-docked-bottom:last-child{border-bottom-left-radius:10px;border-bottom-right-radius:10px}
+.x-window .x-resizable-handle-east{right:-8px;width:8px}
+.x-window .x-resizable-handle-south{bottom:-8px;height:8px}
+.x-window .x-resizable-handle-southeast{right:-8px;bottom:-8px}
 .x-window-header-default{background-color:#fff}
-.x-window .x-resizable-handle-east{width:2px}
-.x-window .x-resizable-handle-south{height:2px}
 .x-splitter{background-color:rgba(0,0,0,0)}
 .x-splitter-active{background-color:#e2590b}
 .x-window-header-title-default>.x-title-text-default{color:#1e2330;font-weight:600}
@@ -2050,10 +2055,15 @@ div.monitor{border-color:#333947}
 .x-progress-default .x-progress-bar-default{border-radius:999px;background:linear-gradient(90deg, #c65310, #fa802e)}
 .x-progress-default .x-progress-text{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .x-progress-default .x-progress-text-back{color:#e0e4eb;text-shadow:none}
-.x-window-default,.x-menu-default,.x-boundlist{border-radius:10px;box-shadow:0 20px 50px rgba(0,0,0,.55);overflow:hidden}
+.x-window-default,.x-menu-default,.x-boundlist{border-radius:10px;box-shadow:0 20px 50px rgba(0,0,0,.55)}
+.x-menu-default,.x-boundlist{overflow:hidden}
+.x-window-default{overflow:visible}
+.x-window-default>.x-window-header{border-radius:10px 10px 0 0}
+.x-window-default>.x-window-bodyWrap>.x-window-body:last-child,.x-window-default>.x-window-bodyWrap>.x-docked-bottom:last-child{border-bottom-left-radius:10px;border-bottom-right-radius:10px}
+.x-window .x-resizable-handle-east{right:-8px;width:8px}
+.x-window .x-resizable-handle-south{bottom:-8px;height:8px}
+.x-window .x-resizable-handle-southeast{right:-8px;bottom:-8px}
 .x-window-header-default{background-color:#161a22}
-.x-window .x-resizable-handle-east{width:2px}
-.x-window .x-resizable-handle-south{height:2px}
 .x-splitter{background-color:rgba(0,0,0,0)}
 .x-splitter-active{background-color:#f0690f}
 .x-window-header-title-default>.x-title-text-default{color:#e0e4eb;font-weight:600}

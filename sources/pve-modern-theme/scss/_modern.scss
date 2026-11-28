@@ -341,22 +341,47 @@
 .x-boundlist {
   border-radius: $radius;
   box-shadow: if($mode == dark, 0 20px 50px rgba(0, 0, 0, 0.55), 0 20px 50px rgba(16, 24, 40, 0.18));
+}
+
+.x-menu-default,
+.x-boundlist {
   overflow: hidden;
+}
+
+// A window does not clip its content, so its resize handles can sit outside
+// it: inside, they covered most of a thin scrollbar on its edge, which could
+// not be grabbed. Its header and its last part round its corners instead.
+.x-window-default {
+  overflow: visible;
+}
+
+.x-window-default > .x-window-header {
+  border-radius: $radius $radius 0 0;
+}
+
+.x-window-default > .x-window-bodyWrap > .x-window-body:last-child,
+.x-window-default > .x-window-bodyWrap > .x-docked-bottom:last-child {
+  border-bottom-left-radius: $radius;
+  border-bottom-right-radius: $radius;
+}
+
+.x-window .x-resizable-handle-east {
+  right: -8px;
+  width: 8px;
+}
+
+.x-window .x-resizable-handle-south {
+  bottom: -8px;
+  height: 8px;
+}
+
+.x-window .x-resizable-handle-southeast {
+  right: -8px;
+  bottom: -8px;
 }
 
 .x-window-header-default {
   background-color: $surface;
-}
-
-// The resize handles on the right and bottom edges of a window lie over its
-// content: at their 5px they covered most of a thin scrollbar, which then
-// could not be grabbed. Thinner, they leave it free; the corners still resize.
-.x-window .x-resizable-handle-east {
-  width: 2px;
-}
-
-.x-window .x-resizable-handle-south {
-  height: 2px;
 }
 
 // Splitters
