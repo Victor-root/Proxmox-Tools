@@ -108,10 +108,13 @@ div.x-border-layout-ct {
   color: $icon-color;
 }
 
-// Form fields
+// Form fields: the transparent border of the wrap stays clear (see _modern)
+.x-form-text-default {
+  background-color: $content-background-color;
+}
+
 .x-form-text-default,
 .x-form-trigger-wrap-default {
-  background-color: $content-background-color;
   color: $text-color;
 }
 

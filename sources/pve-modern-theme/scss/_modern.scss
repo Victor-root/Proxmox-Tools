@@ -102,18 +102,40 @@
   font-weight: 500;
 }
 
-// Form fields
+// Form fields. ExtJS often puts a field flush with the edge of a container that
+// clips its overflow; at a fractional screen scale (125 %) that edge cut the
+// border of the field in half. The border is drawn one pixel inside instead,
+// over the field, and the real one stays transparent to keep the layout.
 .x-form-trigger-wrap-default {
+  position: relative;
   border-radius: $radius-sm;
-  border-color: $border-color;
+  border-color: transparent;
   overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm - 1px;
+    pointer-events: none;
+  }
 }
 
 // focus rings are drawn inside the field: an outer ring gets clipped by headers and panel edges
 .x-form-trigger-wrap-focus,
-.x-form-trigger-wrap-default.x-form-trigger-wrap-focus {
+.x-form-trigger-wrap-default.x-form-trigger-wrap-focus,
+.x-form-trigger-wrap-default.x-form-trigger-wrap-invalid {
+  border-color: transparent;
+}
+
+.x-form-trigger-wrap-default.x-form-trigger-wrap-focus::after {
   border-color: $primary-color;
   box-shadow: inset 0 0 0 1px $primary-color;
+}
+
+.x-form-trigger-wrap-default.x-form-trigger-wrap-invalid::after {
+  border-color: $status-error;
 }
 
 // Straight accent bar on the left of the selected row
@@ -324,6 +346,17 @@
 
 .x-window-header-default {
   background-color: $surface;
+}
+
+// The resize handles on the right and bottom edges of a window lie over its
+// content: at their 5px they covered most of a thin scrollbar, which then
+// could not be grabbed. Thinner, they leave it free; the corners still resize.
+.x-window .x-resizable-handle-east {
+  width: 2px;
+}
+
+.x-window .x-resizable-handle-south {
+  height: 2px;
 }
 
 // Splitters
